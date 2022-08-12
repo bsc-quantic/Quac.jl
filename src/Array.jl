@@ -1,17 +1,17 @@
 using LinearAlgebra
 
 Matrix(x::AbstractGate) = Matrix{Float32}(x)
-Matrix{T}(::AbstractGate) where {T} = error("Implementation not found")
+Matrix{T}(_::AbstractGate) where {T} = error("Implementation not found")
 
-Matrix{T}(::I) where {T} = Matrix{T}(LinearAlgebra.I, 2, 2)
-Matrix{T}(::X) where {T} = Matrix{T}([0 1; 1 0])
-Matrix{T}(::Y) where {T} = Matrix{T}([0 -1im; 1im 0])
-Matrix{T}(::Z) where {T} = Matrix{T}([1 0; 0 -1])
-Matrix{T}(::H) where {T} = Matrix{T}([1 1; 1 -1] ./ sqrt(2))
-Matrix{T}(::S) where {T} = Matrix{T}([1 0; 0 1im])
-Matrix{T}(::Sd) where {T} = Matrix{T}([1 0; 0 -1im])
-Matrix{F}(::T) where {F} = Matrix{F}([1 0; 0 cispi(1 // 4)])
-Matrix{F}(::Td) where {F} = Matrix{F}([1 0; 0 cispi(-1 // 4)])
+Matrix{T}(_::I) where {T} = Matrix{T}(LinearAlgebra.I, 2, 2)
+Matrix{T}(_::X) where {T} = Matrix{T}([0 1; 1 0])
+Matrix{T}(_::Y) where {T} = Matrix{T}([0 -1im; 1im 0])
+Matrix{T}(_::Z) where {T} = Matrix{T}([1 0; 0 -1])
+Matrix{T}(_::H) where {T} = Matrix{T}([1 1; 1 -1] ./ sqrt(2))
+Matrix{T}(_::S) where {T} = Matrix{T}([1 0; 0 1im])
+Matrix{T}(_::Sd) where {T} = Matrix{T}([1 0; 0 -1im])
+Matrix{F}(_::T) where {F} = Matrix{F}([1 0; 0 cispi(1 // 4)])
+Matrix{F}(_::Td) where {F} = Matrix{F}([1 0; 0 cispi(-1 // 4)])
 
 Matrix{T}(g::Rx) where {T} =
     Matrix{T}([cos(g.θ / 2) -1im*sin(g.θ / 2); -1im*sin(g.θ / 2) cos(g.θ / 2)])
