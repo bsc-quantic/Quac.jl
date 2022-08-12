@@ -30,3 +30,16 @@ Matrix{T}(g::U3) where {T} = Matrix{T}(
 # TODO Matrix{T}(g::Control) = ...
 
 Matrix{T}(g::Swap) = Matrix{T}([1 0 0 0; 0 0 1 0; 0 1 0 0; 0 0 0 1])
+
+# diagonal matrices
+# NOTE efficient multiplication due to no memory swap needed: plain element-wise multiplication
+Diagonal(x::AbstractGate) = Diagonal{ComplexF32}(x)
+Diagonal{T}(_::AbstractGate) where {T} = error("Implementation not found")
+
+Diagonal{T}(_::I) where {T} = Diagonal{T}(LinearAlgebra.I, 2)
+Diagonal{T}(_::Z) where {T} = Diagonal{T}([1, -1])
+Diagonal{T}(_::S) where {T} = Diagonal{T}([1, 1im])
+Diagonal{T}(_::Sd) where {T} = Diagonal{T}([1, -1im])
+Diagonal{T}(_::T) where {T} = Diagonal{T}([1, cispi(1 // 4)])
+Diagonal{T}(_::Td) where {T} = Diagonal{T}([1, cispi(-1 // 4)])
+Diagonal{T}(_::Rz) where {T} = Diagonal{T}([1 0; 0 cis(g.θ)])
