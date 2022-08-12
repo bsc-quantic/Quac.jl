@@ -1,6 +1,6 @@
 using LinearAlgebra
 
-Matrix(x::AbstractGate) = Matrix{Float32}(x)
+Matrix(x::AbstractGate) = Matrix{ComplexF32}(x)
 Matrix{T}(_::AbstractGate) where {T} = error("Implementation not found")
 
 Matrix{T}(_::I) where {T} = Matrix{T}(LinearAlgebra.I, 2, 2)
