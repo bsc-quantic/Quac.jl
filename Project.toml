@@ -3,5 +3,8 @@ uuid = "b9105292-1415-45cf-bff1-d6ccf71e6143"
 authors = ["Sergio Sánchez Ramírez <sergio.sanchez.ramirez@bsc.es>"]
 version = "0.0.1"
 
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+
 [compat]
 julia = "^1.6.0"
