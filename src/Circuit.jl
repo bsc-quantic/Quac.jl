@@ -1,4 +1,4 @@
-import Base: push!, length, <=, iterate, IteratorSize
+import Base: push!, length, iterate, IteratorSize
 
 export Circuit
 export lanes
@@ -13,9 +13,11 @@ struct Element{T}
     priority::Vector{Pair{Int,Int}}
 end
 
+Element(gate::AbstractGate, priority) = Element{AbstractGate}(gate, priority)
+
 data(e::Element) = e.data
 
-<=(e::Element, head::Vector{Int}) = all(p <= head[lane] for (lane, p) in e.priority)
+isathead(e::Element, head::Vector{Int}) = all(p == head[lane] for (lane, p) in e.priority)
 
 """
 A quantum circuit implementation using multi-priority queues.
@@ -38,10 +40,13 @@ Base.length(circ::Circuit) = sum(length(lane) for lane in circ.lanes)
 Appends a gate to the circuit.
 """
 Base.push!(circ::Circuit, gate::AbstractGate) = begin
-    new_priority = lanes(gate) .|> lane -> lane => circ.lanes[lane] + 1 |> collect
-    el = Element(gate, new_priority)
+    new_priority = [lane => length(circ.lanes[lane]) + 1 for lane in lanes(gate)]
+    el = Element{AbstractGate}(gate, new_priority)
 
-    lanes(gate) .|> lane -> circ.lanes[lane] .|> queue -> push!(queue, el)
+    for lane in lanes(gate)
+        queue = circ.lanes[lane]
+        push!(queue, el)
+    end
 end
 
 """
@@ -55,17 +60,23 @@ Retrieves next gate from `state` by travelling through a topologically sorted pa
 """
 Base.iterate(circ::Circuit, state = fill(1, lanes(circ))) = begin
     # find winner
-    candidates = enumerate(state) .|> (x -> begin
-        lane, i = x
-        circ.lanes[lane][i]
-    end)
-    winner = filter(x -> x <= state, candidates) |> first
-    if winner == nothing
+    candidates =
+        enumerate(state) .|>
+        (x -> begin
+            lane, i = x
+            get(circ.lanes[lane], i, nothing)
+        end) |>
+        (x -> filter(!isnothing, x))
+    if isempty(candidates)
         return nothing
     end
 
+    winner = filter(x -> isathead(x, state), candidates) |> first
+
     # update head
-    winner.priority .|> ((lane, priority) -> state[lane] = priority)
+    for (lane, priority) in winner.priority
+        state[lane] = priority + 1
+    end
 
     (data(winner), state)
 end
