@@ -3,8 +3,13 @@ import Base: push!, length
 export Circuit
 export lanes
 
-struct Element
-    data::AbstractGate
+"""
+    Element{T}
+
+One element of a queue, which contains an element of type `T` and multiple priority numbers.
+"""
+struct Element{T}
+    data::T
     priority::Vector{Pair{Int,Int}}
 end
 
@@ -14,7 +19,7 @@ A quantum circuit implementation using multi-priority queues.
 - Multi-priority numbers can be retrieved procedurally from gate-lanes encoded inside the gates of the queues.
 """
 struct Circuit
-    lanes::Vector{Vector{Element}}
+    lanes::Vector{Vector{Element{AbstractGate}}}
 
     Circuit(n::Int) = new(fill(Element[], n))
 end
