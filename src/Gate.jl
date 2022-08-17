@@ -15,8 +15,8 @@ Expected requirements:
 """
 abstract type AbstractGate end
 
-lane(x::AbstractGate) = x.lane
-Base.adjoint(x::T) where {T<:AbstractGate} = Base.adjoint(T)(lane(x))
+lanes(x::AbstractGate) = (x.lane,)
+Base.adjoint(x::T) where {T<:AbstractGate} = Base.adjoint(T)(lanes(x))
 
 struct I <: AbstractGate
     lane::Int
@@ -83,7 +83,7 @@ parameters(x::T) where {T<:AbstractParametricGate} =
     Dict(parameter => getfield(x, parameter) for parameter in parameters(T))
 
 Base.adjoint(::Type{T}) where {T<:AbstractParametricGate} = T
-Base.adjoint(x::T) where {T<:AbstractParametricGate} = Base.adjoint(T)(lane())
+Base.adjoint(x::T) where {T<:AbstractParametricGate} = Base.adjoint(T)(lanes())
 
 struct Rx <: AbstractParametricGate
     lane::Int
@@ -129,12 +129,12 @@ CRz(control, target, θ) = Control(control, Rz(target, θ))
 
 control(g::Control{T}) where {T} = g.lane
 control(g::Control{T}) where {T<:Control} = (g.lane, control(g.op)...)
-target(g::Control{T}) where {T} = lane(g.op)
+target(g::Control{T}) where {T} = lanes(g.op)
 target(g::Control{T}) where {T<:Control} = target(g.op)
-lane(g::Control{T}) where {T} = (control(g)..., target(g)...)
+lanes(g::Control{T}) where {T} = (control(g)..., target(g)...)
 
 Base.adjoint(::Type{Control{T}}) where {T<:AbstractGate} = Control{adjoint(T)}
-Base.adjoint(g::Control{T}) where {T<:AbstractGate} = Control(lane(g), adjoint(g.op))
+Base.adjoint(g::Control{T}) where {T<:AbstractGate} = Control(lanes(g), adjoint(g.op))
 
 # special case for Control{T} where {T<:AbstractParametricGate}, as it is parametric
 isparametric(::Type{Control{<:AbstractParametricGate}}) = true
