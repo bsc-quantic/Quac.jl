@@ -1,4 +1,4 @@
-import Base: push!, length
+import Base: push!, length, <=, iterate, IteratorSize
 
 export Circuit
 export lanes
@@ -12,6 +12,10 @@ struct Element{T}
     data::T
     priority::Vector{Pair{Int,Int}}
 end
+
+data(e::Element) = e.data
+
+<=(e::Element, head::Vector{Int}) = all(p <= head[lane] for (lane, p) in e.priority)
 
 """
 A quantum circuit implementation using multi-priority queues.
@@ -39,3 +43,31 @@ Base.push!(circ::Circuit, gate::AbstractGate) = begin
 
     lanes(gate) .|> lane -> circ.lanes[lane] .|> queue -> push!(queue, el)
 end
+
+"""
+    Base.iterate(circ::Circuit[, state])
+
+Retrieves next gate from `state` by travelling through a topologically sorted path.
+
+# Arguments
+- `circ::Circuit`
+- `state` should be a `NTuple{N, Int}` where `N` is the number of lanes. Each element points to the head of the current cut.
+"""
+Base.iterate(circ::Circuit, state = fill(1, lanes(circ))) = begin
+    # find winner
+    candidates = enumerate(state) .|> (x -> begin
+        lane, i = x
+        circ.lanes[lane][i]
+    end)
+    winner = filter(x -> x <= state, candidates) |> first
+    if winner == nothing
+        return nothing
+    end
+
+    # update head
+    winner.priority .|> ((lane, priority) -> state[lane] = priority)
+
+    (data(winner), state)
+end
+
+Base.IteratorSize(::Type{Circuit}) = Base.HasLength()
