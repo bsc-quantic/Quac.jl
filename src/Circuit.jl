@@ -26,7 +26,7 @@ end
 
 lanes(circ::Circuit) = length(circ.lanes)
 
-numgates(circ::Circuit) = sum(length(lane) for lane in circ.lanes)
+Base.length(circ::Circuit) = sum(length(lane) for lane in circ.lanes)
 
 """
     push!(circ, gate)
