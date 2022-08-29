@@ -1,4 +1,4 @@
-import Base: push!, length, iterate, IteratorSize
+import Base: push!, length, iterate, IteratorSize, in
 
 export Circuit
 export lanes
@@ -17,7 +17,7 @@ Element(gate::AbstractGate, priority) = Element{AbstractGate}(gate, priority)
 
 data(e::Element) = e.data
 
-isathead(e::Element, head::Vector{Int}) = all(p == head[lane] for (lane, p) in e.priority)
+in(e::Element, head::Vector{Int}) = all(p == head[lane] for (lane, p) in e.priority)
 
 """
 A quantum circuit implementation using multi-priority queues.
