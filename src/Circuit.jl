@@ -1,4 +1,4 @@
-import Base: push!, length, iterate, IteratorSize, in, adjoint
+import Base: push!, length, iterate, IteratorSize, in, adjoint, getindex
 using Base.Iterators: enumerate, filter
 
 export Circuit
@@ -98,3 +98,6 @@ Base.adjoint(circ::Circuit) = begin
 
     Circuit(lanes)
 end
+
+Base.getindex(circ::Circuit, lane, index) = data(circ.lanes[lane][index])
+
