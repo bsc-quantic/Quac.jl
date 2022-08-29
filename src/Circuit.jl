@@ -1,4 +1,5 @@
 import Base: push!, length, iterate, IteratorSize, in
+using Base.Iterators: enumerate, filter
 
 export Circuit
 export lanes
@@ -56,24 +57,25 @@ Retrieves next gate from `state` by travelling through a topologically sorted pa
 
 # Arguments
 - `circ::Circuit`
-- `state` should be a `NTuple{N, Int}` where `N` is the number of lanes. Each element points to the head of the current cut.
+- `state` (or head) should be a `NTuple{N, Int}` where `N` is the number of lanes. Each element is a pointer to the next gate on each lane.
 """
 Base.iterate(circ::Circuit, state = fill(1, lanes(circ))) = begin
-    # find winner
+    # retrieve gates on the edge of the cut
     candidates =
-        enumerate(state) .|>
+        enumerate(state) |>
+        (x -> filter((lane, head) -> head > length(circ.lanes[lane]), x)) .|>
         (x -> begin
             lane, i = x
-            get(circ.lanes[lane], i, nothing)
-        end) |>
-        (x -> filter(!isnothing, x))
+            circ.lanes[lane][i]
+        end)
     if isempty(candidates)
         return nothing
     end
 
-    winner = filter(x -> isathead(x, state), candidates) |> first
+    # choose first valid gate
+    winner = filter(x -> x ∈ state, candidates) |> first
 
-    # update head
+    # update head by advancing cut on involved lanes
     for (lane, priority) in winner.priority
         state[lane] = priority + 1
     end
