@@ -1,4 +1,4 @@
-using LinearAlgebra
+import LinearAlgebra: Matrix, Diagonal
 
 Matrix(x::AbstractGate) = Matrix{ComplexF32}(x)
 Matrix{T}(_::AbstractGate) where {T} = error("Implementation not found")
@@ -43,3 +43,7 @@ Diagonal{T}(_::Sd) where {T} = Diagonal{T}([1, -1im])
 Diagonal{T}(_::T) where {T} = Diagonal{T}([1, cispi(1 // 4)])
 Diagonal{T}(_::Td) where {T} = Diagonal{T}([1, cispi(-1 // 4)])
 Diagonal{T}(_::Rz) where {T} = Diagonal{T}([1 0; 0 cis(g.θ)])
+
+# permutational matrices (diagonal + permutation)
+# Permutation(x::AbstractGate) = Permutation{ComplexF32}(x)
+# Permutation{T}(_::AbstractGate) where {T} = error("Implementation not found")
