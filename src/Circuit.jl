@@ -1,4 +1,4 @@
-import Base: push!, length, iterate, IteratorSize, in
+import Base: push!, length, iterate, IteratorSize, in, adjoint
 using Base.Iterators: enumerate, filter
 
 export Circuit
@@ -29,6 +29,7 @@ struct Circuit
     lanes::Vector{Vector{Element{AbstractGate}}}
 
     Circuit(n::Int) = new(fill(Element[], n))
+    Circuit(lanes::Vector{Vector{Element{AbstractGate}}}) = new(lanes)
 end
 
 lanes(circ::Circuit) = length(circ.lanes)
@@ -84,3 +85,16 @@ Base.iterate(circ::Circuit, state = fill(1, lanes(circ))) = begin
 end
 
 Base.IteratorSize(::Type{Circuit}) = Base.HasLength()
+
+Base.adjoint(circ::Circuit) = begin
+    lanes = [
+        [
+            Element{AbstractGate}(
+                data(el),
+                [laneid => length(circ.lanes[laneid]) - p + 1 for (laneid, p) in el.priority],
+            ) for el in lane
+        ] for lane in circ.lanes
+    ]
+
+    Circuit(lanes)
+end
