@@ -1,4 +1,4 @@
-import Base: push!, length, iterate, IteratorSize, in, adjoint, getindex
+import Base: push!, length, iterate, IteratorSize, in, adjoint, getindex, show
 using Base.Iterators: enumerate, filter
 
 export Circuit
@@ -101,3 +101,4 @@ end
 
 Base.getindex(circ::Circuit, lane, index) = data(circ.lanes[lane][index])
 
+Base.show(io::IO, circ::Circuit) = println(io, "Circuit(n=$(lanes(circ)))")
