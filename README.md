@@ -4,25 +4,10 @@
 
 **_What does this means, you ask?_** Well, `Quac` is not a simulator, neither a controller of quantum computers. It just provides a `Circuit` data stracture, a set of gates and tools to manipulate them. Developers may use it as the core of their simulators or hardware controllers.
 
+> ⚠️ Measurement gates are not currently supported as we are exploring how to fit non-unitary gates.
+
 ## Features
 ### Multiple representation of gates
-TODO
-
-## Example
-
-### 4-qubit QFT
-TODO
-
-```julia
-using Quac
-
-circ = Circuit(4)
-push!()
-```
-
-## Internals
-### Gates
-> ⚠️ Measurement gates are not currently supported as we are exploring how to fit non-unitary gates.
 
 Gates are symbolic in the sense that they do not store their representation. In `Quac` a gate just stores the lane in which it acts, and parameters if it's a parametric gate. Thanks to Julia's multiple-dispatch different representations can be queried lazily.
 
@@ -57,7 +42,22 @@ Furthermore, the $Z$ gate allows a `Diagonal` representation!
   ⋅   -1.0
 ```
 
-#### `AbstractGate` interface
+
+## Example
+
+### 4-qubit QFT
+TODO
+
+```julia
+using Quac
+
+circ = Circuit(4)
+push!()
+```
+
+## Internals
+
+### `AbstractGate` interface
 
 Follow these instructions to implemente your own custom gate.
 
