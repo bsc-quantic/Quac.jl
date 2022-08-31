@@ -91,5 +91,6 @@ Instead `Quac` uses multi-priority queues to store gates.
 
 
 ## To do
-- [ ] ZX-calculi
+- [ ] Gate decompositions
+- [ ] ZX-calculus
 - [ ] Spatial layouts
