@@ -8,6 +8,7 @@ export isparametric, parameters
 export Rx, Ry, Rz, U1, U2, U3
 export Control, Swap
 export CX, CY, CZ, CRx, CRy, CRz
+export Measurement, ∏₀, ∏₁
 
 """
 Expected requirements:
@@ -145,3 +146,10 @@ struct Swap <: AbstractGate
 end
 
 Base.adjoint(::Type{Swap}) = Swap
+
+struct Measurement{T<:AbstractGate,S} <: AbstractGate
+    lane::Int
+end
+
+∏₀ = Measurement{Z,0}
+∏₁ = Measurement{Z,1}
