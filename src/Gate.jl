@@ -1,4 +1,4 @@
-import Base: show, adjoint
+import Base: show, adjoint, rand
 
 export AbstractGate
 export lane
@@ -84,6 +84,9 @@ Base.getindex(x::T, key::Symbol) where {T<:AbstractParametricGate} = x.param[key
 
 Base.adjoint(::Type{T}) where {T<:AbstractParametricGate} = T
 Base.adjoint(x::T) where {T<:AbstractParametricGate} = Base.adjoint(T)(lanes())
+
+Base.rand(::NamedTuple{N,T}) where {N,T} = NamedTuple{N}(rand(type) for type in T.parameters)
+Base.rand(::Type{T}, lane::Int) where {T<:AbstractParametricGate} = T(lane, rand(fieldtype(T, :param)))
 
 struct Rx <: AbstractParametricGate
     lane::Int
