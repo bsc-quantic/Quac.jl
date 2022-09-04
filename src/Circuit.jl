@@ -60,7 +60,7 @@ Retrieves next gate from `state` by travelling through a topologically sorted pa
 - `circ::Circuit`
 - `state` (or head) should be a `NTuple{N, Int}` where `N` is the number of lanes. Each element is a pointer to the next gate on each lane.
 """
-Base.iterate(circ::Circuit, state = fill(1, lanes(circ))) = begin
+Base.iterate(circ::Circuit, state=fill(1, lanes(circ))) = begin
     # retrieve gates on the edge of the cut
     candidates =
         enumerate(state) |>
