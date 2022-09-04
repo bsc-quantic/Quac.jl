@@ -102,3 +102,6 @@ This data structure allows us to store gates in the most compact way while itera
 - [ ] Gate decompositions
 - [ ] ZX-calculus
 - [ ] Spatial layouts
+- [ ] Measurements
+- [ ] Visualization
+- [ ] Support for _qudits_
