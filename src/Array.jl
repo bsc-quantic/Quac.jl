@@ -14,16 +14,16 @@ Matrix{F}(_::T) where {F} = Matrix{F}([1 0; 0 cispi(1 // 4)])
 Matrix{F}(_::Td) where {F} = Matrix{F}([1 0; 0 cispi(-1 // 4)])
 
 Matrix{T}(g::Rx) where {T} =
-    Matrix{T}([cos(g.θ / 2) -1im*sin(g.θ / 2); -1im*sin(g.θ / 2) cos(g.θ / 2)])
+    Matrix{T}([cos(g[:θ] / 2) -1im*sin(g[:θ] / 2); -1im*sin(g[:θ] / 2) cos(g[:θ] / 2)])
 Matrix{T}(g::Ry) where {T} =
-    Matrix{T}([cos(g.θ / 2) -sin(g.θ / 2); sin(g.θ / 2) cos(g.θ / 2)])
-Matrix{T}(g::Rz) where {T} = Matrix{T}([1 0; 0 cis(g.θ)])
+    Matrix{T}([cos(g[:θ] / 2) -sin(g[:θ] / 2); sin(g[:θ] / 2) cos(g[:θ] / 2)])
+Matrix{T}(g::Rz) where {T} = Matrix{T}([1 0; 0 cis(g[:θ])])
 
-Matrix{T}(g::U2) where {T} = 1 / sqrt(2) * Matrix{T}([1 -cis(g.λ); cis(g.ϕ) cis(g.ϕ + g.λ)])
+Matrix{T}(g::U2) where {T} = 1 / sqrt(2) * Matrix{T}([1 -cis(g[:λ]); cis(g[:ϕ]) cis(g[:ϕ] + g[:λ])])
 Matrix{T}(g::U3) where {T} = Matrix{T}(
     [
-        cos(g.θ / 2) -cis(g.λ)*sin(g.θ / 2)
-        cis(g.ϕ)*sin(g.θ / 2) cis(g.ϕ + g.λ)*cos(g.θ / 2)
+        cos(g[:θ] / 2) -cis(g[:λ])*sin(g[:θ] / 2)
+        cis(g[:ϕ])*sin(g[:θ] / 2) cis(g[:ϕ] + g[:λ])*cos(g[:θ] / 2)
     ],
 )
 
@@ -42,7 +42,7 @@ Diagonal{T}(_::S) where {T} = Diagonal{T}([1, 1im])
 Diagonal{T}(_::Sd) where {T} = Diagonal{T}([1, -1im])
 Diagonal{T}(_::T) where {T} = Diagonal{T}([1, cispi(1 // 4)])
 Diagonal{T}(_::Td) where {T} = Diagonal{T}([1, cispi(-1 // 4)])
-Diagonal{T}(_::Rz) where {T} = Diagonal{T}([1 0; 0 cis(g.θ)])
+Diagonal{T}(_::Rz) where {T} = Diagonal{T}([1 0; 0 cis(g[:θ])])
 
 # permutational matrices (diagonal + permutation)
 # Permutation(x::AbstractGate) = Permutation{ComplexF32}(x)
