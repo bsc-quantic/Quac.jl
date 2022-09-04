@@ -77,42 +77,37 @@ abstract type AbstractParametricGate <: AbstractGate end
 isparametric(::Type{<:AbstractGate}) = false
 isparametric(::Type{<:AbstractParametricGate}) = true
 
-parameters(::Type{T}) where {T<:AbstractParametricGate} =
-    filter(x -> x != :lane, fieldnames(T))
-parameters(x::T) where {T<:AbstractParametricGate} =
-    Dict(parameter => getfield(x, parameter) for parameter in parameters(T))
+parameters(::Type{T}) where {T<:AbstractParametricGate} = keys(fieldtype(T, :param))
+parameters(x::T) where {T<:AbstractParametricGate} = x.param
 
 Base.adjoint(::Type{T}) where {T<:AbstractParametricGate} = T
 Base.adjoint(x::T) where {T<:AbstractParametricGate} = Base.adjoint(T)(lanes())
 
 struct Rx <: AbstractParametricGate
     lane::Int
-    θ::Float32
+    param::NamedTuple{(:θ,),Tuple{Float32}}
 end
 
 struct Ry <: AbstractParametricGate
     lane::Int
-    θ::Float32
+    param::NamedTuple{(:θ,),Tuple{Float32}}
 end
 
 struct Rz <: AbstractParametricGate
     lane::Int
-    θ::Float32
+    param::NamedTuple{(:θ,),Tuple{Float32}}
 end
 
 U1 = Rz
 
 struct U2 <: AbstractParametricGate
     lane::Int
-    ϕ::Float32
-    λ::Float32
+    param::NamedTuple{(:ϕ, :λ),Tuple{Float32,Float32}}
 end
 
 struct U3 <: AbstractParametricGate
     lane::Int
-    θ::Float32
-    ϕ::Float32
-    λ::Float32
+    param::NamedTuple{(:θ, :ϕ, :λ),Tuple{Float32,Float32,Float32}}
 end
 
 struct Control{T} <: AbstractGate
