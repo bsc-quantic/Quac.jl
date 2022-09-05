@@ -18,54 +18,99 @@ abstract type AbstractGate end
 lanes(x::AbstractGate) = (x.lane,)
 Base.adjoint(x::T) where {T<:AbstractGate} = Base.adjoint(T)(lanes(x))
 
+"""
+    I(lane)
+
+The ``σ₀`` Pauli matrix gate.
+"""
 struct I <: AbstractGate
     lane::Int
 end
 
 Base.adjoint(::Type{I}) = I
 
+"""
+    X(lane)
+
+The ``σ₁`` Pauli matrix gate.
+"""
 struct X <: AbstractGate
     lane::Int
 end
 
 Base.adjoint(::Type{X}) = X
 
+"""
+    Y(lane)
+
+The ``σ₂`` Pauli matrix gate.
+"""
 struct Y <: AbstractGate
     lane::Int
 end
 
 Base.adjoint(::Type{Y}) = Y
 
+"""
+    Z(lane)
+
+The ``σ₂`` Pauli matrix gate.
+"""
 struct Z <: AbstractGate
     lane::Int
 end
 
 Base.adjoint(::Type{Z}) = Z
 
+"""
+    H(lane)
+
+The Hadamard gate.
+"""
 struct H <: AbstractGate
     lane::Int
 end
 
 Base.adjoint(::Type{H}) = H
 
+"""
+    S(lane)
+
+The S gate or ``π/2`` rotation around Z-axis.
+"""
 struct S <: AbstractGate
     lane::Int
 end
 
 Base.adjoint(::Type{S}) = Sd
 
+"""
+    Sd(lane)
+
+The S† gate or ``-π/2`` rotation around Z-axis.
+"""
 struct Sd <: AbstractGate
     lane::Int
 end
 
 Base.adjoint(::Type{Sd}) = S
 
+"""
+    T(lane)
+
+The T gate or ``π/4`` rotation around Z-axis.
+"""
 struct T <: AbstractGate
     lane::Int
 end
 
 Base.adjoint(::Type{T}) = Td
 
+"""
+    Td(lane)
+
+The T† gate or ``-π/4`` rotation around Z-axis.
+"""
 struct Td <: AbstractGate
     lane::Int
 end
@@ -88,16 +133,34 @@ Base.adjoint(x::T) where {T<:AbstractParametricGate} = Base.adjoint(T)(lanes())
 Base.rand(::NamedTuple{N,T}) where {N,T} = NamedTuple{N}(rand(type) for type in T.parameters)
 Base.rand(::Type{T}, lane::Int) where {T<:AbstractParametricGate} = T(lane, rand(fieldtype(T, :param)))
 
+"""
+    Rx(lane, (θ,))
+
+The ``\theta`` rotation around the X-axis gate.
+"""
 struct Rx <: AbstractParametricGate
     lane::Int
     param::NamedTuple{(:θ,),Tuple{Float32}}
 end
 
+"""
+    Ry(lane, (θ,))
+
+The ``\theta`` rotation around the Y-axis gate.
+"""
 struct Ry <: AbstractParametricGate
     lane::Int
     param::NamedTuple{(:θ,),Tuple{Float32}}
 end
 
+"""
+    Rz(lane, (θ,))
+
+The ``\theta`` rotation around the Z-axis gate.
+
+# Notes
+- The `U1` gate is an alias of `Rz`.
+"""
 struct Rz <: AbstractParametricGate
     lane::Int
     param::NamedTuple{(:θ,),Tuple{Float32}}
@@ -145,6 +208,11 @@ isparametric(::Type{Control{T}}) where {T<:Control} = isparametric(T)
 parameters(g::Control{<:AbstractParametricGate}) = parameters(g.op)
 parameters(g::Control{<:Control}) = parameters(g.op)
 
+"""
+    Swap(lanes)
+
+The SWAP gate.
+"""
 struct Swap <: AbstractGate
     lane::NTuple{2,Int}
 end

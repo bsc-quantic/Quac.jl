@@ -86,6 +86,23 @@ end
 
 Base.IteratorSize(::Type{Circuit}) = Base.HasLength()
 
+"""
+    Base.adjoint(circ)
+
+Retrieve the adjoint circuit which fulfills the following equality.
+
+```julia
+circ * circ' == I(n)
+```
+
+# Notes
+
+If all gates are hermitian, then the following equality also holds.
+
+```julia
+circ * circ' == circ' * circ == I(n)
+```
+"""
 Base.adjoint(circ::Circuit) = begin
     lanes = [
         [
@@ -99,6 +116,11 @@ Base.adjoint(circ::Circuit) = begin
     Circuit(lanes)
 end
 
+"""
+    Base.getindex(circ, lane, index)
+
+Retrieve gate at lane `lane` and depth `index`.
+"""
 Base.getindex(circ::Circuit, lane, index) = data(circ.lanes[lane][index])
 
 Base.show(io::IO, circ::Circuit) = println(io, "Circuit(n=$(lanes(circ)))")
