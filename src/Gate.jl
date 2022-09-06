@@ -136,7 +136,7 @@ Base.rand(::Type{T}, lane::Int) where {T<:AbstractParametricGate} = T(lane, rand
 """
     Rx(lane, (θ,))
 
-The ``\theta`` rotation around the X-axis gate.
+The ``\\theta`` rotation around the X-axis gate.
 """
 struct Rx <: AbstractParametricGate
     lane::Int
@@ -146,7 +146,7 @@ end
 """
     Ry(lane, (θ,))
 
-The ``\theta`` rotation around the Y-axis gate.
+The ``\\theta`` rotation around the Y-axis gate.
 """
 struct Ry <: AbstractParametricGate
     lane::Int
@@ -156,7 +156,7 @@ end
 """
     Rz(lane, (θ,))
 
-The ``\theta`` rotation around the Z-axis gate.
+The ``\\theta`` rotation around the Z-axis gate.
 
 # Notes
 - The `U1` gate is an alias of `Rz`.
