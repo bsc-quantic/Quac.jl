@@ -17,7 +17,7 @@ QFT(n::Int) = begin
         for control in target+1:n
             m = control - target
             θ = 2π / 2^m
-            push!(circ, CRz(control, target, (θ=θ))
+            push!(circ, CRz(control, target, θ))
         end
     end
 
