@@ -10,8 +10,12 @@ export Control, Swap
 export CX, CY, CZ, CRx, CRy, CRz
 
 """
-Expected requirements:
-- A field called `lane`
+    AbstractGate
+
+Type of gates. Any gate type must fulfill the following requirements:
+- A `lane` field (or property) of type `T <: Union{Int, NTuple{N,Int}} where {N}`
+  - This requirement can be bypassed by specializing `lanes`.
+- A specialized method for `Base.adjoint(::Type{T})` where `T` is the gate type.
 """
 abstract type AbstractGate end
 
@@ -117,6 +121,11 @@ end
 
 Base.adjoint(::Type{Td}) = T
 
+"""
+    AbstractParametricGate
+
+The type of parametric gates.
+"""
 abstract type AbstractParametricGate <: AbstractGate end
 
 isparametric(::Type{<:AbstractGate}) = false
@@ -172,21 +181,35 @@ end
 
 U1 = Rz
 
+"""
+    U2
+
+The ``U2`` gate.
+"""
 struct U2 <: AbstractParametricGate
     lane::Int
     param::NamedTuple{(:ϕ, :λ),Tuple{Float32,Float32}}
 end
 
+"""
+    U3
+
+The ``U3`` gate.
+"""
 struct U3 <: AbstractParametricGate
     lane::Int
     param::NamedTuple{(:θ, :ϕ, :λ),Tuple{Float32,Float32,Float32}}
 end
 
-struct Control{T} <: AbstractGate
+"""
+    Control
+
+A controlled gate.
+"""
+struct Control{T<:AbstractGate} <: AbstractGate
     lane::Int
     op::T
 end
-
 Control{T}(control::Integer, target::Integer) where {T<:AbstractGate} = Control(control, T(target))
 Control{T}(lanes::Integer...) where {T<:AbstractGate} = Control(first(lanes), Control{T}(Iterators.drop(lanes, 1)...))
 
