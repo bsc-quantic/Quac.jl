@@ -1,5 +1,5 @@
 # Algorithms
 
 ```@docs
-Algorithms.QFT
+Quac.Algorithms.QFT
 ```
