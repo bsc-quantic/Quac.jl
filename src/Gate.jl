@@ -125,7 +125,11 @@ isparametric(::Type{<:AbstractParametricGate}) = true
 parameters(::Type{T}) where {T<:AbstractParametricGate} = keys(fieldtype(T, :param))
 parameters(x::T) where {T<:AbstractParametricGate} = x.param
 
-Base.getindex(x::T, key::Symbol) where {T<:AbstractParametricGate} = x.param[key]
+Base.propertynames(::Type{T}) where {T<:AbstractParametricGate} = parameters(T)
+Base.propertynames(x::T) where {T<:AbstractParametricGate} = parameters(T)
+Base.getproperty(x::T, name::Symbol) where {T<:AbstractParametricGate} = parameters(x)[name]
+
+Base.getindex(x::T, key::Symbol) where {T<:AbstractParametricGate} = parameters(x)[key]
 
 Base.adjoint(::Type{T}) where {T<:AbstractParametricGate} = T
 Base.adjoint(x::T) where {T<:AbstractParametricGate} = Base.adjoint(T)(lanes())
