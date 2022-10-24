@@ -202,6 +202,8 @@ lanes(g::Control{T}) where {T} = (control(g)..., target(g)...)
 Base.adjoint(::Type{Control{T}}) where {T<:AbstractGate} = Control{adjoint(T)}
 Base.adjoint(g::Control{T}) where {T<:AbstractGate} = Control(lanes(g), adjoint(g.op))
 
+const Toffoli{T} = Control{Control{T}}
+
 # special case for Control{T} where {T<:AbstractParametricGate}, as it is parametric
 isparametric(::Type{Control{<:AbstractParametricGate}}) = true
 isparametric(::Type{Control{T}}) where {T<:Control} = isparametric(T)
