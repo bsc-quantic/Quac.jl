@@ -64,7 +64,7 @@ Base.iterate(circ::Circuit, state=fill(1, lanes(circ))) = begin
     # retrieve gates on the edge of the cut
     candidates =
         enumerate(state) |>
-        (x -> filter((lane, head) -> head > length(circ.lanes[lane]), x)) .|>
+        (x -> filter(y -> ((lane, head) = y; head <= length(circ.lanes[lane])), x)) .|>
         (x -> begin
             lane, i = x
             circ.lanes[lane][i]
