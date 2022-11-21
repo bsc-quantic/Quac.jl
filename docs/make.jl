@@ -1,18 +1,8 @@
-if pwd() == @__DIR__
-    # executing inside 'docs/' folder => load parent
-    using Pkg
-    Pkg.activate(".")
+using Pkg
+Pkg.activate(@__DIR__)
+Pkg.instantiate()
 
-    push!(LOAD_PATH, dirname(pwd()))
-
-elseif pwd() == dirname(@__DIR__)
-    # executing in project root folder => activate 'docs' env
-    using Pkg
-    Pkg.activate("docs")
-
-    push!(LOAD_PATH, pwd())
-
-end
+push!(LOAD_PATH, "$(@__DIR__)/..")
 
 using Documenter
 using Quac
