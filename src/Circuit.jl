@@ -1,5 +1,7 @@
 import Base: push!, length, iterate, IteratorSize, in, adjoint, getindex, show
 using Base.Iterators: enumerate, filter
+using SimpleWeightedGraphs
+using Combinatorics
 
 export Circuit
 export lanes
@@ -124,3 +126,28 @@ Retrieve gate at lane `lane` and depth `index`.
 Base.getindex(circ::Circuit, lane, index) = data(circ.lanes[lane][index])
 
 Base.show(io::IO, circ::Circuit) = println(io, "Circuit(n=$(lanes(circ)))")
+
+"""
+    connectivity([f,] circuit)
+
+Generate connectivity graph between qubits.
+"""
+function connectivity(f, circ::Circuit)
+    connections = Iterators.map(Iterators.filter(f, circ)) do gate
+                      n = length(lanes(gate))
+                      if n == 1
+                          src = dst = only(lanes(gate))
+                          return [[src, dst, 1]]
+                      else
+                          return vcat.(combinations(lanes(gate), 2), 1)
+                      end
+                  end |> Iterators.flatten |> collect
+
+    src = [conn[1] for conn in connections]
+    dst = [conn[2] for conn in connections]
+    weights = [conn[3] for conn in connections]
+
+    return SimpleWeightedGraph(src, dst, weights; combine=+)
+end
+
+connectivity(circ::Circuit) = connectivity(gate -> length(lanes(gate)) >= 2, circ)
