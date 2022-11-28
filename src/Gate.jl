@@ -1,12 +1,14 @@
 import Base: show, adjoint, rand
 
 export AbstractGate
+export lanes
 export I, X, Y, Z, H, S, Sd, T, Td
 export AbstractParametricGate
 export isparametric, parameters
 export Rx, Ry, Rz, U1, U2, U3
 export Control, Swap
 export CX, CY, CZ, CRx, CRy, CRz
+export control, target, op
 
 """
     AbstractGate
@@ -223,6 +225,9 @@ control(g::Control{T}) where {T<:Control} = (g.lane, control(g.op)...)
 target(g::Control{T}) where {T} = lanes(g.op)
 target(g::Control{T}) where {T<:Control} = target(g.op)
 lanes(g::Control{T}) where {T} = (control(g)..., target(g)...)
+
+op(g::Control{T}) where {T} = g.op
+op(g::Control{T}) where {T<:Control} = op(g.op)
 
 Base.adjoint(::Type{Control{T}}) where {T<:AbstractGate} = Control{adjoint(T)}
 Base.adjoint(g::Control{T}) where {T<:AbstractGate} = Control(lanes(g), adjoint(g.op))
