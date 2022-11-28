@@ -6,3 +6,4 @@ abstract type Blueprint end
 Compiles a `Circuit` for a specific hardware architecture or `Blueprint`.
 """
 function compile end
+export compile
