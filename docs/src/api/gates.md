@@ -18,13 +18,17 @@ Z(4)
 Any gate can be represented by a dense matrix.
 ```jldoctest z-gate
 julia> Matrix(gate)
-ComplexF32[1.0f0 + 0.0f0im 0.0f0 + 0.0f0im; 0.0f0 + 0.0f0im -1.0f0 + 0.0f0im]
+2×2 Matrix{ComplexF32}:
+ 1.0+0.0im   0.0+0.0im
+ 0.0+0.0im  -1.0+0.0im
 ```
 
 You can even specify the `eltype`!
 ```jldoctest z-gate
 julia> Matrix{Int}(gate)
-[1 0; 0 -1]
+2×2 Matrix{Int64}:
+ 1   0
+ 0  -1
 ```
 
 Furthermore, the $Z$ gate allows a `Diagonal` representation!
