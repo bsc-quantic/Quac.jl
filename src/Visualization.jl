@@ -20,17 +20,17 @@ end
 function draw end
 export draw
 
-function draw(gate::AbstractGate)
+function draw(gate::AbstractGate; top::Bool=false, bottom::Bool=false)
     n = (length ∘ lanes)(gate)
     if n == 1
-        draw_block()
+        draw_block(; top=bottom, bottom=top)
     else
         a, b = extrema(lanes(gate))
         n = b - a + 1
         vcat(
-            draw_multiblock_top(),
+            draw_multiblock_top(; top=top),
             fill(draw_multiblock_mid(), (n - 2))...,
-            draw_multiblock_bottom()
+            draw_multiblock_bottom(; bottom=bottom)
         )
     end
 end
