@@ -45,15 +45,18 @@ Furthermore, the $Z$ gate allows a `Diagonal` representation!
 
 ## Example
 
+More examples can be found in the `examples/` folder.
+
 ### 4-qubit QFT
-TODO
 
 ```julia
 using Quac
 
-circ = Circuit(4)
-push!()
+circ = Quac.Algorithms.QFT(4)
+draw(circ)
 ```
+
+![Quantum Fourier Transform](assets/qft.svg)
 
 ## Internals
 
