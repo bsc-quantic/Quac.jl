@@ -4,21 +4,57 @@ using MathTeXEngine
 abstract type VisualizationLayout <: Blueprint end
 
 function compile(::Type{<:VisualizationLayout}, circuit)
-    new = Circuit(lanes(circuit))
+    compiled_circuit = Circuit(lanes(circuit))
 
     for gate in circuit
-        # TODO
+        r = range(extrema(lanes(gate))...)
+        m = maximum(length, compiled_circuit.lanes)
+
+        for i in r
+            while length(compiled_circuit.lanes[i]) < m
+                push!(compiled_circuit, I(i))
+            end
+            if i ∉ lanes(gate)
+                push!(compiled_circuit, I(i))
+            end
+        end
+        push!(compiled_circuit, gate)
     end
 
-    error("not implemented yet")
-end
+    m = maximum(length, compiled_circuit.lanes)
+    for i in 1:lanes(compiled_circuit)
+        while length(compiled_circuit.lanes[i]) < m
+            push!(compiled_circuit, I(i))
+        end
+    end
 
-function Base.show(io::IO, ::MIME"image/svg+xml", circ::Circuit)
-    error("not implemented yet")
+    return compiled_circuit
 end
 
 function draw end
 export draw
+
+function draw(circ::Circuit)
+    compiled_circuit = compile(VisualizationLayout, circ)
+    @assert allequal(length.(compiled_circuit.lanes))
+
+    return hcat([
+        vcat(map(draw,
+            # filter `I` gates added between multi-qubit gates
+            foldl(data.(moment) |> unique, init=()) do acc, x
+                if x isa I && (l = only(lanes(x)); any(x -> l ∈ range(x...), extrema.(lanes.(acc))))
+                    return acc
+                end
+                return tuple(acc..., x)
+            end)...)
+        for moment in zip(compiled_circuit.lanes...)
+    ]...)
+end
+
+function Base.show(io::IO, ::MIME"image/svg+xml", circ::Circuit)
+    _ = draw(circ)
+    println(io, svgstring())
+end
 
 function draw(gate::AbstractGate; top::Bool=false, bottom::Bool=false)
     n = (length ∘ lanes)(gate)
