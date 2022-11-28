@@ -218,7 +218,7 @@ CRx(control, target, θ) = Control(control, Rx(target, θ))
 CRy(control, target, θ) = Control(control, Ry(target, θ))
 CRz(control, target, θ) = Control(control, Rz(target, θ))
 
-control(g::Control{T}) where {T} = g.lane
+control(g::Control{T}) where {T} = (g.lane,)
 control(g::Control{T}) where {T<:Control} = (g.lane, control(g.op)...)
 target(g::Control{T}) where {T} = lanes(g.op)
 target(g::Control{T}) where {T<:Control} = target(g.op)
