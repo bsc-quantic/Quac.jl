@@ -1,7 +1,6 @@
 import Base: show, adjoint, rand
 
 export AbstractGate
-export lane
 export I, X, Y, Z, H, S, Sd, T, Td
 export AbstractParametricGate
 export isparametric, parameters
