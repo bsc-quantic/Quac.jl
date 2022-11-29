@@ -68,8 +68,8 @@ struct H <: AbstractGate
     lane::Int
 end
 
-for T in [I, X, Y, Z, H]
-    @eval Base.adjoint(::Type{T}) = T
+for G in [I, X, Y, Z, H]
+    @eval Base.adjoint(::Type{$G}) = $G
 end
 
 """
