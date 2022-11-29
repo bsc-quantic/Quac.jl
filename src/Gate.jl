@@ -21,7 +21,7 @@ Type of gates. Any gate type must fulfill the following requirements:
 abstract type AbstractGate end
 
 lanes(x::AbstractGate) = (x.lane,)
-Base.adjoint(x::T) where {T<:AbstractGate} = Base.adjoint(T)(lanes(x))
+Base.adjoint(x::T) where {T<:AbstractGate} = Base.adjoint(T)(lanes(x)...)
 
 """
     I(lane)
