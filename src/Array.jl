@@ -18,7 +18,7 @@ Matrix{T}(::Type{Sd}) where {T} = Matrix{T}([1 0; 0 -1im])
 Matrix{F}(::Type{T}) where {F} = Matrix{F}([1 0; 0 cispi(1 // 4)])
 Matrix{F}(::Type{Td}) where {F} = Matrix{F}([1 0; 0 cispi(-1 // 4)])
 
-Matrix{T}(::Type{Swap}) = Matrix{T}([1 0 0 0; 0 0 1 0; 0 1 0 0; 0 0 0 1])
+Matrix{T}(::Type{Swap}) where {T} = Matrix{T}([1 0 0 0; 0 0 1 0; 0 1 0 0; 0 0 0 1])
 
 Matrix{T}(g::Rx) where {T} = Matrix{T}([
     cos(g[:θ] / 2) -1im*sin(g[:θ] / 2)
