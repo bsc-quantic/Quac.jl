@@ -126,7 +126,7 @@ abstract type AbstractParametricGate <: AbstractGate end
 isparametric(::Type{<:AbstractGate}) = false
 isparametric(::Type{<:AbstractParametricGate}) = true
 
-parameters(::Type{T}) where {T<:AbstractParametricGate} = keys(fieldtype(T, :param))
+parameters(::Type{T}) where {T<:AbstractParametricGate} = fieldtype(T, :param).parameters[1]
 parameters(x::T) where {T<:AbstractParametricGate} = x.param
 
 Base.propertynames(::Type{T}) where {T<:AbstractParametricGate} = parameters(T)
@@ -233,8 +233,8 @@ const Toffoli{T} = Control{Control{T}}
 # special case for Control{T} where {T<:AbstractParametricGate}, as it is parametric
 isparametric(::Type{Control{<:AbstractParametricGate}}) = true
 isparametric(::Type{Control{T}}) where {T<:Control} = isparametric(T)
-parameters(g::Control{<:AbstractParametricGate}) = parameters(g.op)
-parameters(g::Control{<:Control}) = parameters(g.op)
+parameters(g::Control) = parameters(op(g))
+parameters(::Type{T}) where {T<:Control} = parameters(op(T))
 
 """
     Swap(lanes)
