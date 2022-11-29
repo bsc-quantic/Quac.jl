@@ -20,6 +20,8 @@ Type of gates. Any gate type must fulfill the following requirements:
 """
 abstract type AbstractGate end
 
+function lanes end
+
 lanes(x::AbstractGate) = (x.lane,)
 Base.adjoint(x::T) where {T<:AbstractGate} = Base.adjoint(T)(lanes(x)...)
 
@@ -195,6 +197,10 @@ struct U3 <: AbstractParametricGate
     param::NamedTuple{(:θ, :ϕ, :λ),Tuple{Float32,Float32,Float32}}
 end
 
+for G in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, U2, U3]
+    @eval lanes(::Type{$G}) = 1
+end
+
 """
     Control
 
@@ -219,6 +225,7 @@ control(g::Control{T}) where {T<:Control} = (g.lane, control(g.op)...)
 target(g::Control{T}) where {T} = lanes(g.op)
 target(g::Control{T}) where {T<:Control} = target(g.op)
 lanes(g::Control{T}) where {T} = (control(g)..., target(g)...)
+lanes(::Type{Control{T}}) where {T} = 1 + lanes(T)
 
 op(g::Control{T}) where {T} = g.op
 op(g::Control{T}) where {T<:Control} = op(g.op)
@@ -246,3 +253,4 @@ struct Swap <: AbstractGate
 end
 
 Base.adjoint(::Type{Swap}) = Swap
+lanes(::Type{Swap}) = 2
