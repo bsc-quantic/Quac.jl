@@ -2,6 +2,7 @@ import LinearAlgebra: Matrix, Diagonal
 import LinearAlgebra
 
 Matrix(x::AbstractGate) = Matrix{ComplexF32}(x)
+Matrix(::Type{T}) where {T<:AbstractGate} = Matrix{ComplexF32}(T)
 
 for G in [I, X, Y, Z, H, S, Sd, T, Td, Swap]
     @eval Matrix{T}(_::$G) where {T} = Matrix{T}($G)
