@@ -53,7 +53,7 @@ Diagonal{T}(::Type{I}) where {T} = Diagonal{T}(LinearAlgebra.I, 2)
 Diagonal{T}(::Type{Z}) where {T} = Diagonal{T}([1, -1])
 Diagonal{T}(::Type{S}) where {T} = Diagonal{T}([1, 1im])
 Diagonal{T}(::Type{Sd}) where {T} = Diagonal{T}([1, -1im])
-Diagonal{T}(::Type{T}) where {T} = Diagonal{T}([1, cispi(1 // 4)])
+Diagonal{F}(::Type{T}) where {F} = Diagonal{F}([1, cispi(1 // 4)])
 Diagonal{T}(::Type{Td}) where {T} = Diagonal{T}([1, cispi(-1 // 4)])
 
 Diagonal{T}(g::Rz) where {T} = Diagonal{T}([1 0; 0 cis(g[:θ])])
