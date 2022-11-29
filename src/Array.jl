@@ -71,3 +71,16 @@ Diagonal{T}(g::Rz) where {T} = Diagonal{T}([1 0; 0 cis(g[:θ])])
 # permutational matrices (diagonal + permutation)
 # Permutation(x::AbstractGate) = Permutation{ComplexF32}(x)
 # Permutation{T}(_::AbstractGate) where {T} = error("Implementation not found")
+
+# preferred representation
+function arraytype end
+export arraytype
+
+arraytype(::T) where {T<:AbstractGate} = arraytype(T)
+arraytype(::Type{<:AbstractGate}) = Matrix
+
+for G in [I, Z, S, Sd, T, Td, Rz]
+    @eval arraytype(::Type{$G}) = Diagonal
+end
+
+arraytype(::Type{T}) where {T<:Control} = arraytype(op(T)) == Diagonal ? Diagonal : Matrix
