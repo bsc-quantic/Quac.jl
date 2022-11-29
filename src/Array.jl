@@ -43,6 +43,7 @@ Matrix{T}(g::U3) where {T} = Matrix{T}([
 # diagonal matrices
 # NOTE efficient multiplication due to no memory swap needed: plain element-wise multiplication
 Diagonal(x::AbstractGate) = Diagonal{ComplexF32}(x)
+Diagonal(::Type{T}) where {T<:AbstractGate} = Diagonal{ComplexF32}(T)
 
 for G in [I, Z, S, Sd, T, Td]
     @eval Diagonal{T}(_::$G) where {T} = Diagonal{T}($G)
