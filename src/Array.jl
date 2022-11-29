@@ -38,7 +38,16 @@ Matrix{T}(g::U3) where {T} = Matrix{T}([
     cis(g[:ϕ])*sin(g[:θ] / 2) cis(g[:ϕ] + g[:λ])*cos(g[:θ] / 2)
 ])
 
-# TODO Matrix{T}(g::Control) = ...
+function Matrix{T}(g::Control) where {T}
+    n = (length ∘ lanes)(g)
+    t = (length ∘ target)(g)
+
+    M = Matrix{T}(LinearAlgebra.I, 2^n, 2^n)
+
+    M[(2^n-2^t+1):end, (2^n-2^t+1):end] = Matrix{T}(op(g))
+
+    return M
+end
 
 # diagonal matrices
 # NOTE efficient multiplication due to no memory swap needed: plain element-wise multiplication
