@@ -32,8 +32,6 @@ struct I <: AbstractGate
     lane::Int
 end
 
-Base.adjoint(::Type{I}) = I
-
 """
     X(lane)
 
@@ -42,8 +40,6 @@ The ``σ₁`` Pauli matrix gate.
 struct X <: AbstractGate
     lane::Int
 end
-
-Base.adjoint(::Type{X}) = X
 
 """
     Y(lane)
@@ -54,8 +50,6 @@ struct Y <: AbstractGate
     lane::Int
 end
 
-Base.adjoint(::Type{Y}) = Y
-
 """
     Z(lane)
 
@@ -64,8 +58,6 @@ The ``σ₂`` Pauli matrix gate.
 struct Z <: AbstractGate
     lane::Int
 end
-
-Base.adjoint(::Type{Z}) = Z
 
 """
     H(lane)
@@ -76,7 +68,9 @@ struct H <: AbstractGate
     lane::Int
 end
 
-Base.adjoint(::Type{H}) = H
+for T in [I, X, Y, Z, H]
+    @eval Base.adjoint(::Type{T}) = T
+end
 
 """
     S(lane)
