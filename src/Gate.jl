@@ -222,9 +222,11 @@ lanes(g::Control{T}) where {T} = (control(g)..., target(g)...)
 
 op(g::Control{T}) where {T} = g.op
 op(g::Control{T}) where {T<:Control} = op(g.op)
+op(::Type{Control{T}}) where {T} = T
+op(::Type{Control{T}}) where {T<:Control} = op(T)
 
 Base.adjoint(::Type{Control{T}}) where {T<:AbstractGate} = Control{adjoint(T)}
-Base.adjoint(g::Control{T}) where {T<:AbstractGate} = Control(lanes(g), adjoint(g.op))
+Base.adjoint(g::Control{T}) where {T<:AbstractGate} = Control(g.lane, op(g)')
 
 const Toffoli{T} = Control{Control{T}}
 
