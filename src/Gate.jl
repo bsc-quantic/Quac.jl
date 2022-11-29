@@ -135,7 +135,7 @@ Base.propertynames(x::T) where {T<:AbstractParametricGate} = parameters(T)
 Base.getindex(x::T, key::Symbol) where {T<:AbstractParametricGate} = parameters(x)[key]
 
 Base.adjoint(::Type{T}) where {T<:AbstractParametricGate} = T
-Base.adjoint(x::T) where {T<:AbstractParametricGate} = Base.adjoint(T)(lanes())
+Base.adjoint(x::T) where {T<:AbstractParametricGate} = Base.adjoint(T)(lanes(x)..., NamedTuple{parameters(T)}(.-(values(parameters(x)))))
 
 Base.rand(::NamedTuple{N,T}) where {N,T} = NamedTuple{N}(rand(type) for type in T.parameters)
 Base.rand(::Type{T}, lane::Int) where {T<:AbstractParametricGate} = T(lane, rand(fieldtype(T, :param)))
