@@ -59,7 +59,7 @@ end
 function draw(gate::AbstractGate; top::Bool=false, bottom::Bool=false)
     n = (length ∘ lanes)(gate)
     if n == 1
-        draw_block(; top=bottom, bottom=top)
+        draw_block(; top=top, bottom=bottom)
     else
         a, b = extrema(lanes(gate))
         n = b - a + 1
@@ -104,7 +104,7 @@ function draw(gate::Control)
             end
             for lane in r if lane < only(t)
         ]...,
-        draw(op(gate); top=any(<(only(t)), c), bottom=any(>(only(t)), c)),
+        draw(op(gate); top=!any(<(only(t)), c), bottom=!any(>(only(t)), c)),
         [
             if lane == last(r)
                 draw_copy(:bottom)
