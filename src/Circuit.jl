@@ -158,3 +158,22 @@ function connectivity(f, circ::Circuit)
 end
 
 connectivity(circ::Circuit) = connectivity(gate -> length(lanes(gate)) >= 2, circ)
+
+"""
+    moments(circuit)
+
+Return moments (lists of gates that _can_ execute at the same time) of the circuit.
+"""
+function moments(circ::Circuit)
+    m = [AbstractGate[]]
+
+    for gate in circ
+        if isempty(last(m)) || isdisjoint(lanes(gate), ∪(lanes.(last(m))...))
+            push!(last(m), gate)
+        else
+            push!(m, [gate])
+        end
+    end
+
+    return m
+end
