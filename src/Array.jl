@@ -12,8 +12,6 @@ for G in [I, Z, S, Sd, T, Td, Rz]
     @eval arraytype(::Type{$G}) = Diagonal
 end
 
-# TODO Array{T,N} where {T} instead of Matrix
-# TODO N-dim Diagonal type
 arraytype(::Type{T}) where {T<:Control} = arraytype(op(T)) == Diagonal ? Diagonal : Matrix
 
 Matrix(x::AbstractGate) = Matrix{ComplexF32}(x)
