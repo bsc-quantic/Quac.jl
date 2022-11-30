@@ -4,7 +4,7 @@ using SimpleWeightedGraphs
 using Combinatorics
 
 export Circuit
-export lanes
+export lanes, connectivity, moments
 
 """
     Element{T}
