@@ -56,10 +56,11 @@ Matrix{T}(g::U3) where {T} = Matrix{T}([
 
 function Matrix{T}(::Type{Control{G}}) where {T,G}
     n = lanes(Control{G})
+    t = lanes(G)
 
     M = Matrix{T}(LinearAlgebra.I, 2^n, 2^n)
 
-    M[(2^n-2+1):end, (2^n-2+1):end] = Matrix{T}(G)
+    M[(2^n-2^t+1):end, (2^n-2^t+1):end] = Matrix{T}(G)
 
     return M
 end
