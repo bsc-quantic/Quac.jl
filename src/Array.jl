@@ -1,6 +1,21 @@
 import LinearAlgebra: Matrix, Diagonal, eigvals, eigvecs, eigen
 using LinearAlgebra: Eigen, LinearAlgebra
 
+# preferred representation
+function arraytype end
+export arraytype
+
+arraytype(::T) where {T<:AbstractGate} = arraytype(T)
+arraytype(::Type{G}) where {G<:AbstractGate} = Array{T,2 * lanes(G)} where {T}
+
+for G in [I, Z, S, Sd, T, Td, Rz]
+    @eval arraytype(::Type{$G}) = Diagonal
+end
+
+# TODO Array{T,N} where {T} instead of Matrix
+# TODO N-dim Diagonal type
+arraytype(::Type{T}) where {T<:Control} = arraytype(op(T)) == Diagonal ? Diagonal : Matrix
+
 Matrix(x::AbstractGate) = Matrix{ComplexF32}(x)
 Matrix(::Type{T}) where {T<:AbstractGate} = Matrix{ComplexF32}(T)
 
@@ -80,21 +95,6 @@ Diagonal{T}(g::Rz) where {T} = Diagonal{T}([1 0; 0 cis(g[:θ])])
 # permutational matrices (diagonal + permutation)
 # Permutation(x::AbstractGate) = Permutation{ComplexF32}(x)
 # Permutation{T}(_::AbstractGate) where {T} = error("Implementation not found")
-
-# preferred representation
-function arraytype end
-export arraytype
-
-arraytype(::T) where {T<:AbstractGate} = arraytype(T)
-arraytype(::Type{G}) where {G<:AbstractGate} = Array{T,2 * lanes(G)} where {T}
-
-for G in [I, Z, S, Sd, T, Td, Rz]
-    @eval arraytype(::Type{$G}) = Diagonal
-end
-
-# TODO Array{T,N} where {T} instead of Matrix
-# TODO N-dim Diagonal type
-arraytype(::Type{T}) where {T<:Control} = arraytype(op(T)) == Diagonal ? Diagonal : Matrix
 
 # Linear Algebra factorizations
 eigen(::Type{T}) where {T<:AbstractGate} = Eigen(eigvals(T), eigvecs(T))
