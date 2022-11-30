@@ -133,6 +133,10 @@ Base.show(io::IO, circ::Circuit) = println(io, "Circuit(#lanes=$(lanes(circ)), #
     connectivity([f,] circuit)
 
 Generate connectivity graph between qubits.
+
+# Arguments
+- f: Function to filter gates from circuit.
+- circuit: Circuit.
 """
 function connectivity(f, circ::Circuit)
     connections = Iterators.map(Iterators.filter(f, circ)) do gate
