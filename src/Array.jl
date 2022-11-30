@@ -75,6 +75,15 @@ function Matrix{T}(g::Control) where {T}
     return M
 end
 
+Array(x::AbstractGate) = Array{ComplexF32}(x)
+Array(::Type{T}) where {T<:AbstractGate} = Array{ComplexF32}(T)
+
+Array{T}(::Type{Swap}) where {T} = Array{T,4}(Swap)
+Array{T,4}(::Type{Swap}) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
+
+Array{T}(::Type{G}) where {T,G<:Control} = Array{T,2 * lanes(G)}(reshape(Matrix{T}(G), fill(2, 2 * lanes(G))...))
+Array{T}(g::G) where {T,G<:Control} = Array{T,2 * lanes(G)}(reshape(Matrix{T}(g), fill(2, 2 * lanes(G))...))
+
 # diagonal matrices
 # NOTE efficient multiplication due to no memory swap needed: plain element-wise multiplication
 Diagonal(x::AbstractGate) = Diagonal{ComplexF32}(x)
