@@ -1,5 +1,5 @@
-import LinearAlgebra: Matrix, Diagonal
-import LinearAlgebra
+import LinearAlgebra: Matrix, Diagonal, eigvals, eigvecs, eigen
+using LinearAlgebra: Eigen, LinearAlgebra
 
 Matrix(x::AbstractGate) = Matrix{ComplexF32}(x)
 Matrix(::Type{T}) where {T<:AbstractGate} = Matrix{ComplexF32}(T)
@@ -95,3 +95,59 @@ end
 # TODO Array{T,N} where {T} instead of Matrix
 # TODO N-dim Diagonal type
 arraytype(::Type{T}) where {T<:Control} = arraytype(op(T)) == Diagonal ? Diagonal : Matrix
+
+# Linear Algebra factorizations
+eigen(::Type{T}) where {T<:AbstractGate} = Eigen(eigvals(T), eigvecs(T))
+eigen(::T) where {T<:AbstractGate} = eigen(T)
+eigen(g::T) where {T<:AbstractParametricGate} = Eigen(eigvals(T), eigvecs(T))
+
+eigvals(::Type{T}) where {T<:AbstractGate} = eigvals(Matrix(T))
+eigvals(::T) where {T<:AbstractGate} = eigvals(T)
+eigvals(g::T) where {T<:AbstractParametricGate} = eigvals(Matrix(g))
+
+eigvecs(::Type{T}) where {T<:AbstractGate} = eigvecs(Matrix(T))
+eigvecs(::T) where {T<:AbstractGate} = eigvecs(T)
+eigvecs(g::T) where {T<:AbstractParametricGate} = eigvecs(Matrix(g))
+
+eigvals(::Type{I}) = [1, 1]
+eigvecs(::Type{I}) = [1 0; 0 1]
+
+for G in [X, Y, Z, H]
+    @eval eigvals(::$G) = eigvals($G)
+    @eval eigvals(::Type{$G}) = [-1, 1]
+end
+
+eigvecs(::Type{X}) = sqrt(2) / 2 .* [-1 1; 1 1]
+eigvecs(::Type{Y}) = sqrt(2) / 2 .* [-1im -1im; -1 1]
+eigvecs(::Type{Z}) = [0 1; 1 0]
+eigvecs(::Type{H}) = (m = [1-sqrt(2) 1+sqrt(2); 1 1]; m ./ sqrt.(sum(m .^ 2, dims = 1)))
+
+eigvals(::Type{S}) = [1im, 1]
+eigvals(::Type{Sd}) = [-1im, 1]
+eigvals(::Type{T}) = [sqrt(2) / 2 + 1im * sqrt(2) / 2, 1]
+eigvals(::Type{Td}) = [sqrt(2) / 2 - 1im * sqrt(2) / 2, 1]
+
+for G in [S, Sd, T, Td]
+    @eval eigvecs(::Type{$G}) = eigvecs(Z)
+end
+
+for G in [Rx, Ry, Rz]
+    @eval eigen(g::$G) = Eigen(eigvals(g), eigvecs($G))
+end
+
+eigvals(g::Rx) = [cis(-g[:θ] / 2), cis(g[:θ] / 2)]
+eigvals(g::Ry) = [cis(-g[:θ] / 2), cis(g[:θ] / 2)]
+eigvals(g::Rz) = [1, cis(g[:θ])]
+
+eigvecs(g::Rx) = eigvecs(Rx)
+eigvecs(::Type{Rx}) = (α = sqrt(2) / 2; α * [1 1; 1 -1])
+eigvecs(g::Ry) = eigvecs(Ry)
+eigvecs(::Type{Ry}) = (α = sqrt(2) / 2; α * [-1im 1; 1 -1im])
+eigvecs(g::Rz) = eigvecs(Rz)
+eigvecs(::Type{Rz}) = [1 0; 0 1]
+
+eigvals(::Type{Swap}) = [-1, 1, 1, 1]
+eigvecs(::Type{Swap}) = (α = sqrt(2) / 2;
+[0 1 0 0; α 0 α 0; -α 0 α 0; 0 0 0 1])
+
+# TODO eigen of `Control`?
