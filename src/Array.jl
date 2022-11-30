@@ -1,4 +1,5 @@
-import LinearAlgebra: Matrix, Diagonal, eigvals, eigvecs, eigen
+import Base: Matrix, Array
+import LinearAlgebra: Diagonal, eigvals, eigvecs, eigen
 using LinearAlgebra: Eigen, LinearAlgebra
 
 # preferred representation
