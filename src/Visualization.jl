@@ -38,17 +38,22 @@ function draw(circ::Circuit)
     compiled_circuit = compile(VisualizationLayout, circ)
     @assert allequal(length.(compiled_circuit.lanes))
 
-    return hcat([
-        vcat(map(draw,
-            # filter `I` gates added between multi-qubit gates
-            foldl(data.(moment) |> unique, init=()) do acc, x
-                if x isa I && (l = only(lanes(x)); any(x -> l ∈ range(x...), extrema.(lanes.(acc))))
-                    return acc
-                end
-                return tuple(acc..., x)
-            end)...)
-        for moment in zip(compiled_circuit.lanes...)
-    ]...)
+    return hcat(
+        [
+            vcat(
+                map(
+                    draw,
+                    # filter `I` gates added between multi-qubit gates
+                    foldl(data.(moment) |> unique, init = ()) do acc, x
+                        if x isa I && (l = only(lanes(x)); any(x -> l ∈ range(x...), extrema.(lanes.(acc))))
+                            return acc
+                        end
+                        return tuple(acc..., x)
+                    end,
+                )...,
+            ) for moment in zip(compiled_circuit.lanes...)
+        ]...,
+    )
 end
 
 function Base.show(io::IO, ::MIME"image/svg+xml", circ::Circuit)
@@ -56,17 +61,17 @@ function Base.show(io::IO, ::MIME"image/svg+xml", circ::Circuit)
     println(io, svgstring())
 end
 
-function draw(gate::AbstractGate; top::Bool=false, bottom::Bool=false)
+function draw(gate::AbstractGate; top::Bool = false, bottom::Bool = false)
     n = (length ∘ lanes)(gate)
     if n == 1
-        draw_block(; top=top, bottom=bottom)
+        draw_block(; top = top, bottom = bottom)
     else
         a, b = extrema(lanes(gate))
         n = b - a + 1
         vcat(
-            draw_multiblock_top(; top=top),
+            draw_multiblock_top(; top = top),
             fill(draw_multiblock_mid(), (n - 2))...,
-            draw_multiblock_bottom(; bottom=bottom)
+            draw_multiblock_bottom(; bottom = bottom),
         )
     end
 end
@@ -75,7 +80,7 @@ draw(::I) = draw(I)
 function draw(::Type{I})
     @drawsvg begin
         origin()
-        line(Point(-25, 0), Point(25, 0), action=:stroke)
+        line(Point(-25, 0), Point(25, 0), action = :stroke)
     end 50 50
 end
 
@@ -101,10 +106,9 @@ function draw(gate::Control)
                 draw_copy(:mid)
             else
                 draw_cross()
-            end
-            for lane in r if lane < only(t)
+            end for lane in r if lane < only(t)
         ]...,
-        draw(op(gate); top=!any(<(only(t)), c), bottom=!any(>(only(t)), c)),
+        draw(op(gate); top = !any(<(only(t)), c), bottom = !any(>(only(t)), c)),
         [
             if lane == last(r)
                 draw_copy(:bottom)
@@ -112,33 +116,32 @@ function draw(gate::Control)
                 draw_copy(:mid)
             else
                 draw_cross()
-            end
-            for lane in r if lane > only(t)
-        ]...
+            end for lane in r if lane > only(t)
+        ]...,
     )
 end
 
-function draw_block(label=""; top::Bool=false, bottom::Bool=false)
+function draw_block(label = ""; top::Bool = false, bottom::Bool = false)
     @drawsvg begin
         origin()
 
         # lane wire
-        line(Point(-25, 0), Point(-15, 0), action=:stroke)
-        line(Point(25, 0), Point(15, 0), action=:stroke)
+        line(Point(-25, 0), Point(-15, 0), action = :stroke)
+        line(Point(25, 0), Point(15, 0), action = :stroke)
 
         # control connectors
         if top
-            line(Point(0, 25), Point(0, 15), action=:stroke)
+            line(Point(0, 25), Point(0, 15), action = :stroke)
         end
         if bottom
-            line(Point(0, -25), Point(0, -15), action=:stroke)
+            line(Point(0, -25), Point(0, -15), action = :stroke)
         end
 
-        rect(-15, -15, 30, 30, action=:stroke)
+        rect(-15, -15, 30, 30, action = :stroke)
 
         # label
         fontsize(16)
-        text(label, valign=:middle, halign=:center)
+        text(label, valign = :middle, halign = :center)
     end 50 50
 end
 
@@ -147,12 +150,12 @@ function draw_multiblock_mid()
         origin()
 
         # lane wire
-        line(Point(-25, 0), Point(-15, 0), action=:stroke)
-        line(Point(25, 0), Point(15, 0), action=:stroke)
+        line(Point(-25, 0), Point(-15, 0), action = :stroke)
+        line(Point(25, 0), Point(15, 0), action = :stroke)
 
         # vertical lines
-        line(Point(-15, -25), Point(-15, 25), action=:stroke)
-        line(Point(15, -25), Point(15, 25), action=:stroke)
+        line(Point(-15, -25), Point(-15, 25), action = :stroke)
+        line(Point(15, -25), Point(15, 25), action = :stroke)
     end 50 50
 end
 
@@ -161,15 +164,15 @@ function draw_multiblock_bottom()
         origin()
 
         # lane wire
-        line(Point(-25, 0), Point(-15, 0), action=:stroke)
-        line(Point(25, 0), Point(15, 0), action=:stroke)
+        line(Point(-25, 0), Point(-15, 0), action = :stroke)
+        line(Point(25, 0), Point(15, 0), action = :stroke)
 
         # vertical lines
-        line(Point(-15, -25), Point(-15, 15), action=:stroke)
-        line(Point(15, -25), Point(15, 15), action=:stroke)
+        line(Point(-15, -25), Point(-15, 15), action = :stroke)
+        line(Point(15, -25), Point(15, 15), action = :stroke)
 
         # terminal
-        line(Point(-15, 15), Point(15, 15), action=:stroke)
+        line(Point(-15, 15), Point(15, 15), action = :stroke)
     end 50 50
 end
 
@@ -178,15 +181,15 @@ function draw_multiblock_top()
         origin()
 
         # lane wire
-        line(Point(-25, 0), Point(-15, 0), action=:stroke)
-        line(Point(25, 0), Point(15, 0), action=:stroke)
+        line(Point(-25, 0), Point(-15, 0), action = :stroke)
+        line(Point(25, 0), Point(15, 0), action = :stroke)
 
         # vertical lines
-        line(Point(-15, 25), Point(-15, -15), action=:stroke)
-        line(Point(15, 25), Point(15, -15), action=:stroke)
+        line(Point(-15, 25), Point(-15, -15), action = :stroke)
+        line(Point(15, 25), Point(15, -15), action = :stroke)
 
         # terminal
-        line(Point(-15, -15), Point(15, -15), action=:stroke)
+        line(Point(-15, -15), Point(15, -15), action = :stroke)
     end 50 50
 end
 
@@ -194,17 +197,17 @@ function draw_cross()
     @drawsvg begin
         origin()
 
-        line(Point(-25, 0), Point(25, 0), action=:stroke)
-        line(Point(0, -25), Point(0, 25), action=:stroke)
+        line(Point(-25, 0), Point(25, 0), action = :stroke)
+        line(Point(0, -25), Point(0, 25), action = :stroke)
     end 50 50
 end
 
 function draw_copy(dir::Symbol)
     @drawsvg begin
         origin()
-        line(Point(-25, 0), Point(25, 0), action=:stroke)
+        line(Point(-25, 0), Point(25, 0), action = :stroke)
 
-        circle(0, 0, 5, action=:fill)
+        circle(0, 0, 5, action = :fill)
 
         (a, b) = if dir == :top
             Point(0, 0), Point(0, 25)
@@ -215,6 +218,6 @@ function draw_copy(dir::Symbol)
         else
             throw(ArgumentError("`dir`=$dir is invalid"))
         end
-        line(a, b, action=:stroke)
+        line(a, b, action = :stroke)
     end 50 50
 end

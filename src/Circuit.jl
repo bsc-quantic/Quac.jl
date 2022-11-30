@@ -24,8 +24,9 @@ in(e::Element, head::Vector{Int}) = all(p == head[lane] for (lane, p) in e.prior
 
 """
 A quantum circuit implementation using multi-priority queues.
-- Queues are gate-buffers in qubit lanes.
-- Multi-priority numbers can be retrieved procedurally from gate-lanes encoded inside the gates of the queues.
+
+  - Queues are gate-buffers in qubit lanes.
+  - Multi-priority numbers can be retrieved procedurally from gate-lanes encoded inside the gates of the queues.
 """
 struct Circuit
     lanes::Vector{Vector{Element{AbstractGate}}}
@@ -59,10 +60,11 @@ end
 Retrieves next gate from `state` by travelling through a topologically sorted path.
 
 # Arguments
-- `circ::Circuit`
-- `state` (or head) should be a `NTuple{N, Int}` where `N` is the number of lanes. Each element is a pointer to the next gate on each lane.
+
+  - `circ::Circuit`
+  - `state` (or head) should be a `NTuple{N, Int}` where `N` is the number of lanes. Each element is a pointer to the next gate on each lane.
 """
-Base.iterate(circ::Circuit, state=fill(1, lanes(circ))) = begin
+Base.iterate(circ::Circuit, state = fill(1, lanes(circ))) = begin
     # retrieve gates on the edge of the cut
     candidates =
         enumerate(state) |>
@@ -134,20 +136,20 @@ Generate connectivity graph between qubits.
 """
 function connectivity(f, circ::Circuit)
     connections = Iterators.map(Iterators.filter(f, circ)) do gate
-                      n = length(lanes(gate))
-                      if n == 1
-                          src = dst = only(lanes(gate))
-                          return [[src, dst, 1]]
-                      else
-                          return vcat.(combinations(lanes(gate), 2), 1)
-                      end
-                  end |> Iterators.flatten |> collect
+        n = length(lanes(gate))
+        if n == 1
+            src = dst = only(lanes(gate))
+            return [[src, dst, 1]]
+        else
+            return vcat.(combinations(lanes(gate), 2), 1)
+        end
+    end |> Iterators.flatten |> collect
 
     src = [conn[1] for conn in connections]
     dst = [conn[2] for conn in connections]
     weights = [conn[3] for conn in connections]
 
-    return SimpleWeightedGraph(src, dst, weights; combine=+)
+    return SimpleWeightedGraph(src, dst, weights; combine = +)
 end
 
 connectivity(circ::Circuit) = connectivity(gate -> length(lanes(gate)) >= 2, circ)

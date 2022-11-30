@@ -5,7 +5,7 @@ using Quac
 export QFT
 
 """
-	QFT(n)
+    QFT(n)
 
 Generate a Quantum Fourier Transform circuit of `n` qubits.
 """
@@ -17,7 +17,7 @@ QFT(n::Int) = begin
         for control in target+1:n
             m = control - target
             θ = 2π / 2^m
-            push!(circ, CRz(control, target, (θ=θ,)))
+            push!(circ, CRz(control, target, (θ = θ,)))
         end
     end
 

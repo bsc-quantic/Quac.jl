@@ -14,9 +14,11 @@ export control, target, op
     AbstractGate
 
 Type of gates. Any gate type must fulfill the following requirements:
-- A `lane` field (or property) of type `T <: Union{Int, NTuple{N,Int}} where {N}`
-  - This requirement can be bypassed by specializing `lanes`.
-- A specialized method for `Base.adjoint(::Type{T})` where `T` is the gate type.
+
+  - A `lane` field (or property) of type `T <: Union{Int, NTuple{N,Int}} where {N}`
+    
+      + This requirement can be bypassed by specializing `lanes`.
+  - A specialized method for `Base.adjoint(::Type{T})` where `T` is the gate type.
 """
 abstract type AbstractGate end
 
@@ -137,7 +139,8 @@ Base.propertynames(x::T) where {T<:AbstractParametricGate} = parameters(T)
 Base.getindex(x::T, key::Symbol) where {T<:AbstractParametricGate} = parameters(x)[key]
 
 Base.adjoint(::Type{T}) where {T<:AbstractParametricGate} = T
-Base.adjoint(x::T) where {T<:AbstractParametricGate} = Base.adjoint(T)(lanes(x)..., NamedTuple{parameters(T)}(.-(values(parameters(x)))))
+Base.adjoint(x::T) where {T<:AbstractParametricGate} =
+    Base.adjoint(T)(lanes(x)..., NamedTuple{parameters(T)}(.-(values(parameters(x)))))
 
 Base.rand(::NamedTuple{N,T}) where {N,T} = NamedTuple{N}(rand(type) for type in T.parameters)
 Base.rand(::Type{T}, lane::Int) where {T<:AbstractParametricGate} = T(lane, rand(fieldtype(T, :param)))
@@ -168,7 +171,8 @@ end
 The ``\\theta`` rotation around the Z-axis gate.
 
 # Notes
-- The `U1` gate is an alias of `Rz`.
+
+  - The `U1` gate is an alias of `Rz`.
 """
 struct Rz <: AbstractParametricGate
     lane::Int
