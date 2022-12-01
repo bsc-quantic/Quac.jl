@@ -16,3 +16,5 @@ makedocs(
         "Ecosystem" => "ecosystem.md",
     ],
 )
+
+deploydocs(repo = "github.com/UB-Quantic/Quac.jl.git")
