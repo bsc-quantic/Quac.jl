@@ -255,6 +255,10 @@ The SWAP gate.
 """
 struct Swap <: AbstractGate
     lane::NTuple{2,Int}
+
+    function Swap(a, b)
+        new((a, b))
+    end
 end
 
 Base.adjoint(::Type{Swap}) = Swap
