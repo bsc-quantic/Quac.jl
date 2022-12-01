@@ -31,7 +31,7 @@ Base.adjoint(x::T) where {T<:AbstractGate} = Base.adjoint(T)(lanes(x)...)
 """
     I(lane)
 
-The ``σ₀`` Pauli matrix gate.
+The ``σ_0`` Pauli matrix gate.
 """
 struct I <: AbstractGate
     lane::Int
@@ -40,7 +40,7 @@ end
 """
     X(lane)
 
-The ``σ₁`` Pauli matrix gate.
+The ``σ_1`` Pauli matrix gate.
 """
 struct X <: AbstractGate
     lane::Int
@@ -49,7 +49,7 @@ end
 """
     Y(lane)
 
-The ``σ₂`` Pauli matrix gate.
+The ``σ_2`` Pauli matrix gate.
 """
 struct Y <: AbstractGate
     lane::Int
@@ -58,7 +58,7 @@ end
 """
     Z(lane)
 
-The ``σ₂`` Pauli matrix gate.
+The ``σ_3`` Pauli matrix gate.
 """
 struct Z <: AbstractGate
     lane::Int
@@ -80,7 +80,7 @@ end
 """
     S(lane)
 
-The S gate or ``π/2`` rotation around Z-axis.
+The ``S`` gate or ``\\frac{π}{2}`` rotation around Z-axis.
 """
 struct S <: AbstractGate
     lane::Int
@@ -91,7 +91,7 @@ Base.adjoint(::Type{S}) = Sd
 """
     Sd(lane)
 
-The S† gate or ``-π/2`` rotation around Z-axis.
+The ``S^\\dagger`` gate or ``-\\frac{π}{2}`` rotation around Z-axis.
 """
 struct Sd <: AbstractGate
     lane::Int
@@ -102,7 +102,7 @@ Base.adjoint(::Type{Sd}) = S
 """
     T(lane)
 
-The T gate or ``π/4`` rotation around Z-axis.
+The ``T`` gate or ``\\frac{π}{4}`` rotation around Z-axis.
 """
 struct T <: AbstractGate
     lane::Int
@@ -113,7 +113,7 @@ Base.adjoint(::Type{T}) = Td
 """
     Td(lane)
 
-The T† gate or ``-π/4`` rotation around Z-axis.
+The ``T^\\dagger`` gate or ``-\\frac{π}{4}`` rotation around Z-axis.
 """
 struct Td <: AbstractGate
     lane::Int
@@ -185,7 +185,7 @@ end
 U1 = Rz
 
 """
-    U2
+    U2(lane, (ϕ, λ))
 
 The ``U2`` gate.
 """
@@ -195,7 +195,7 @@ struct U2 <: AbstractParametricGate
 end
 
 """
-    U3
+    U3(lane, (θ, ϕ, λ))
 
 The ``U3`` gate.
 """
@@ -209,7 +209,7 @@ for G in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, U2, U3]
 end
 
 """
-    Control
+    Control(lane, op::AbstractGate)
 
 A controlled gate.
 """
@@ -249,7 +249,7 @@ parameters(g::Control) = parameters(op(g))
 parameters(::Type{T}) where {T<:Control} = parameters(op(T))
 
 """
-    Swap(lanes)
+    Swap(lane1, lane2)
 
 The SWAP gate.
 """
