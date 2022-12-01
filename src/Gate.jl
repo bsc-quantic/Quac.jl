@@ -25,7 +25,7 @@ abstract type AbstractGate end
 
 function lanes end
 
-lanes(x::AbstractGate) = (x.lane,)
+lanes(x::AbstractGate) = (x.lane...,)
 Base.adjoint(x::T) where {T<:AbstractGate} = Base.adjoint(T)(lanes(x)...)
 
 """

@@ -70,10 +70,11 @@ end
 
 function Matrix{T}(g::Control) where {T}
     n = (length ∘ lanes)(g)
+    t = (length ∘ target)(g)
 
     M = Matrix{T}(LinearAlgebra.I, 2^n, 2^n)
 
-    M[(2^n-2+1):end, (2^n-2+1):end] = Matrix{T}(op(g))
+    M[(2^n-2^t+1):end, (2^n-2^t+1):end] = Matrix{T}(op(g))
 
     return M
 end
