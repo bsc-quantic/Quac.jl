@@ -10,7 +10,7 @@ using Quac
 makedocs(
     sitename = "Quac",
     pages = [
-        "index.md",
+        "Home" => "index.md",
         "API Reference" =>
             ["Gates" => "api/gates.md", "Circuit" => "api/circuit.md", "Algorithms" => "api/algorithms.md"],
         "Ecosystem" => "ecosystem.md",
