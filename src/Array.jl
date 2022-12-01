@@ -111,16 +111,13 @@ Diagonal{T}(g::Rz) where {T} = Diagonal{T}([1 0; 0 cis(g[:θ])])
 
 # Linear Algebra factorizations
 eigen(::Type{T}) where {T<:AbstractGate} = Eigen(eigvals(T), eigvecs(T))
-eigen(::T) where {T<:AbstractGate} = eigen(T)
-eigen(g::T) where {T<:AbstractParametricGate} = Eigen(eigvals(T), eigvecs(T))
+eigen(g::T) where {T<:AbstractGate} = isparametric(T) ? Eigen(eigvals(g), eigvecs(g)) : eigen(T)
 
 eigvals(::Type{T}) where {T<:AbstractGate} = eigvals(Matrix(T))
-eigvals(::T) where {T<:AbstractGate} = eigvals(T)
-eigvals(g::T) where {T<:AbstractParametricGate} = eigvals(Matrix(g))
+eigvals(g::T) where {T<:AbstractGate} = isparametric(T) ? eigvals(Matrix(g)) : eigvals(T)
 
 eigvecs(::Type{T}) where {T<:AbstractGate} = eigvecs(Matrix(T))
-eigvecs(::T) where {T<:AbstractGate} = eigvecs(T)
-eigvecs(g::T) where {T<:AbstractParametricGate} = eigvecs(Matrix(g))
+eigvecs(g::T) where {T<:AbstractGate} = isparametric(T) ? eigvecs(Matrix(g)) : eigvecs(T)
 
 eigvals(::Type{I}) = [1, 1]
 eigvecs(::Type{I}) = [1 0; 0 1]
