@@ -1,12 +1,8 @@
 name: Documenter
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
     branches: [ "master" ]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -16,12 +12,9 @@ jobs:
       contents: write
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-
-      - uses: julia-actions/julia-buildpkg@v1
-
+      - uses: julia-actions/julia-buildpkg@latest
       - name: Deploy package documentation
-        uses: julia-actions/julia-docdeploy@v1.3.0
+        uses: julia-actions/julia-docdeploy@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
