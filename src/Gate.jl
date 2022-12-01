@@ -18,6 +18,7 @@ Type of gates. Any gate type must fulfill the following requirements:
   - A `lane` field (or property) of type `T <: Union{Int, NTuple{N,Int}} where {N}`
     
       + This requirement can be bypassed by specializing `lanes`.
+
   - A specialized method for `Base.adjoint(::Type{T})` where `T` is the gate type.
 """
 abstract type AbstractGate end
