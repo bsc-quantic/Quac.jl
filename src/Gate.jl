@@ -127,6 +127,8 @@ The type of parametric gates.
 """
 abstract type AbstractParametricGate <: AbstractGate end
 
+isparametric(::T) where {T<:AbstractGate} = isparametric(T)
+
 isparametric(::Type{<:AbstractGate}) = false
 isparametric(::Type{<:AbstractParametricGate}) = true
 
@@ -241,9 +243,7 @@ Base.adjoint(g::Control{T}) where {T<:AbstractGate} = Control(g.lane, op(g)')
 
 const Toffoli{T} = Control{Control{T}}
 
-# special case for Control{T} where {T<:AbstractParametricGate}, as it is parametric
-isparametric(::Type{Control{<:AbstractParametricGate}}) = true
-isparametric(::Type{Control{T}}) where {T<:Control} = isparametric(T)
+isparametric(::Type{Control{T}}) where {T} = isparametric(T)
 parameters(g::Control) = parameters(op(g))
 parameters(::Type{T}) where {T<:Control} = parameters(op(T))
 
