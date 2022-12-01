@@ -26,6 +26,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Setup Pages
         uses: actions/configure-pages@v2
+      - name: Build package
+        uses: julia-actions/julia-buildpkg@latest
       - name: Generate documentation
         run: julia docs/make.jl
       - name: Upload GitHub Pages artifact
