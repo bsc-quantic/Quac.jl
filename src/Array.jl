@@ -161,4 +161,7 @@ eigvals(::Type{Swap}) = [-1, 1, 1, 1]
 eigvecs(::Type{Swap}) = (α = sqrt(2) / 2;
 [0 1 0 0; α 0 α 0; -α 0 α 0; 0 0 0 1])
 
-# TODO eigen of `Control`?
+eigvals(::Type{T}) where {T<:Control} = [eigvals(op(T))..., fill(1, 2^(lanes(T) - 1))...]
+eigvals(g::T) where {T<:Control} = [eigvals(op(g))..., fill(1, 2^(lanes(T) - 1))...]
+
+# TODO eigenvecs of `Control`?
