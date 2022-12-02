@@ -218,7 +218,7 @@ struct Control{T<:AbstractGate} <: AbstractGate
     op::T
 end
 Control{T}(control::Integer, target::Integer) where {T<:AbstractGate} = Control(control, T(target))
-Control{T}(lanes::Integer...) where {T<:AbstractGate} = Control(first(lanes), Control{T}(Iterators.drop(lanes, 1)...))
+Control{T}(args...) where {T} = Control{T}(args[1], T(args[2:end]...))
 
 CX(control, target) = Control(control, X(target))
 CY(control, target) = Control(control, Y(target))
