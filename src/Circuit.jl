@@ -177,3 +177,39 @@ function moments(circ::Circuit)
 
     return m
 end
+
+function Base.hcat(circs::Circuit...)
+    !allequal(lanes(circ) for circ in circs) && throw(DimensionMismatch("circuits must have same lanes"))
+
+    reduce(map(x -> x.lanes, circs)) do acc, circ
+        map(zip(acc, circ)) do (acclane, lane)
+            offset = length(acclane)
+
+            return [acclane..., map(lane) do el
+                priority = [k => v + offset for (k, v) in el.priority]
+                return Element{AbstractGate}(data(el), priority)
+            end...]
+        end
+    end |> Circuit
+end
+
+function Base.vcat(circs::Circuit...)
+    offsets = [0, cumsum(lanes.(circs))[1:end-1]...]
+
+    mapreduce(vcat, zip(offsets, circs)) do (offset, circ)
+        map(circ.lanes) do lane
+            map(enumerate(lane)) do (i, el)
+                priority = [k + offset => v for (k, v) in el.priority]
+                gate = data(el)
+
+                if isparametric(gate)
+                    gate = typeof(gate)((lanes(gate) .+ offset)..., parameters(gate))
+                else
+                    gate = typeof(gate)((lanes(gate) .+ offset)...)
+                end
+
+                return Element{AbstractGate}(gate, priority)
+            end
+        end
+    end |> Circuit
+end
