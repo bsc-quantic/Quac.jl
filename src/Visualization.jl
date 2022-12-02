@@ -58,7 +58,7 @@ end
 
 function Base.show(io::IO, ::MIME"image/svg+xml", circ::Circuit)
     _ = draw(circ)
-    println(io, svgstring())
+    print(io, svgstring())
 end
 
 function draw(gate::AbstractGate; top::Bool = false, bottom::Bool = false)

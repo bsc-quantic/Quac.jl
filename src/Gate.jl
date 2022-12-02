@@ -1,4 +1,4 @@
-import Base: show, adjoint, rand
+import Base: adjoint, rand
 
 export AbstractGate
 export lanes

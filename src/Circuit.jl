@@ -127,7 +127,7 @@ Retrieve gate at lane `lane` and depth `index`.
 """
 Base.getindex(circ::Circuit, lane, index) = data(circ.lanes[lane][index])
 
-Base.show(io::IO, circ::Circuit) = println(io, "Circuit(#lanes=$(lanes(circ)), #gates=$(sum(1 for _ in circ)))")
+Base.show(io::IO, circ::Circuit) = print(io, "Circuit(#lanes=$(lanes(circ)), #gates=$(sum(1 for _ in circ)))")
 
 """
     connectivity([f,] circuit)
