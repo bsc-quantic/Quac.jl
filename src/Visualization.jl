@@ -1,59 +1,41 @@
 using Luxor
 using MathTeXEngine
 
-abstract type VisualizationLayout <: Blueprint end
-
-function compile(::Type{<:VisualizationLayout}, circuit)
-    compiled_circuit = Circuit(lanes(circuit))
-
-    for gate in circuit
-        r = range(extrema(lanes(gate))...)
-        m = maximum(length, compiled_circuit.lanes)
-
-        for i in r
-            while length(compiled_circuit.lanes[i]) < m
-                push!(compiled_circuit, I(i))
-            end
-            if i ∉ lanes(gate)
-                push!(compiled_circuit, I(i))
-            end
-        end
-        push!(compiled_circuit, gate)
-    end
-
-    m = maximum(length, compiled_circuit.lanes)
-    for i in 1:lanes(compiled_circuit)
-        while length(compiled_circuit.lanes[i]) < m
-            push!(compiled_circuit, I(i))
-        end
-    end
-
-    return compiled_circuit
-end
-
 function draw end
 export draw
 
 function draw(circ::Circuit)
-    compiled_circuit = compile(VisualizationLayout, circ)
-    @assert allequal(length.(compiled_circuit.lanes))
+    n = lanes(circ)
 
-    return hcat(
-        [
-            vcat(
-                map(
-                    draw,
-                    # filter `I` gates added between multi-qubit gates
-                    foldl(data.(moment) |> unique, init = ()) do acc, x
-                        if x isa I && (l = only(lanes(x)); any(x -> l ∈ range(x...), extrema.(lanes.(acc))))
-                            return acc
-                        end
-                        return tuple(acc..., x)
-                    end,
-                )...,
-            ) for moment in zip(compiled_circuit.lanes...)
-        ]...,
-    )
+    # split moments if gates overlap in 1D
+    _moments = Iterators.map(moments(circ)) do moment
+        queue = copy(moment)
+        ms = Vector{AbstractGate}[]
+
+        # group gates with disjoint lane ranges
+        while !isempty(queue)
+            ref = popfirst!(queue)
+            refrange = range(extrema(lanes(ref))...)
+            moment = [ref]
+            for gate in queue
+                if isdisjoint(refrange, range(extrema(lanes(gate))...))
+                    push!(moment, gate)
+                end
+            end
+
+            queue = setdiff(queue, moment)
+            push!(ms, moment)
+        end
+
+        return ms
+    end |> Iterators.flatten |> collect
+
+    return mapreduce(hcat, _moments) do moment
+        (min, max) = extrema(mapreduce(lanes, ∪, moment))
+        moment = [map(I, filter(<(min), 1:n))..., moment..., map(I, filter(>(max), 1:n))...]
+
+        mapreduce(draw, vcat, moment)
+    end
 end
 
 function Base.show(io::IO, ::MIME"image/svg+xml", circ::Circuit)
