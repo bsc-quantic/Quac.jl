@@ -54,6 +54,8 @@ Base.push!(circ::Circuit, gate::AbstractGate) = begin
     end
 end
 
+Base.push!(circ::Circuit, gates::AbstractGate...) = foreach(g -> push!(circ, g), gates)
+
 """
     Base.iterate(circ::Circuit[, state])
 
