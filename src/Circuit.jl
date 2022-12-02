@@ -180,6 +180,11 @@ function moments(circ::Circuit)
     return m
 end
 
+"""
+    hcat(circ::Circuit...)
+
+Join circuits in the temporal dimension.
+"""
 function Base.hcat(circs::Circuit...)
     !allequal(lanes(circ) for circ in circs) && throw(DimensionMismatch("circuits must have same lanes"))
 
@@ -195,6 +200,11 @@ function Base.hcat(circs::Circuit...)
     end |> Circuit
 end
 
+"""
+    vcat(circ::Circuit...)
+
+Join circuits in the spatial dimension.
+"""
 function Base.vcat(circs::Circuit...)
     offsets = [0, cumsum(lanes.(circs))[1:end-1]...]
 
