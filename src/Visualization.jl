@@ -50,11 +50,7 @@ function draw(gate::AbstractGate; top::Bool = false, bottom::Bool = false)
     else
         a, b = extrema(lanes(gate))
         n = b - a + 1
-        vcat(
-            draw_multiblock_top(; top = top),
-            fill(draw_multiblock_mid(), (n - 2))...,
-            draw_multiblock_bottom(; bottom = bottom),
-        )
+        vcat(draw_block(; top = top), fill(draw_multiblock_mid(), (n - 2))..., draw_block(; bottom = bottom))
     end
 end
 
@@ -138,40 +134,6 @@ function draw_multiblock_mid()
         # vertical lines
         line(Point(-15, -25), Point(-15, 25), action = :stroke)
         line(Point(15, -25), Point(15, 25), action = :stroke)
-    end 50 50
-end
-
-function draw_multiblock_bottom()
-    @drawsvg begin
-        origin()
-
-        # lane wire
-        line(Point(-25, 0), Point(-15, 0), action = :stroke)
-        line(Point(25, 0), Point(15, 0), action = :stroke)
-
-        # vertical lines
-        line(Point(-15, -25), Point(-15, 15), action = :stroke)
-        line(Point(15, -25), Point(15, 15), action = :stroke)
-
-        # terminal
-        line(Point(-15, 15), Point(15, 15), action = :stroke)
-    end 50 50
-end
-
-function draw_multiblock_top()
-    @drawsvg begin
-        origin()
-
-        # lane wire
-        line(Point(-25, 0), Point(-15, 0), action = :stroke)
-        line(Point(25, 0), Point(15, 0), action = :stroke)
-
-        # vertical lines
-        line(Point(-15, 25), Point(-15, -15), action = :stroke)
-        line(Point(15, 25), Point(15, -15), action = :stroke)
-
-        # terminal
-        line(Point(-15, -15), Point(15, -15), action = :stroke)
     end 50 50
 end
 
