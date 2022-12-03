@@ -39,6 +39,8 @@ lanes(circ::Circuit) = length(circ.lanes)
 
 Base.length(circ::Circuit) = sum(length(lane) for lane in circ.lanes)
 
+Base.isempty(circ::Circuit) = all(isempty, circ.lanes)
+
 """
     push!(circ, gate)
 
