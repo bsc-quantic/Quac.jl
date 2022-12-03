@@ -4,15 +4,15 @@ using MathTeXEngine
 function draw end
 export draw
 
-function draw(circ::Circuit)
-    n = lanes(circ)
+function draw(circuit::Circuit)
+    n = lanes(circuit)
 
-    if isempty(circ)
+    if isempty(circuit)
         return vcat([draw(I) for _ in 1:n]...)
     end
 
     # split moments if gates overlap in 1D
-    _moments = Iterators.map(moments(circ)) do moment
+    _moments = Iterators.map(moments(circuit)) do moment
         queue = copy(moment)
         ms = Vector{AbstractGate}[]
 
@@ -42,8 +42,8 @@ function draw(circ::Circuit)
     end
 end
 
-function Base.show(io::IO, ::MIME"image/svg+xml", circ::Circuit)
-    _ = draw(circ)
+function Base.show(io::IO, ::MIME"image/svg+xml", circuit::Circuit)
+    _ = draw(circuit)
     print(io, svgstring())
 end
 
