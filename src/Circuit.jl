@@ -16,7 +16,7 @@ struct Element{T}
     priority::Vector{Pair{Int,Int}}
 end
 
-Element(gate::AbstractGate, priority) = Element{AbstractGate}(gate, priority)
+Element(gate::Gate, priority) = Element{Gate}(gate, priority)
 
 data(e::Element) = e.data
 
@@ -29,10 +29,10 @@ A quantum circuit implementation using multi-priority queues.
   - Multi-priority numbers can be retrieved procedurally from gate-lanes encoded inside the gates of the queues.
 """
 struct Circuit
-    lanes::Vector{Vector{Element{AbstractGate}}}
+    lanes::Vector{Vector{Element{Gate}}}
 
     Circuit(n::Int) = new(fill(Element[], n))
-    Circuit(lanes::Vector{Vector{Element{AbstractGate}}}) = new(lanes)
+    Circuit(lanes::Vector{Vector{Element{Gate}}}) = new(lanes)
 end
 
 lanes(circuit::Circuit) = length(circuit.lanes)
@@ -46,9 +46,9 @@ Base.isempty(circuit::Circuit) = all(isempty, circuit.lanes)
 
 Appends a gate to the circuit.
 """
-Base.push!(circuit::Circuit, gate::AbstractGate) = begin
+Base.push!(circuit::Circuit, gate::Gate) = begin
     new_priority = [lane => length(circuit.lanes[lane]) + 1 for lane in lanes(gate)]
-    el = Element{AbstractGate}(gate, new_priority)
+    el = Element{Gate}(gate, new_priority)
 
     for lane in lanes(gate)
         queue = circuit.lanes[lane]
@@ -56,7 +56,7 @@ Base.push!(circuit::Circuit, gate::AbstractGate) = begin
     end
 end
 
-Base.push!(circuit::Circuit, gates::AbstractGate...) = foreach(g -> push!(circuit, g), gates)
+Base.push!(circuit::Circuit, gates::Gate...) = foreach(g -> push!(circuit, g), gates)
 
 """
     Base.iterate(circuit::Circuit[, state])
@@ -114,10 +114,7 @@ circuit * circuit' == circuit' * circuit == I(n)
 Base.adjoint(circuit::Circuit) = begin
     lanes = [
         [
-            Element{AbstractGate}(
-                data(el),
-                [laneid => length(circuit.lanes[laneid]) - p + 1 for (laneid, p) in el.priority],
-            ) for el in lane
+            Element{Gate}(data(el), [laneid => length(circuit.lanes[laneid]) - p + 1 for (laneid, p) in el.priority]) for el in lane
         ] for lane in circuit.lanes
     ]
 
@@ -169,7 +166,7 @@ connectivity(circuit::Circuit) = connectivity(gate -> length(lanes(gate)) >= 2, 
 Return moments (lists of gates that _can_ execute at the same time) of the circuit.
 """
 function moments(circuit::Circuit)
-    m = [AbstractGate[]]
+    m = [Gate[]]
 
     for gate in circuit
         if isempty(last(m)) || isdisjoint(lanes(gate), ∪(lanes.(last(m))...))
@@ -196,7 +193,7 @@ function Base.hcat(circuits::Circuit...)
 
             return [acclane..., map(lane) do el
                 priority = [k => v + offset for (k, v) in el.priority]
-                return Element{AbstractGate}(data(el), priority)
+                return Element{Gate}(data(el), priority)
             end...]
         end
     end |> Circuit
@@ -222,7 +219,7 @@ function Base.vcat(circuits::Circuit...)
                     gate = typeof(gate)((lanes(gate) .+ offset)...)
                 end
 
-                return Element{AbstractGate}(gate, priority)
+                return Element{Gate}(gate, priority)
             end
         end
     end |> Circuit

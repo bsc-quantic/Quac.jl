@@ -14,7 +14,7 @@ function draw(circuit::Circuit)
     # split moments if gates overlap in 1D
     _moments = Iterators.map(moments(circuit)) do moment
         queue = copy(moment)
-        ms = Vector{AbstractGate}[]
+        ms = Vector{Gate}[]
 
         # group gates with disjoint lane ranges
         while !isempty(queue)
@@ -47,7 +47,7 @@ function Base.show(io::IO, ::MIME"image/svg+xml", circuit::Circuit)
     print(io, svgstring())
 end
 
-function draw(gate::AbstractGate; top::Bool = false, bottom::Bool = false)
+function draw(gate::Gate; top::Bool = false, bottom::Bool = false)
     n = (length ∘ lanes)(gate)
     if n == 1
         draw_block(; top = top, bottom = bottom)

@@ -6,8 +6,8 @@ using LinearAlgebra: Eigen, LinearAlgebra
 function arraytype end
 export arraytype
 
-arraytype(::T) where {T<:AbstractGate} = arraytype(T)
-arraytype(::Type{<:AbstractGate}) = Array{T} where {T}
+arraytype(::T) where {T<:Gate} = arraytype(T)
+arraytype(::Type{<:Gate}) = Array{T} where {T}
 
 for G in [I, Z, S, Sd, T, Td, Rz]
     @eval arraytype(::Type{$G}) = Diagonal
@@ -19,8 +19,8 @@ end
 
 # TODO arraytype(::Type{T}) where {T<:Control} = arraytype(op(T)) == Diagonal ? Diagonal : Matrix
 
-Matrix(x::AbstractGate) = Matrix{ComplexF32}(x)
-Matrix(::Type{T}) where {T<:AbstractGate} = Matrix{ComplexF32}(T)
+Matrix(x::Gate) = Matrix{ComplexF32}(x)
+Matrix(::Type{T}) where {T<:Gate} = Matrix{ComplexF32}(T)
 
 for G in [I, X, Y, Z, H, S, Sd, T, Td, Swap]
     @eval Matrix{T}(_::$G) where {T} = Matrix{T}($G)
@@ -79,8 +79,8 @@ function Matrix{T}(g::Control) where {T}
     return M
 end
 
-Array(x::AbstractGate) = Array{ComplexF32}(x)
-Array(::Type{T}) where {T<:AbstractGate} = Array{ComplexF32}(T)
+Array(x::Gate) = Array{ComplexF32}(x)
+Array(::Type{T}) where {T<:Gate} = Array{ComplexF32}(T)
 
 Array{T}(::Type{Swap}) where {T} = Array{T,4}(Swap)
 Array{T,4}(::Type{Swap}) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
@@ -90,8 +90,8 @@ Array{T}(g::G) where {T,G<:Control} = Array{T,2 * lanes(G)}(reshape(Matrix{T}(g)
 
 # diagonal matrices
 # NOTE efficient multiplication due to no memory swap needed: plain element-wise multiplication
-Diagonal(x::AbstractGate) = Diagonal{ComplexF32}(x)
-Diagonal(::Type{T}) where {T<:AbstractGate} = Diagonal{ComplexF32}(T)
+Diagonal(x::Gate) = Diagonal{ComplexF32}(x)
+Diagonal(::Type{T}) where {T<:Gate} = Diagonal{ComplexF32}(T)
 
 for G in [I, Z, S, Sd, T, Td]
     @eval Diagonal{T}(_::$G) where {T} = Diagonal{T}($G)
@@ -107,18 +107,18 @@ Diagonal{T}(::Type{Td}) where {T} = Diagonal{T}([1, cispi(-1 // 4)])
 Diagonal{T}(g::Rz) where {T} = Diagonal{T}([1 0; 0 cis(g[:θ])])
 
 # permutational matrices (diagonal + permutation)
-# Permutation(x::AbstractGate) = Permutation{ComplexF32}(x)
-# Permutation{T}(_::AbstractGate) where {T} = error("Implementation not found")
+# Permutation(x::Gate) = Permutation{ComplexF32}(x)
+# Permutation{T}(_::Gate) where {T} = error("Implementation not found")
 
 # Linear Algebra factorizations
-eigen(::Type{T}) where {T<:AbstractGate} = Eigen(eigvals(T), eigvecs(T))
-eigen(g::T) where {T<:AbstractGate} = isparametric(T) ? Eigen(eigvals(g), eigvecs(g)) : eigen(T)
+eigen(::Type{T}) where {T<:Gate} = Eigen(eigvals(T), eigvecs(T))
+eigen(g::T) where {T<:Gate} = isparametric(T) ? Eigen(eigvals(g), eigvecs(g)) : eigen(T)
 
-eigvals(::Type{T}) where {T<:AbstractGate} = eigvals(Matrix(T))
-eigvals(g::T) where {T<:AbstractGate} = isparametric(T) ? eigvals(Matrix(g)) : eigvals(T)
+eigvals(::Type{T}) where {T<:Gate} = eigvals(Matrix(T))
+eigvals(g::T) where {T<:Gate} = isparametric(T) ? eigvals(Matrix(g)) : eigvals(T)
 
-eigvecs(::Type{T}) where {T<:AbstractGate} = eigvecs(Matrix(T))
-eigvecs(g::T) where {T<:AbstractGate} = isparametric(T) ? eigvecs(Matrix(g)) : eigvecs(T)
+eigvecs(::Type{T}) where {T<:Gate} = eigvecs(Matrix(T))
+eigvecs(g::T) where {T<:Gate} = isparametric(T) ? eigvecs(Matrix(g)) : eigvecs(T)
 
 eigvals(::Type{I}) = [1, 1]
 eigvecs(::Type{I}) = [1 0; 0 1]

@@ -1,9 +1,9 @@
 import Base: adjoint, rand
 
-export AbstractGate
+export Gate
 export lanes
 export I, X, Y, Z, H, S, Sd, T, Td
-export AbstractParametricGate
+export ParametricGate
 export isparametric, parameters
 export Rx, Ry, Rz, U1, U2, U3
 export Control, Swap
@@ -11,7 +11,7 @@ export CX, CY, CZ, CRx, CRy, CRz
 export control, target, op
 
 """
-    AbstractGate
+    Gate
 
 Type of gates. Any gate type must fulfill the following requirements:
 
@@ -21,19 +21,19 @@ Type of gates. Any gate type must fulfill the following requirements:
 
   - A specialized method for `Base.adjoint(::Type{T})` where `T` is the gate type.
 """
-abstract type AbstractGate end
+abstract type Gate end
 
 function lanes end
 
-lanes(x::AbstractGate) = (x.lane...,)
-Base.adjoint(x::T) where {T<:AbstractGate} = Base.adjoint(T)(lanes(x)...)
+lanes(x::Gate) = (x.lane...,)
+Base.adjoint(x::T) where {T<:Gate} = Base.adjoint(T)(lanes(x)...)
 
 """
     I(lane)
 
 The ``σ_0`` Pauli matrix gate.
 """
-struct I <: AbstractGate
+struct I <: Gate
     lane::Int
 end
 
@@ -42,7 +42,7 @@ end
 
 The ``σ_1`` Pauli matrix gate.
 """
-struct X <: AbstractGate
+struct X <: Gate
     lane::Int
 end
 
@@ -51,7 +51,7 @@ end
 
 The ``σ_2`` Pauli matrix gate.
 """
-struct Y <: AbstractGate
+struct Y <: Gate
     lane::Int
 end
 
@@ -60,7 +60,7 @@ end
 
 The ``σ_3`` Pauli matrix gate.
 """
-struct Z <: AbstractGate
+struct Z <: Gate
     lane::Int
 end
 
@@ -69,7 +69,7 @@ end
 
 The Hadamard gate.
 """
-struct H <: AbstractGate
+struct H <: Gate
     lane::Int
 end
 
@@ -82,7 +82,7 @@ end
 
 The ``S`` gate or ``\\frac{π}{2}`` rotation around Z-axis.
 """
-struct S <: AbstractGate
+struct S <: Gate
     lane::Int
 end
 
@@ -93,7 +93,7 @@ Base.adjoint(::Type{S}) = Sd
 
 The ``S^\\dagger`` gate or ``-\\frac{π}{2}`` rotation around Z-axis.
 """
-struct Sd <: AbstractGate
+struct Sd <: Gate
     lane::Int
 end
 
@@ -104,7 +104,7 @@ Base.adjoint(::Type{Sd}) = S
 
 The ``T`` gate or ``\\frac{π}{4}`` rotation around Z-axis.
 """
-struct T <: AbstractGate
+struct T <: Gate
     lane::Int
 end
 
@@ -115,45 +115,45 @@ Base.adjoint(::Type{T}) = Td
 
 The ``T^\\dagger`` gate or ``-\\frac{π}{4}`` rotation around Z-axis.
 """
-struct Td <: AbstractGate
+struct Td <: Gate
     lane::Int
 end
 
 Base.adjoint(::Type{Td}) = T
 
 """
-    AbstractParametricGate
+    ParametricGate
 
 The type of parametric gates.
 """
-abstract type AbstractParametricGate <: AbstractGate end
+abstract type ParametricGate <: Gate end
 
-isparametric(::T) where {T<:AbstractGate} = isparametric(T)
+isparametric(::T) where {T<:Gate} = isparametric(T)
 
-isparametric(::Type{<:AbstractGate}) = false
-isparametric(::Type{<:AbstractParametricGate}) = true
+isparametric(::Type{<:Gate}) = false
+isparametric(::Type{<:ParametricGate}) = true
 
-parameters(::Type{T}) where {T<:AbstractParametricGate} = fieldtype(T, :param).parameters[1]
-parameters(x::T) where {T<:AbstractParametricGate} = x.param
+parameters(::Type{T}) where {T<:ParametricGate} = fieldtype(T, :param).parameters[1]
+parameters(x::T) where {T<:ParametricGate} = x.param
 
-Base.propertynames(::Type{T}) where {T<:AbstractParametricGate} = parameters(T)
-Base.propertynames(x::T) where {T<:AbstractParametricGate} = parameters(T)
+Base.propertynames(::Type{T}) where {T<:ParametricGate} = parameters(T)
+Base.propertynames(x::T) where {T<:ParametricGate} = parameters(T)
 
-Base.getindex(x::T, key::Symbol) where {T<:AbstractParametricGate} = parameters(x)[key]
+Base.getindex(x::T, key::Symbol) where {T<:ParametricGate} = parameters(x)[key]
 
-Base.adjoint(::Type{T}) where {T<:AbstractParametricGate} = T
-Base.adjoint(x::T) where {T<:AbstractParametricGate} =
+Base.adjoint(::Type{T}) where {T<:ParametricGate} = T
+Base.adjoint(x::T) where {T<:ParametricGate} =
     Base.adjoint(T)(lanes(x)..., NamedTuple{parameters(T)}(.-(values(parameters(x)))))
 
 Base.rand(::NamedTuple{N,T}) where {N,T} = NamedTuple{N}(rand(type) for type in T.parameters)
-Base.rand(::Type{T}, lane::Int) where {T<:AbstractParametricGate} = T(lane, rand(fieldtype(T, :param)))
+Base.rand(::Type{T}, lane::Int) where {T<:ParametricGate} = T(lane, rand(fieldtype(T, :param)))
 
 """
     Rx(lane, (θ,))
 
 The ``\\theta`` rotation around the X-axis gate.
 """
-struct Rx <: AbstractParametricGate
+struct Rx <: ParametricGate
     lane::Int
     param::NamedTuple{(:θ,),Tuple{Float32}}
 end
@@ -163,7 +163,7 @@ end
 
 The ``\\theta`` rotation around the Y-axis gate.
 """
-struct Ry <: AbstractParametricGate
+struct Ry <: ParametricGate
     lane::Int
     param::NamedTuple{(:θ,),Tuple{Float32}}
 end
@@ -177,7 +177,7 @@ The ``\\theta`` rotation around the Z-axis gate.
 
   - The `U1` gate is an alias of `Rz`.
 """
-struct Rz <: AbstractParametricGate
+struct Rz <: ParametricGate
     lane::Int
     param::NamedTuple{(:θ,),Tuple{Float32}}
 end
@@ -189,7 +189,7 @@ U1 = Rz
 
 The ``U2`` gate.
 """
-struct U2 <: AbstractParametricGate
+struct U2 <: ParametricGate
     lane::Int
     param::NamedTuple{(:ϕ, :λ),Tuple{Float32,Float32}}
 end
@@ -199,7 +199,7 @@ end
 
 The ``U3`` gate.
 """
-struct U3 <: AbstractParametricGate
+struct U3 <: ParametricGate
     lane::Int
     param::NamedTuple{(:θ, :ϕ, :λ),Tuple{Float32,Float32,Float32}}
 end
@@ -209,15 +209,15 @@ for G in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, U2, U3]
 end
 
 """
-    Control(lane, op::AbstractGate)
+    Control(lane, op::Gate)
 
 A controlled gate.
 """
-struct Control{T<:AbstractGate} <: AbstractGate
+struct Control{T<:Gate} <: Gate
     lane::Int
     op::T
 end
-Control{T}(control::Integer, target::Integer) where {T<:AbstractGate} = Control(control, T(target))
+Control{T}(control::Integer, target::Integer) where {T<:Gate} = Control(control, T(target))
 Control{T}(args...) where {T} = Control{T}(args[1], T(args[2:end]...))
 
 CX(control, target) = Control(control, X(target))
@@ -239,8 +239,8 @@ op(g::Control{T}) where {T<:Control} = op(g.op)
 op(::Type{Control{T}}) where {T} = T
 op(::Type{Control{T}}) where {T<:Control} = op(T)
 
-Base.adjoint(::Type{Control{T}}) where {T<:AbstractGate} = Control{adjoint(T)}
-Base.adjoint(g::Control{T}) where {T<:AbstractGate} = Control(g.lane, op(g)')
+Base.adjoint(::Type{Control{T}}) where {T<:Gate} = Control{adjoint(T)}
+Base.adjoint(g::Control{T}) where {T<:Gate} = Control(g.lane, op(g)')
 
 const Toffoli{T} = Control{Control{T}}
 
@@ -253,7 +253,7 @@ parameters(::Type{T}) where {T<:Control} = parameters(op(T))
 
 The SWAP gate.
 """
-struct Swap <: AbstractGate
+struct Swap <: Gate
     lane::NTuple{2,Int}
 
     function Swap(a, b)

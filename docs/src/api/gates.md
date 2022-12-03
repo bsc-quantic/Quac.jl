@@ -41,9 +41,9 @@ julia> Diagonal{Float32}(gate)
 
 All gates follow the Gate interface which consist in:
 
-1. Set the parent abstract type to `AbstractGate`. Your struct should have a `lane` field of type `Int`.
+1. Set the parent abstract type to `Gate`. Your struct should have a `lane` field of type `Int`.
   - If your gate is a multi-qubit gate, then `lane` is of type `NTuple{N,Int}`.
-  - If your gate is a parametric gate, then inherit from `AbstractParametricGate`.
+  - If your gate is a parametric gate, then inherit from `ParametricGate`.
 2. Specify the type of the adjoint of the gate type. If the gate is hermitian, then it is itself.
 3. Provide the representations of the gate type. At least the `Matrix` representation should be provided.
   - If the gate accepts other representations, you can implement them. For example, the $Z$ gate allows a `Diagonal`  representation.
@@ -52,7 +52,7 @@ All gates follow the Gate interface which consist in:
 using Quac
 using LinearAlgebra
 
-struct Z <: AbstractGate
+struct Z <: Gate
     lane::Int
 end
 
@@ -64,7 +64,7 @@ Diagonal{T}(_::Z) where {T} = Diagonal{T}([1, -1])
 ```
 
 ```@docs
-AbstractGate
+Gate
 ```
 
 ## Pauli gates
@@ -90,7 +90,7 @@ Td
 
 ## Parametric gates
 ```@docs
-AbstractParametricGate
+ParametricGate
 ```
 
 ### Rotation gates
