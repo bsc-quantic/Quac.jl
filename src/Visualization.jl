@@ -7,6 +7,10 @@ export draw
 function draw(circ::Circuit)
     n = lanes(circ)
 
+    if isempty(circ)
+        return vcat([draw(I) for _ in 1:n]...)
+    end
+
     # split moments if gates overlap in 1D
     _moments = Iterators.map(moments(circ)) do moment
         queue = copy(moment)
