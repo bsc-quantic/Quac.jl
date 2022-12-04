@@ -1,5 +1,7 @@
 # Quac
 
+[![](https://img.shields.io/badge/docs-stable-blue)](https://bsc-quantic.github.io/Quac.jl)
+
 `Quac` stands for _**Qua**ntum **c**ircuits_ and its a Julia library for quantum circuits with no assumptions about their use.
 
 **_What does this means, you ask?_** Well, `Quac` is not a simulator, neither a controller of quantum computers. It just provides a `Circuit` data stracture, a set of gates and tools to manipulate them. Developers may use it as the core of their simulators or hardware controllers.
