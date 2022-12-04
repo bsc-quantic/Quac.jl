@@ -42,69 +42,22 @@ Furthermore, the $Z$ gate allows a `Diagonal` representation!
   ⋅   -1.0
 ```
 
+### Layout-agnostic `Circuit` representation
+Quac uses multi-priority queues for representing `Circuit`s.
 
-## Example
-
-More examples can be found in the `examples/` folder.
-
-### 4-qubit QFT
-
+### SVG rendering of `Circuit`s
 ```julia
 using Quac
 
 circ = Quac.Algorithms.QFT(4)
 draw(circ)
 ```
-
 ![Quantum Fourier Transform](assets/qft.svg)
 
-## Internals
-
-### `AbstractGate` interface
-
-Follow these instructions to implemente your own custom gate.
-
-1. Set the parent abstract type to `AbstractGate`. Your struct should have a `lane` field of type `Int`.
-
-```julia
-struct CustomGate <: AbstractGate
-	lane::Int
-end
-```
-  - If your gate is a multi-qubit gate, then `lane` is of type `NTuple{N,Int}`.
-  - If your gate is a parametric gate, then inherit from `AbstractParametricGate`.
-
-2. Specify the type of the adjoint of your `CustomGate`. If your gate is hermitian, then it is itself.
-
-```julia
-Base.adjoint(::Type{CustomGate}) = CustomGate
-```
-
-3. Provide the representations of `CustomGate`. At least the `Matrix` representation should be provided.
-
-```julia
-Matrix{T}(_::CustomGate) where {T} = Matrix{T}([...])
-```
-
-  - If the gate accepts other representations, you can implement them. For example, the $Z$ gate allows a `Diagonal`  representation.
-
-  ```julia
-  Diagonal{T}(_::Z) where {T} = Diagonal{T}([1, -1])
-  ```
-
-### Circuit
-Circuits can be seen as DAGs (Direct Acyclic Graphs). In the case of quantum circuits, the width of the DAG is constant and equal to the number of qubits. Also the indgree and outdegree of quantum gates must be equal. Thus, using a graph for representing quantum circuits seems excesive because of its contraints. I am follower of the _"Make invalid states unrepresentable" moto, so I
-
-Instead `Quac` uses multi-priority queues to store gates where there is a queue per qubit lane that stores the gates that act on it, and priorities are the order in which they are applied. If a gate acts on multiple qubits, it will contain a priority per qubit.
-This data structure allows us to store gates in the most compact way while iterating on gates, create the reverse circuit, .... are still efficient. It seems to be the perfect fit for quantum circuits.
-
-**Is this really necessary?** No, the bottleneck of quantum circuits is not on their representation but when reading the source code of other quantum circuit libraries, I wasn't convinced by their solutions: graphs, already laid out lists of lists, a serialized list of gates, ... It seemed like nobody could found the proper data structure for representing them. So I came up with multi-priority queues which seem like the perfect fit and as a consequence, the implementation is simple and efficient.
-
-
-## To do
+## Roadmap
 - [ ] Gate decompositions
 - [ ] ZX-calculus
 - [ ] Spatial layouts
 - [ ] Measurements
-- [ ] Visualization
+- [x] Visualization
 - [ ] Support for _qudits_
