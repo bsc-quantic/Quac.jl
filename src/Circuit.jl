@@ -82,7 +82,13 @@ Base.iterate(circuit::Circuit, state = fill(1, lanes(circuit))) = begin
     end
 
     # choose first valid gate
-    winner = filter(x -> x ∈ state, candidates) |> first
+    winner = reduce(filter(x -> x ∈ state, candidates)) do a, b
+        if mapreduce(x -> x[2], max, a.priority) <= mapreduce(x -> x[2], max, b.priority)
+            return a
+        else
+            return b
+        end
+    end
 
     # update head by advancing cut on involved lanes
     for (lane, priority) in winner.priority
