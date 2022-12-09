@@ -39,7 +39,7 @@ julia> Diagonal{Float32}(gate)
   ⋅   -1.0
 ```
 
-### `Gate` interface
+### `Gate` trait
 
 All gates follow the `Gate` interface.
 
@@ -67,9 +67,9 @@ Matrix{T}(_::CustomGate) where {T} = Matrix{T}([...])
 
   - If the gate accepts other representations, you can implement them. For example, the $Z$ gate allows a `Diagonal`  representation.
 
-  ```julia
-  Diagonal{T}(_::Z) where {T} = Diagonal{T}([1, -1])
-  ```
+```julia
+Diagonal{T}(_::Z) where {T} = Diagonal{T}([1, -1])
+```
 
 ```@docs
 Gate
@@ -77,7 +77,7 @@ Gate
 
 ## Pauli gates
 ```@docs
-I
+Quac.I
 X
 Y
 Z

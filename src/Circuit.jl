@@ -35,14 +35,29 @@ struct Circuit
     Circuit(lanes::Vector{Vector{Element{Gate}}}) = new(lanes)
 end
 
+"""
+    lanes(circuit)
+
+Return the number of qubit lanes in a circuit.
+"""
 lanes(circuit::Circuit) = length(circuit.lanes)
 
+"""
+    length(circuit)
+
+Return the number of gates in a circuit.
+"""
 Base.length(circuit::Circuit) = sum(length(lane) for lane in circuit.lanes)
 
+"""
+    isempty(circuit)
+
+Check whether the circuit contains any gate.
+"""
 Base.isempty(circuit::Circuit) = all(isempty, circuit.lanes)
 
 """
-    push!(circuit, gate)
+    push!(circuit, gate...)
 
 Appends a gate to the circuit.
 """
