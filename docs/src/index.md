@@ -8,6 +8,7 @@
 
 - **Multiple representation of gates** Gates are symbolic in Quac, and thanks to Julia's multiple-dispatch, they posess multiple representations like dense arrays, diagonal matrices, ...
 - **(New) compact and efficient description of circuits** Unlike other libraries, Quac uses **multi-priority queues** as the underlying data-structure.
+- **SVG rendering of quantum circuits** ![4-qubit Quantum Fourier Transform](../../assets/qft.svg)
 - **Extendibility** Every part of the package is extendible with new types or functionality as you wish.
 
 ## Contents
