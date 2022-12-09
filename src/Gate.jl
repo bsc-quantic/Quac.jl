@@ -2,7 +2,7 @@ import Base: adjoint, rand
 
 export Gate
 export lanes
-export I, X, Y, Z, H, S, Sd, T, Td
+export X, Y, Z, H, S, Sd, T, Td
 export ParametricGate
 export isparametric, parameters
 export Rx, Ry, Rz, U1, U2, U3
@@ -32,6 +32,10 @@ Base.adjoint(x::T) where {T<:Gate} = Base.adjoint(T)(lanes(x)...)
     I(lane)
 
 The ``σ_0`` Pauli matrix gate.
+
+# Note
+
+Due to name clashes with `LinearAlgebra.I`, `Quac.I` is not exported by default.
 """
 struct I <: Gate
     lane::Int
