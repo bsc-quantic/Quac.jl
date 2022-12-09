@@ -20,7 +20,7 @@ function draw(circuit::Circuit)
         while !isempty(queue)
             ref = popfirst!(queue)
             refrange = range(extrema(lanes(ref))...)
-            moment = [ref]
+            moment = Gate[ref]
             for gate in queue
                 if isdisjoint(refrange, range(extrema(lanes(gate))...))
                     push!(moment, gate)
