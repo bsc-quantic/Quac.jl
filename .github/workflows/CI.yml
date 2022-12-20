@@ -52,6 +52,6 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
-            using Muscle
-            DocMeta.setdocmeta!(Muscle, :DocTestSetup, :(using Muscle); recursive=true)
-            doctest(Muscle)'
+            using Quac
+            DocMeta.setdocmeta!(Quac, :DocTestSetup, :(using Quac); recursive=true)
+            doctest(Quac)'
