@@ -92,7 +92,6 @@ Base.iterate(circuit::Circuit, state = fill(1, lanes(circuit))) = begin
             lane, i = x
             circuit.lanes[lane][i]
         end)
-
     if isempty(candidates)
         return nothing
     end
