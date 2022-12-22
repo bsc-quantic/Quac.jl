@@ -134,9 +134,9 @@ circuit * circuit' == circuit' * circuit == I(n)
 """
 Base.adjoint(circuit::Circuit) = begin
     lanes = [
-        [
-            Element{Gate}(data(el), [laneid => length(circuit.lanes[laneid]) - p + 1 for (laneid, p) in el.priority]) for el in lane
-        ] for lane in circuit.lanes
+        reverse([
+            Element{Gate}(data(el)', [laneid => length(circuit.lanes[laneid]) - p + 1 for (laneid, p) in el.priority]) for el in lane
+        ]) for lane in circuit.lanes
     ]
 
     Circuit(lanes)
