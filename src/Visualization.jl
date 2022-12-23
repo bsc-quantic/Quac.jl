@@ -123,7 +123,7 @@ function draw_block(label = ""; top::Bool = false, bottom::Bool = false)
 
         # label
         fontsize(16)
-        text(label, valign = :middle, halign = :center)
+        text(label, Point(0, 0), valign = :middle, halign = :center)
     end 50 50
 end
 
