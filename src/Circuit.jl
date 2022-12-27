@@ -47,7 +47,7 @@ lanes(circuit::Circuit) = length(circuit.lanes)
 
 Return the number of gates in a circuit.
 """
-Base.length(circuit::Circuit) = sum(length(lane) for lane in circuit.lanes)
+Base.length(circuit::Circuit) = sum(length(lane) for lane in circuit.lanes; init = 0)
 
 """
     isempty(circuit)
