@@ -4,11 +4,11 @@ using MathTeXEngine
 function draw end
 export draw
 
-function draw(circuit::Circuit; background::Union{String, Nothing} = nothing)
+function draw(circuit::Circuit; kwargs...)
     n = lanes(circuit)
 
     if isempty(circuit)
-        return vcat([draw(I; background) for _ in 1:n]...)
+        return vcat([draw(I; kwargs...) for _ in 1:n]...)
     end
 
     # split moments if gates overlap in 1D
@@ -38,7 +38,7 @@ function draw(circuit::Circuit; background::Union{String, Nothing} = nothing)
         (min, max) = extrema(mapreduce(lanes, ∪, moment))
         moment = [map(I, filter(<(min), 1:n))..., moment..., map(I, filter(>(max), 1:n))...]
 
-        mapreduce(x->draw(x; background), vcat, moment)
+        mapreduce(x->draw(x; kwargs...), vcat, moment)
     end
 end
 
@@ -47,19 +47,19 @@ function Base.show(io::IO, ::MIME"image/svg+xml", circuit::Circuit)
     print(io, svgstring())
 end
 
-function draw(gate::Gate; top::Bool = false, bottom::Bool = false, background::Union{String, Nothing} = nothing)
+function draw(gate::Gate; top::Bool = false, bottom::Bool = false, kwargs...)
     n = (length ∘ lanes)(gate)
     if n == 1
-        draw_block(; top = top, bottom = bottom, background)
+        draw_block(; top = top, bottom = bottom, kwargs...)
     else
         a, b = extrema(lanes(gate))
         n = b - a + 1
-        vcat(draw_block(; top = top, background), fill(draw_multiblock_mid(; background), (n - 2))..., draw_block(; bottom = bottom, background))
+        vcat(draw_block(; top = top, kwargs...), fill(draw_multiblock_mid(; kwargs...), (n - 2))..., draw_block(; bottom = bottom, kwargs...))
     end
 end
 
 draw(::I) = draw(I)
-function draw(::Type{I}; background::Union{String, Nothing} = nothing)
+function draw(::Type{I}; background = nothing)
     @drawsvg begin
         (background !== nothing) && Luxor.background(background)
         origin()
@@ -74,7 +74,7 @@ for (T, N) in [(X, "X"), (Y, "Y"), (Z, "Z"), (H, "H"), (S, "S"), (Sd, L"S^\dagge
     end
 end
 
-function draw(gate::Control; background::Union{String, Nothing} = nothing)
+function draw(gate::Control; kwargs...)
     c = control(gate)
     t = target(gate)
     r = range(extrema(lanes(gate))...)
@@ -84,27 +84,27 @@ function draw(gate::Control; background::Union{String, Nothing} = nothing)
     vcat(
         [
             if lane == first(r)
-                draw_copy(:top; background)
+                draw_copy(:top; kwargs...)
             elseif lane ∈ c
-                draw_copy(:mid; background)
+                draw_copy(:mid; kwargs...)
             else
-                draw_cross(; background)
+                draw_cross(; kwargs...)
             end for lane in r if lane < only(t)
         ]...,
-        draw(op(gate); top = !any(<(only(t)), c), bottom = !any(>(only(t)), c), background),
+        draw(op(gate); top = !any(<(only(t)), c), bottom = !any(>(only(t)), c), kwargs...),
         [
             if lane == last(r)
-                draw_copy(:bottom; background)
+                draw_copy(:bottom; kwargs...)
             elseif lane ∈ c
-                draw_copy(:mid; background)
+                draw_copy(:mid; kwargs...)
             else
-                draw_cross(; background)
+                draw_cross(; kwargs...)
             end for lane in r if lane > only(t)
         ]...,
     )
 end
 
-function draw_block(label = ""; top::Bool = false, bottom::Bool = false, background::Union{String, Nothing} = nothing)
+function draw_block(label = ""; top::Bool = false, bottom::Bool = false, background = nothing)
     @drawsvg begin
         (background !== nothing) && Luxor.background(background)
         origin()
@@ -129,7 +129,7 @@ function draw_block(label = ""; top::Bool = false, bottom::Bool = false, backgro
     end 50 50
 end
 
-function draw_multiblock_mid(;background::Union{String, Nothing} = nothing)
+function draw_multiblock_mid(; background = nothing)
     @drawsvg begin
         (background !== nothing) && Luxor.background(background)
         origin()
@@ -144,7 +144,7 @@ function draw_multiblock_mid(;background::Union{String, Nothing} = nothing)
     end 50 50
 end
 
-function draw_cross(;background::Union{String, Nothing} = nothing)
+function draw_cross(; background = nothing)
     @drawsvg begin
         (background !== nothing) && Luxor.background(background)
         origin()
@@ -154,7 +154,7 @@ function draw_cross(;background::Union{String, Nothing} = nothing)
     end 50 50
 end
 
-function draw_copy(dir::Symbol; background::Union{String, Nothing} = nothing)
+function draw_copy(dir::Symbol; background = nothing)
     @drawsvg begin
         (background !== nothing) && Luxor.background(background)
         origin()
