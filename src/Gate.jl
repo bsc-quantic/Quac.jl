@@ -127,8 +127,6 @@ end
 
 Base.adjoint(::Type{Td}) = T
 
-const Phase = Union{Z,S,Sd,T,Td,Rz}
-
 """
     ParametricGate
 
@@ -215,6 +213,8 @@ end
 for G in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, U2, U3]
     @eval lanes(::Type{$G}) = 1
 end
+
+const Phase = Union{Z,S,Sd,T,Td,Rz}
 
 """
     Control(lane, op::Gate)
