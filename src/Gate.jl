@@ -190,7 +190,7 @@ struct Rz <: ParametricGate
     param::NamedTuple{(:θ,),Tuple{Float32}}
 end
 
-U1 = Rz
+const U1 = Rz
 
 """
     U2(lane, (ϕ, λ))
