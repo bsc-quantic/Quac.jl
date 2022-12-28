@@ -68,6 +68,8 @@ struct Z <: Gate
     lane::Int
 end
 
+const Pauli = Union{I,X,Y,Z}
+
 """
     H(lane)
 
@@ -124,6 +126,8 @@ struct Td <: Gate
 end
 
 Base.adjoint(::Type{Td}) = T
+
+const Phase = Union{Z,S,Sd,T,Td,Rz}
 
 """
     ParametricGate
