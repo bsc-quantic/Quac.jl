@@ -20,7 +20,7 @@ Element(gate::Gate, priority) = Element{Gate}(gate, priority)
 
 data(e::Element) = e.data
 
-∈(e::Element, head::Vector{Int}) = all(p == head[lane] for (lane, p) in e.priority)
+in(e::Element, head::Vector{Int}) = all(p == head[lane] for (lane, p) in e.priority)
 
 """
 A quantum circuit implementation using multi-priority queues.
