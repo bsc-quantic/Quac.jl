@@ -67,7 +67,6 @@ draw(::I) = draw(I)
 function draw(::Type{I}; background = nothing)
     @drawsvg begin
         (background !== nothing) && Luxor.background(background)
-
         origin()
         line(Point(-25, 0), Point(25, 0), action = :stroke)
     end 50 50
@@ -113,8 +112,6 @@ end
 function draw_block(label = ""; top::Bool = false, bottom::Bool = false, background = nothing)
     @drawsvg begin
         (background !== nothing) && Luxor.background(background)
-
-        println("label: $label")
         origin()
 
         # lane wire
