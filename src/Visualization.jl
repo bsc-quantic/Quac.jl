@@ -49,8 +49,13 @@ end
 
 function draw(gate::Gate; top::Bool = false, bottom::Bool = false, kwargs...)
     n = (length ∘ lanes)(gate)
+
     if n == 1
-        draw_block(; top = top, bottom = bottom, kwargs...)
+        if gate isa I
+            draw(I; kwargs...)
+        else
+            draw_block(; top = top, bottom = bottom, kwargs...)
+        end
     else
         a, b = extrema(lanes(gate))
         n = b - a + 1
