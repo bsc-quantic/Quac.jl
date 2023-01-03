@@ -49,8 +49,13 @@ end
 
 function draw(gate::Gate; top::Bool = false, bottom::Bool = false, kwargs...)
     n = (length ∘ lanes)(gate)
+
     if n == 1
-        draw_block(; top = top, bottom = bottom, kwargs...)
+        if gate isa I
+            draw(I; kwargs...)
+        else
+            draw_block(; top = top, bottom = bottom, kwargs...)
+        end
     else
         a, b = extrema(lanes(gate))
         n = b - a + 1
@@ -62,6 +67,7 @@ draw(::I) = draw(I)
 function draw(::Type{I}; background = nothing)
     @drawsvg begin
         (background !== nothing) && Luxor.background(background)
+
         origin()
         line(Point(-25, 0), Point(25, 0), action = :stroke)
     end 50 50
@@ -107,6 +113,8 @@ end
 function draw_block(label = ""; top::Bool = false, bottom::Bool = false, background = nothing)
     @drawsvg begin
         (background !== nothing) && Luxor.background(background)
+
+        println("label: $label")
         origin()
 
         # lane wire
