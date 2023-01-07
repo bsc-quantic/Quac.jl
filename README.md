@@ -1,6 +1,7 @@
 # Quac
 
 [![](https://img.shields.io/badge/docs-stable-blue)](https://bsc-quantic.github.io/Quac.jl)
+[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 `Quac` stands for _**Qua**ntum **c**ircuits_ and its a Julia library for quantum circuits with no assumptions about their use.
 
