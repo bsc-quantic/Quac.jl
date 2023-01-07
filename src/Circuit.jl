@@ -16,7 +16,7 @@ struct Element{T}
     priority::Vector{Pair{Int,Int}}
 end
 
-Element(gate::Gate, priority) = Element{Gate}(gate, priority)
+Element(data::T, priority) where {T} = Element{T}(data, priority)
 
 data(e::Element) = e.data
 
