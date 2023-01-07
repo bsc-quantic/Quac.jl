@@ -1,6 +1,7 @@
 # Quac
 
 [![](https://img.shields.io/badge/docs-stable-blue)](https://bsc-quantic.github.io/Quac.jl)
+[![CI](https://github.com/bsc-quantic/Quac.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/bsc-quantic/Quac.jl/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/bsc-quantic/Quac.jl/branch/master/graph/badge.svg?token=D7KVE9SG9Z)](https://codecov.io/gh/bsc-quantic/Quac.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
