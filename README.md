@@ -4,6 +4,7 @@
 [![CI](https://github.com/bsc-quantic/Quac.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/bsc-quantic/Quac.jl/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/bsc-quantic/Quac.jl/branch/master/graph/badge.svg?token=D7KVE9SG9Z)](https://codecov.io/gh/bsc-quantic/Quac.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+[![Registry](https://badgen.net/badge/registry/bsc-quantic/purple)](https://github.com/bsc-quantic/Registry)
 
 `Quac` stands for _**Qua**ntum **c**ircuits_ and its a Julia library for quantum circuits with no assumptions about their use.
 
