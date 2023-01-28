@@ -1,6 +1,6 @@
 # Quac
 
-[![](https://img.shields.io/badge/docs-stable-blue)](https://bsc-quantic.github.io/Quac.jl)
+[![docs](https://img.shields.io/badge/docs-stable-blue)](https://bsc-quantic.github.io/Quac.jl)
 [![CI](https://github.com/bsc-quantic/Quac.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/bsc-quantic/Quac.jl/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/bsc-quantic/Quac.jl/branch/master/graph/badge.svg?token=D7KVE9SG9Z)](https://codecov.io/gh/bsc-quantic/Quac.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
@@ -13,17 +13,20 @@
 > ⚠️ Measurement gates are not currently supported as we are exploring how to fit non-unitary gates.
 
 ## Features
+
 ### Multiple representation of gates
 
 Gates are symbolic in the sense that they do not store their representation. In `Quac` a gate just stores the lane in which it acts, and parameters if it's a parametric gate. Thanks to Julia's multiple-dispatch different representations can be queried lazily.
 
 For example, this is a $Z$ that acts on qubit 4.
+
 ```julia
 > using Quac
 > gate = Z(4)
 ```
 
 Any gate can be represented by a dense matrix.
+
 ```julia
 > Matrix(gate)
 2×2 Matrix{ComplexF32}:
@@ -32,6 +35,7 @@ Any gate can be represented by a dense matrix.
 ```
 
 You can even specify the `eltype`!
+
 ```julia
 > Matrix{Int}(gate)
 2×2 Matrix{Int64}:
@@ -40,6 +44,7 @@ You can even specify the `eltype`!
 ```
 
 Furthermore, the $Z$ gate allows a `Diagonal` representation!
+
 ```julia
 > using LinearAlgebra
 > Diagonal{Float32}(gate)
@@ -49,18 +54,22 @@ Furthermore, the $Z$ gate allows a `Diagonal` representation!
 ```
 
 ### Layout-agnostic `Circuit` representation
+
 Quac uses multi-priority queues for representing `Circuit`s.
 
 ### SVG rendering of `Circuit`s
+
 ```julia
 using Quac
 
 circ = Quac.Algorithms.QFT(4)
 draw(circ)
 ```
+
 ![Quantum Fourier Transform](assets/qft.svg)
 
 ## Roadmap
+
 - [ ] Gate decompositions
 - [ ] ZX-calculus
 - [ ] Spatial layouts
