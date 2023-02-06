@@ -11,9 +11,12 @@ makedocs(
     sitename = "Quac",
     pages = [
         "Home" => "index.md",
-        "API Reference" =>
-            ["Gates" => "api/gates.md", "Circuit" => "api/circuit.md", "Algorithms" => "api/algorithms.md"],
-        # "Ecosystem" => "ecosystem.md",
+        "API Reference" => [
+            "Gates" => "api/gates.md",
+            "Circuit" => "api/circuit.md",
+            "Algorithms" => "api/algorithms.md",
+            ],
+        "Ecosystem" => "ecosystem.md",
     ],
 )
 
