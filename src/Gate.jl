@@ -1,4 +1,5 @@
 import Base: adjoint, rand
+using Base: front, tail
 
 export Gate
 export lanes
@@ -225,8 +226,11 @@ struct Control{T<:Gate} <: Gate
     lane::Int
     op::T
 end
-Control{T}(control::Integer, target::Integer) where {T<:Gate} = Control(control, T(target))
-Control{T}(args...) where {T} = Control{T}(args[1], T(args[2:end]...))
+Control{T}(control::Integer, target::Integer; kwargs...) where {T<:Gate} = Control{T}(control, T(target; kwargs...))
+# Control{T}(args...) where {T} = Control{T}(args[1], T(args[2:end]...))
+Control(args...) = Control(front(args), last(args))
+Control(control::NTuple{1,<:Integer}, target::T) where {T<:Gate} = Control{T}(only(control), target)
+Control(control::NTuple{N,<:Integer}, target::T) where {N,T<:Gate} = Control(first(control), Control(tail(control), target))
 
 CX(control, target) = Control(control, X(target))
 CY(control, target) = Control(control, Y(target))
