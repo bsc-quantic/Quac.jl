@@ -12,5 +12,6 @@
 - **Extensibility** Every part of the package is extensible with new types or functionality as you wish.
 
 ## Contents
+
 ```@contents
 ```

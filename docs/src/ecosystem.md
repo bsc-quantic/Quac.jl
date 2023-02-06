@@ -6,4 +6,4 @@
 
 ## Gato
 
-[Gato](https://github.com/bsc-quantic/Gato.jl) is a Statevector (aka Schrödinger-like) simulator. 
+[Gato](https://github.com/bsc-quantic/Gato.jl) is a Statevector (aka Schrödinger-like) simulator.
