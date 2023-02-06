@@ -21,14 +21,14 @@ Gates are symbolic in the sense that they do not store their representation. In 
 For example, this is a $Z$ that acts on qubit 4.
 
 ```julia
-> using Quac
-> gate = Z(4)
+julia> using Quac
+julia> gate = Z(4)
 ```
 
 Any gate can be represented by a dense matrix.
 
 ```julia
-> Matrix(gate)
+julia> Matrix(gate)
 2×2 Matrix{ComplexF32}:
  1.0+0.0im   0.0+0.0im
  0.0+0.0im  -1.0+0.0im
@@ -37,7 +37,7 @@ Any gate can be represented by a dense matrix.
 You can even specify the `eltype`!
 
 ```julia
-> Matrix{Int}(gate)
+julia> Matrix{Int}(gate)
 2×2 Matrix{Int64}:
  1   0
  0  -1
@@ -46,8 +46,8 @@ You can even specify the `eltype`!
 Furthermore, the $Z$ gate allows a `Diagonal` representation!
 
 ```julia
-> using LinearAlgebra
-> Diagonal{Float32}(gate)
+julia> using LinearAlgebra
+julia> Diagonal{Float32}(gate)
 2×2 Diagonal{Float32, Vector{Float32}}:
  1.0    ⋅
   ⋅   -1.0
