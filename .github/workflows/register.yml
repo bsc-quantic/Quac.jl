@@ -24,6 +24,16 @@ jobs:
             using Pkg
             pkg"add RegistryTools"
           '
+      - name: Debug Registry
+        run: |
+          julia -e '
+            using Logging
+            using Pkg
+            pkg"registry add https://github.com/bsc-quantic/Registry"
+            for dir in readdir(first(DEPOT_PATH); join=true)
+              @info readchomp(`git -C $dir remote show origin`)
+            end
+          '
       - name: Create Pull Request
         env:
           GITHUB_TOKEN: ${{ secrets.REPOSITORY_TOKEN }}
