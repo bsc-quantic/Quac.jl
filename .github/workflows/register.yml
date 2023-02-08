@@ -15,7 +15,7 @@ jobs:
         with:
           version: '1.6'
       # taken from https://github.com/JuliaRegistries/Registrator.jl/issues/197
-      - uses: Install Registrator
+      - name: Install Registrator
         run: |
           julia -e '
             using Pkg
