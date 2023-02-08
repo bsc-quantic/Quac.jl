@@ -59,7 +59,7 @@ jobs:
               gitconfig = Dict(
                 "user.name" => "github-actions[bot]",
                 "user.email" => "41898282+github-actions[bot]@users.noreply.github.com",
-                # "http.https://github.com/.extraheader" => "Authorization: Bearer $(ENV["GITHUB_TOKEN"])"
+                "http.https://github.com/.extraheader" => "Authorization: Bearer $(ENV["GITHUB_TOKEN"])"
               )
             )
           '
