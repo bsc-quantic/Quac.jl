@@ -63,11 +63,14 @@ jobs:
             @info "Registry: $private_reg_url"
 
             cd(mktempdir()) do
-              gitconfig = Dict(
-                "user.name" => "github-actions[bot]",
-                "user.email" => "41898282+github-actions[bot]@users.noreply.github.com",
-              )
-              regbranch = RegistryTools.register(pkg_url, project, tree_hash; registry=private_reg_url, registry_deps=[general_reg_url], push=true, gitconfig=gitconfig)
+              regbranch = RegistryTools.register(pkg_url, project, tree_hash;
+                registry = private_reg_url,
+                registry_deps = [general_reg_url],
+                push = true,
+                gitconfig = Dict(
+                  "user.name" => "github-actions[bot]",
+                  "user.email" => "41898282+github-actions[bot]@users.noreply.github.com",
+                ))
               @info regbranch
             end
           '
