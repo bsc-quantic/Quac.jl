@@ -1,6 +1,11 @@
 name: Register Package
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version"
+        required: true
+        type: string
 jobs:
   register:
     runs-on: ubuntu-latest
@@ -9,7 +14,18 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1.6'
-      - run: |
+      - name: Check new version
+        run: |
+          julia -e '
+            using Pkg
+            current_version = Pkg.Types.read_project("Project.toml").version
+            new_version = VersionNumber(${{ inputs.version }})
+            if new_version != current_version
+              error("Current version $current_version is not equal to new version $new_version")
+            end
+          '
+      - name: Create Pull Request
+        run: |
           julia -e '
             using Pkg
             pkg"add LocalRegistry"
