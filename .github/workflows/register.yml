@@ -14,7 +14,11 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1.6'
-      - uses: fregante/setup-git-user@v1
+      # taken from fregante/setup-git-user@v1
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
       # taken from https://github.com/JuliaRegistries/Registrator.jl/issues/197
       - name: Install RegistryTools
         run: |
