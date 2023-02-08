@@ -34,6 +34,8 @@ jobs:
             pkg"add RegistryTools"
           '
       - name: Create Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
         run: |
           julia -e '
             using RegistryTools
@@ -57,12 +59,13 @@ jobs:
             tree_hash = String(readchomp(`git rev-parse HEAD^\{tree\}`))
             @info "Tree hash: $tree_hash"
 
-            const private_reg_url = "https://token:${{ secrets.GITHUB_TOKEN }}@github.com/bsc-quantic/Registry"
+            const private_reg_url = "https://github.com/bsc-quantic/Registry"
             const general_reg_url = "https://github.com/JuliaRegistries/General"
 
             @info "Registry: $private_reg_url"
 
             cd(mktempdir()) do
+              auth = String(readchomp(`echo -n "$(ENV["GITHUB_TOKEN"])" | openssl base64 | tr -d '\n'`))
               regbranch = RegistryTools.register(pkg_url, project, tree_hash;
                 registry = private_reg_url,
                 registry_deps = [general_reg_url],
@@ -70,6 +73,7 @@ jobs:
                 gitconfig = Dict(
                   "user.name" => "github-actions[bot]",
                   "user.email" => "41898282+github-actions[bot]@users.noreply.github.com",
+                  "http.https://github.com/.extraheader" => "Authorization: basic $auth"
                 ))
               @info regbranch
             end
