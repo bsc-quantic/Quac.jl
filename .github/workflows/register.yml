@@ -50,7 +50,7 @@ jobs:
             # taken from fregante/setup-git-user@v1, https://stackoverflow.com/a/71984173
             LocalRegistry.register(;
               registry = "https://github.com/bsc-quantic/Registry",
-              branch = "register/$(project.name)/v$(project.version)"
+              branch = "register/$(project.name)/v$(project.version)",
               commit = true,
               push = true,
               repo = pkg_url,
