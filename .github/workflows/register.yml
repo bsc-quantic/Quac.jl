@@ -14,8 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.REGISTRY_TOKEN }}
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1.6'
