@@ -51,6 +51,7 @@ jobs:
             @info "Registry: $private_reg_url"
 
             cd(mktempdir()) do
-              RegistryTools.register(pkg_url, project, tree_hash; registry=private_reg_url, registry_deps=[general_reg_url], push=true)
+              regbranch = RegistryTools.register(pkg_url, project, tree_hash; registry=private_reg_url, registry_deps=[general_reg_url], push=true)
+              @info regbranch
             end
           '
