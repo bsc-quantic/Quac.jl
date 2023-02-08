@@ -65,7 +65,7 @@ jobs:
             @info "Registry: $private_reg_url"
 
             cd(mktempdir()) do
-              auth = String(readchomp(`echo -n $(ENV["GITHUB_TOKEN"]) '|' openssl base64 '|' tr -d \\n`))
+              auth = base64encode(ENV["GITHUB_TOKEN"])
               regbranch = RegistryTools.register(pkg_url, project, tree_hash;
                 registry = private_reg_url,
                 registry_deps = [general_reg_url],
