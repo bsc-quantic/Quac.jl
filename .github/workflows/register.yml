@@ -17,11 +17,15 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1.6'
-      # taken from fregante/setup-git-user@v1
+      # taken from fregante/setup-git-user@v1, https://stackoverflow.com/a/71984173
       - name: Configure Git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          AUTH=$(echo -n ":${{ secrets.GITHUB_TOKEN }}" | openssl base64 | tr -d '\n')
+          git config --global http.https://github.com/bsc-quantic/Registry/.extraheader="Authorization: Basic $AUTH"
       # taken from https://github.com/JuliaRegistries/Registrator.jl/issues/197
       - name: Install RegistryTools
         run: |
@@ -30,8 +34,6 @@ jobs:
             pkg"add RegistryTools"
           '
       - name: Create Pull Request
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           julia -e '
             using RegistryTools
