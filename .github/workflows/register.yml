@@ -14,21 +14,36 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1.6'
-      - name: Check new version
-        run: |
-          julia -e '
-            using Pkg
-            current_version = Pkg.Types.read_project("Project.toml").version
-            new_version = VersionNumber(${{ inputs.version }})
-            if new_version != current_version
-              error("Current version $current_version is not equal to new version $new_version")
-            end
-          '
+      # taken from https://github.com/JuliaRegistries/Registrator.jl/issues/197
       - name: Create Pull Request
         run: |
           julia -e '
             using Pkg
-            pkg"add LocalRegistry"
-            using LocalRegistry
-            register(; registry="https://github.com/bsc-quantic/Registry.git", ignore_reregistration=false)
+            pkg"add Registrator"
+            using Registrator
+            
+            using Logging
+            project = Pkg.Types.read_project("Project.toml")
+            if isnothing(project)
+              error("Project file not found")
+            end
+
+            @info "Project: $(project.name) = \"$(project.uuid)\" @ $(project.version)"
+
+            new_version = VersionNumber(${{ inputs.version }})
+            if new_version != project.version
+              error("Current version $current_version is not equal to new version $new_version")
+            end
+
+            pkg_url = String(readchomp(`git -C $pkg_path remote get-url origin`))
+            @info "Package URL: $pkg_url"
+
+            const private_reg_url = "https://github.com/bsc-quantic/Registry"
+            const general_reg_url = "https://github.com/JuliaRegistries/General"
+
+            @info "Registry: $private_reg_url"
+
+            cd(mktempdir()) do
+              Registrator.RegEdit.register(pkg_url, project, tree_hash; registry=private_reg_url, registry_deps=[general_reg_url], push=true)
+            end
           '
