@@ -60,7 +60,7 @@ jobs:
             tree_hash = String(readchomp(`git rev-parse HEAD^\{tree\}`))
             @info "Tree hash: $tree_hash"
 
-            const private_reg_url = "https://github.com/bsc-quantic/Registry"
+            const private_reg_url = "https://$(ENV["GITHUB_TOKEN"])@github.com/bsc-quantic/Registry"
             const general_reg_url = "https://github.com/JuliaRegistries/General"
 
             @info "Registry: $private_reg_url"
