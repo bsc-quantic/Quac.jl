@@ -30,7 +30,7 @@ jobs:
 
             @info "Project: $(project.name) = \"$(project.uuid)\" @ $(project.version)"
 
-            new_version = VersionNumber(${{ inputs.version }})
+            new_version = VersionNumber("${{ inputs.version }}")
             if new_version != project.version
               error("Current version $current_version is not equal to new version $new_version")
             end
