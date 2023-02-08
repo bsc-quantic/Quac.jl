@@ -17,15 +17,6 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1.6'
-      # taken from fregante/setup-git-user@v1, https://stackoverflow.com/a/71984173
-      - name: Configure Git
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          AUTH=$(echo -n $GITHUB_TOKEN | openssl base64 | tr -d '\n')
-          git config --global http.https://github.com/bsc-quantic/Registry.extraheader "AUTHORIZATION: basic $AUTH"
       # taken from https://github.com/JuliaRegistries/Registrator.jl/issues/197
       - name: Install RegistryTools
         run: |
@@ -35,7 +26,7 @@ jobs:
           '
       - name: Create Pull Request
         env:
-          GITHUB_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           julia -e '
             using RegistryTools
@@ -60,13 +51,13 @@ jobs:
             tree_hash = String(readchomp(`git rev-parse HEAD^\{tree\}`))
             @info "Tree hash: $tree_hash"
 
-            const private_reg_url = "https://$(ENV["GITHUB_TOKEN"])@github.com/bsc-quantic/Registry"
+            const private_reg_url = "https://github.com/bsc-quantic/Registry"
             const general_reg_url = "https://github.com/JuliaRegistries/General"
 
             @info "Registry: $private_reg_url"
 
             cd(mktempdir()) do
-              auth = base64encode(ENV["GITHUB_TOKEN"])
+              # taken from fregante/setup-git-user@v1, https://stackoverflow.com/a/71984173
               regbranch = RegistryTools.register(pkg_url, project, tree_hash;
                 registry = private_reg_url,
                 registry_deps = [general_reg_url],
@@ -74,7 +65,7 @@ jobs:
                 gitconfig = Dict(
                   "user.name" => "github-actions[bot]",
                   "user.email" => "41898282+github-actions[bot]@users.noreply.github.com",
-                  "http.https://github.com/.extraheader" => "AUTHORIZATION: basic $auth"
+                  "http.https://github.com/.extraheader" => "Authorization: Bearer $(ENV["GITHUB_TOKEN"])"
                 ))
               @info regbranch
             end
