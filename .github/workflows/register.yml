@@ -40,6 +40,7 @@ jobs:
           julia -e '
             using RegistryTools
             using Logging
+            using Base64
             
             project = RegistryTools.Project("Project.toml")
             if isnothing(project)
