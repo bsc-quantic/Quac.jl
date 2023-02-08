@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.REPOSITORY_TOKEN }}
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1.6'
@@ -57,7 +59,7 @@ jobs:
               gitconfig = Dict(
                 "user.name" => "github-actions[bot]",
                 "user.email" => "41898282+github-actions[bot]@users.noreply.github.com",
-                "http.https://github.com/.extraheader" => "Authorization: Bearer $(ENV["GITHUB_TOKEN"])"
+                # "http.https://github.com/.extraheader" => "Authorization: Bearer $(ENV["GITHUB_TOKEN"])"
               )
             )
           '
