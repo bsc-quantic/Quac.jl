@@ -14,6 +14,10 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1.6'
+      - name: Configure Git
+        run: |
+          git config --global user.email "15837247+mofeing@users.noreply.github.com"
+          git config --global user.name "Sergio Sánchez Ramírez (Workflow)"
       # taken from https://github.com/JuliaRegistries/Registrator.jl/issues/197
       - name: Install RegistryTools
         run: |
