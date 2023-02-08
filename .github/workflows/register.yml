@@ -6,6 +6,9 @@ on:
         description: "Version"
         required: true
         type: string
+permissions:
+  contents: write
+  pull-requests: write
 jobs:
   register:
     runs-on: ubuntu-latest
@@ -27,6 +30,8 @@ jobs:
             pkg"add RegistryTools"
           '
       - name: Create Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           julia -e '
             using RegistryTools
