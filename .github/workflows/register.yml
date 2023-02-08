@@ -24,11 +24,10 @@ jobs:
       - name: Create Pull Request
         run: |
           julia -e '
-            using Pkg
             using RegistryTools
             using Logging
             
-            project = Pkg.Types.read_project("Project.toml")
+            project = RegistryTools.Project("Project.toml")
             if isnothing(project)
               error("Project file not found")
             end
