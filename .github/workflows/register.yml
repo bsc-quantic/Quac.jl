@@ -38,7 +38,7 @@ jobs:
             pkg_url = String(readchomp(`git remote get-url origin`))
             @info "Package URL: $pkg_url"
 
-            tree_hash = String(readchomp(`git rev-parse v$(project.version)^\{tree\}`))
+            tree_hash = String(readchomp(`git rev-parse HEAD^\{tree\}`))
             @info "Tree hash: $tree_hash"
 
             const private_reg_url = "https://github.com/bsc-quantic/Registry"
