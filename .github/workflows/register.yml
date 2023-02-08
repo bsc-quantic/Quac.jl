@@ -15,14 +15,19 @@ jobs:
         with:
           version: '1.6'
       # taken from https://github.com/JuliaRegistries/Registrator.jl/issues/197
+      - uses: Install Registrator
+        run: |
+          julia -e '
+            using Pkg
+            pkg"add RegistryTools"
+          '
       - name: Create Pull Request
         run: |
           julia -e '
             using Pkg
-            pkg"add Registrator"
-            using Registrator
-            
+            using RegistryTools
             using Logging
+            
             project = Pkg.Types.read_project("Project.toml")
             if isnothing(project)
               error("Project file not found")
@@ -47,6 +52,6 @@ jobs:
             @info "Registry: $private_reg_url"
 
             cd(mktempdir()) do
-              Registrator.RegEdit.register(pkg_url, project, tree_hash; registry=private_reg_url, registry_deps=[general_reg_url], push=true)
+              RegistryTools.register(pkg_url, project, tree_hash; registry=private_reg_url, registry_deps=[general_reg_url], push=true)
             end
           '
