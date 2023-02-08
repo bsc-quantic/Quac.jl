@@ -63,7 +63,7 @@ jobs:
             @info "Registry: $private_reg_url"
 
             cd(mktempdir()) do
-              const gitconfig = Dict(
+              gitconfig = Dict(
                 "user.name" => "github-actions[bot]",
                 "user.email" => "41898282+github-actions[bot]@users.noreply.github.com",
               )
