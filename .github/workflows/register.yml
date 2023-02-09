@@ -103,7 +103,7 @@ jobs:
                 gitconfig = Dict(
                   "user.name" => "github-actions[bot]",
                   "user.email" => "41898282+github-actions[bot]@users.noreply.github.com",
-                  "http.\"https://github.com/\".extraheader" => "Authorization: Bearer $(ENV["GITHUB_TOKEN"])"
+                  "url.\"https://github-actions[bot]:$(ENV["GITHUB_TOKEN"])@github.com/bsc-quantic/Registry\".insteadOf" => "https://github.com/bsc-quantic/Registry"
                 ))
               @info regbranch
             end
