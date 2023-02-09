@@ -57,6 +57,7 @@ jobs:
                 registry = private_reg_url,
                 registry_deps = [general_reg_url],
                 push = true,
+                branch = "register/$(project.name)/$(project.version)",
                 gitconfig = Dict(
                   "user.name" => "github-actions[bot]",
                   "user.email" => "41898282+github-actions[bot]@users.noreply.github.com",
