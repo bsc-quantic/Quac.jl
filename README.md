@@ -66,7 +66,7 @@ circ = Quac.Algorithms.QFT(4)
 draw(circ)
 ```
 
-![Quantum Fourier Transform](assets/qft.svg)
+![Quantum Fourier Transform](docs/src/assets/qft.svg)
 
 ## Roadmap
 
