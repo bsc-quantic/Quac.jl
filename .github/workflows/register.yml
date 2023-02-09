@@ -17,52 +17,12 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1.6'
-      - name: Install LocalRegistry
+      - name: Install RegistryTools
         run: |
           julia -e '
             using Pkg
-            pkg"add LocalRegistry"
             pkg"add RegistryTools"
           '
-      # - name: Create Pull Request
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
-      #   run: |
-      #     julia -e '
-      #       using Pkg
-      #       using LocalRegistry
-      #       using Logging
-            
-      #       project = Pkg.Types.read_project("Project.toml")
-      #       if isnothing(project)
-      #         error("Project file not found")
-      #       end
-
-      #       @info "Project: $(project.name) = \"$(project.uuid)\" @ $(project.version)"
-
-      #       new_version = VersionNumber("${{ inputs.version }}")
-      #       if new_version != project.version
-      #         error("Current version $(project.version) is not equal to new version $new_version")
-      #       end
-
-      #       pkg_url = String(readchomp(`git remote get-url origin`))
-      #       @info "Package URL: $pkg_url"
-
-      #       # taken from fregante/setup-git-user@v1, https://stackoverflow.com/a/71984173
-      #       LocalRegistry.register(;
-      #         registry = "https://github.com/bsc-quantic/Registry",
-      #         branch = "register/$(project.name)/v$(project.version)",
-      #         commit = true,
-      #         push = true,
-      #         repo = pkg_url,
-      #         gitconfig = Dict(
-      #           "user.name" => "github-actions[bot]",
-      #           "user.email" => "41898282+github-actions[bot]@users.noreply.github.com",
-      #           "http.\"https://github.com/\".extraheader" => "Authorization: Bearer $(ENV["GITHUB_TOKEN"])"
-      #         )
-      #       )
-      #     '
-      # TODO fix RegistryTools
       - name: Create Pull Request
         env:
           GITHUB_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
