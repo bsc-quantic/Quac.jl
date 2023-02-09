@@ -66,5 +66,8 @@ jobs:
                   "url.https://github-actions[bot]:$(ENV["GITHUB_TOKEN"])@github.com/bsc-quantic/Registry.insteadOf" => "https://github.com/bsc-quantic/Registry"
                 ))
               @info regbranch
+              if haskey(regbranch.metadata, "error")
+                error(regbranch.metadata["error"])
+              end
             end
           '
