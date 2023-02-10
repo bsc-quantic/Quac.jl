@@ -6,6 +6,7 @@ export Rx, Ry, Rz, U1, U2, U3
 export Control, Swap
 export CX, CY, CZ, CRx, CRy, CRz
 export control, target, operator
+export Pauli, Phase
 
 abstract type Operator{Params<:NamedTuple} end
 
