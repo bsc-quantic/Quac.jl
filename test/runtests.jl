@@ -2,6 +2,7 @@ using Test
 using Quac
 
 @testset "Unit tests" verbose = true begin
+    include("Operator_test.jl")
     include("Circuit_test.jl")
 end
 
