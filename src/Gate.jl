@@ -61,7 +61,7 @@ Base.adjoint(::Type{Control{Op}}) where {Op} = Control{adjoint(Op)}
 
 # operator sets
 const Pauli = Union{I,X,Y,Z}
-const Phase = Union{Z,S,Sd,T,Td,Rz}
+const Phase = Union{I,Z,S,Sd,T,Td,Rz}
 
 """
     Gate{Operator}(lanes...; parameters...)
