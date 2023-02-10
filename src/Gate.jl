@@ -84,7 +84,7 @@ struct Gate{Op,N,Params}
 end
 
 # constructor aliases
-for Op in filter(x -> x isa DataType, subtypes(Operator))
+for Op in [I, X, Y, Z, H, S, Sd, T, Td, U2, U3, Swap]
     @eval $(Symbol(Op))(lanes...; params...) = Gate{$Op}(lanes...; params...)
 end
 
