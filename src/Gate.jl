@@ -1,6 +1,3 @@
-import Base: adjoint, rand
-using Base: front, tail
-
 export Gate
 export lanes
 export X, Y, Z, H, S, Sd, T, Td
