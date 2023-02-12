@@ -1,5 +1,15 @@
 using Luxor
 using MathTeXEngine
+using LaTeXStrings
+
+texname(::Type{Op}) where {Op<:Operator} = LaTeXString(String(nameof(Op)))
+
+texname(::Type{Sd}) = L"S^\dagger"
+texname(::Type{Td}) = L"T^\dagger"
+
+texname(::Type{Rx}) = L"R_X"
+texname(::Type{Ry}) = L"R_Y"
+texname(::Type{Rz}) = L"R_Z"
 
 function draw end
 export draw
