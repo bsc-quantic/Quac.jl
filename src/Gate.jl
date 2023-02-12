@@ -90,10 +90,11 @@ Control{Op}(lanes...; params...) where {Op} = Gate{Control{Op}}(lanes...; params
 
 lanes(g::Gate) = g.lanes
 Base.length(::Type{Gate{Op}}) where {Op} = length(Op)
-operator(::Gate{Op}) where {Op} = Op
+operator(::Type{<:Gate{Op}}) where {Op} = Op
+operator(::Gate{Op}) where {Op} = operator(Gate{Op})
 
 parameters(g::Gate) = g.parameters
-parameters(::Type{Gate{Op}}) where {Op} = parameters(Op)
+parameters(::Type{<:Gate{Op}}) where {Op} = parameters(Op)
 Base.propertynames(::Type{Gate{Op}}) where {Op} = (first(parameters(Op).parameters)...,)
 Base.propertynames(::G) where {G<:Gate{Op}} where {Op} = propertynames(G)
 Base.getproperty(g::Gate{Op}, i::Symbol) where {Op} = i ∈ propertynames(g) ? parameters(g)[i] : getfield(g, i)
