@@ -45,6 +45,35 @@
         @test adjoint(Control{Control{Control{S}}}) === Control{Control{Control{Sd}}}
     end
 
+    @testset "Base.rand" begin
+        for Op in [
+            I,
+            X,
+            Y,
+            Z,
+            H,
+            S,
+            Sd,
+            T,
+            Td,
+            Rx,
+            Ry,
+            Rz,
+            Swap,
+            Control{I},
+            Control{Control{I}},
+            Control{Control{Control{I}}},
+            Control{Rx},
+            Control{Control{Rx}},
+            Control{Control{Control{Rx}}},
+            Control{Swap},
+            Control{Control{Swap}},
+            Control{Control{Control{Swap}}},
+        ]
+            @test rand(Op) isa parameters(Op)
+        end
+    end
+
     @testset "Operator sets" begin
         @testset "Pauli" begin
             for Op in [I, X, Y, Z]
