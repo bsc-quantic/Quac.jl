@@ -102,6 +102,8 @@ Base.propertynames(::Type{<:Gate{Op}}) where {Op} = (keys(parameters(Op))...,)
 Base.propertynames(::G) where {G<:Gate{Op}} where {Op} = propertynames(G)
 Base.getproperty(g::Gate{Op}, i::Symbol) where {Op} = i ∈ propertynames(g) ? parameters(g)[i] : getfield(g, i)
 
+Base.adjoint(::Type{<:Gate{Op}}) where {Op} = Gate{adjoint(Op)}
+Base.adjoint(::Type{Gate{Op,N,P}}) where {Op,N,P} = Gate{adjoint(Op),N,P}
 Base.adjoint(g::Gate{Op}) where {Op} = Gate{Op'}(lanes(g)...; [key => -val for (key, val) in pairs(parameters(g))]...)
 
 # NOTE useful type piracy
