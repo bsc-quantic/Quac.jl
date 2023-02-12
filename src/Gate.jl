@@ -113,10 +113,10 @@ Base.rand(::Type{Op}) where {Op<:Operator} = rand(parameters(Op))
 Base.rand(::Type{Gate{Op}}, lanes::Integer...) where {Op} = Gate{Op}(lanes...; rand(Op)...)
 
 # Gate{Control}
-op(::Type{Op}) where {Op<:Operator} = Op
-op(::Type{Control{Op}}) where {Op} = Op
-op(::Type{Control{Op}}) where {Op<:Control} = op(Op)
-op(::Type{<:Gate{Op}}) where {Op} = op(Op)
+targettype(::Type{Op}) where {Op<:Operator} = Op
+targettype(::Type{Control{Op}}) where {Op} = Op
+targettype(::Type{Control{Op}}) where {Op<:Control} = targettype(Op)
+targettype(::Type{<:Gate{Op}}) where {Op} = targettype(Op)
 
-control(g::G) where {G<:Gate{<:Control}} = lanes(g)[1:end-length(op(G))]
-target(g::G) where {G<:Gate{<:Control}} = lanes(g)[end-length(op(G))+1:end]
+control(g::G) where {G<:Gate{<:Control}} = lanes(g)[1:end-length(targettype(G))]
+target(g::G) where {G<:Gate{<:Control}} = lanes(g)[end-length(targettype(G))+1:end]
