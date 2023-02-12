@@ -1,6 +1,6 @@
 using Quac: Circuit, lanes, X
 
-@testset "Circuit" verbose = true begin
+@testset "Circuit" begin
     @testset "lanes" begin
         for n in [0, 1, 2, 4]
             @test lanes(Circuit(n)) == n
