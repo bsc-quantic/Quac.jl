@@ -10,6 +10,9 @@ export Pauli, Phase
 
 abstract type Operator{Params<:NamedTuple} end
 
+# NOTE useful type piracy
+Base.keys(::Type{<:NamedTuple{K}}) where {K} = K
+
 # `Operator` with no parameters
 const StaticOperator = Operator{NamedTuple{(),Tuple{}}}
 
@@ -95,7 +98,7 @@ operator(::Gate{Op}) where {Op} = operator(Gate{Op})
 
 parameters(g::Gate) = g.parameters
 parameters(::Type{<:Gate{Op}}) where {Op} = parameters(Op)
-Base.propertynames(::Type{Gate{Op}}) where {Op} = (first(parameters(Op).parameters)...,)
+Base.propertynames(::Type{<:Gate{Op}}) where {Op} = (keys(parameters(Op))...,)
 Base.propertynames(::G) where {G<:Gate{Op}} where {Op} = propertynames(G)
 Base.getproperty(g::Gate{Op}, i::Symbol) where {Op} = i ∈ propertynames(g) ? parameters(g)[i] : getfield(g, i)
 
