@@ -82,11 +82,11 @@ struct Gate{Op<:Operator,N,Params}
 end
 
 # constructor aliases
-for Op in [I, X, Y, Z, H, S, Sd, T, Td, U2, U3, Swap]
-    @eval $(Symbol(Op))(lanes...; params...) = Gate{$Op}(lanes...; params...)
+for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td, :U2, :U3, :Rx, :Ry, :Rz, :Swap]
+    @eval $Op(lanes...; params...) = Gate{$Op}(lanes...; params...)
 end
 
-# TODO Gate{Control} constructor
+Control{Op}(lanes...; params...) where {Op} = Gate{Control{Op}}(lanes...; params...)
 
 lanes(g::Gate) = g.lanes
 Base.length(::Type{Gate{Op}}) where {Op} = length(Op)
