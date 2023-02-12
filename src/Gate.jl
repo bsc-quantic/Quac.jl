@@ -69,7 +69,7 @@ const Phase = Union{I,Z,S,Sd,T,Td,Rz}
 
 An `Operator` located at some `lanes` and configured with some `parameters`.
 """
-struct Gate{Op,N,Params}
+struct Gate{Op<:Operator,N,Params}
     lanes::NTuple{N,Int}
     parameters::Params
 
