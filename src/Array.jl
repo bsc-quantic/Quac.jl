@@ -89,7 +89,14 @@ end
 @eval Array{T}(::Type{G}) where {T,G<:Gate} = Array{T,2 * length(operator(G))}(G)
 @eval Array{T}(g::G) where {T,G<:Gate} = Array{T,2 * length(operator(G))}(isparametric(operator(G)) ? g : G)
 
-Array{T,4}(::Type{<:Gate{Swap}}) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
+# NOTE multidimensional `Array` literal concatenation was introduced in 1.7
+# TODO clean code when we stop supporting Julia 1.6
+Array{T,4}(::Type{<:Gate{Swap}}) where {T} =
+    if VERSION >= v"1.7"
+        Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
+    else
+        reshape(Matrix{T}(Gate{Swap}), (2, 2, 2, 2))
+    end
 
 Array{T}(::Type{Gate{C}}) where {T,C<:Control} =
     Array{T,2 * length(C)}(reshape(Matrix{T}(Gate{C}), fill(2, 2 * length(C))...))
