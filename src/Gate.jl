@@ -96,6 +96,17 @@ Base.length(::Type{Gate{Op}}) where {Op} = length(Op)
 operator(::Type{<:Gate{Op}}) where {Op} = Op
 operator(::Gate{Op}) where {Op} = operator(Gate{Op})
 
+function Base.summary(io::IO, gate::Gate)
+    flatten = Iterators.flatten
+    map = Iterators.map
+
+    Op = operator(gate)
+    Args = join(flatten((lanes(gate), map(x -> "$(x[1])=$(x[2])", pairs(parameters(gate))))), ",")
+    print(io, "$Op($Args)")
+end
+
+Base.show(io::IO, ::MIME"text/plain", gate::Gate) = summary(io, gate)
+
 parameters(g::Gate) = g.parameters
 parameters(::Type{<:Gate{Op}}) where {Op} = parameters(Op)
 Base.propertynames(::Type{<:Gate{Op}}) where {Op} = (keys(parameters(Op))...,)
