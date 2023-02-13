@@ -72,12 +72,6 @@ T
 Td
 ```
 
-## Parametric gates
-
-```@docs
-ParametricGate
-```
-
 ### Rotation gates
 
 ```@docs
