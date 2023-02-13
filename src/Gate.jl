@@ -8,6 +8,11 @@ export CX, CY, CZ, CRx, CRy, CRz
 export control, target, operator
 export Pauli, Phase
 
+"""
+    Operator
+
+Parent type of quantum operators.
+"""
 abstract type Operator{Params<:NamedTuple} end
 
 # NOTE useful type piracy
@@ -19,13 +24,100 @@ const StaticOperator = Operator{NamedTuple{(),Tuple{}}}
 parameters(::Type{<:Operator{Params}}) where {Params} = Params
 isparametric(::Type{T}) where {T<:Operator} = parameters(T) !== NamedTuple{(),Tuple{}}
 
+"""
+    I(lane)
+
+The ``σ_0`` Pauli matrix gate.
+
+# Note
+
+Due to name clashes with `LinearAlgebra.I`, `Quac.I` is not exported by default.
+"""
+abstract type I <: StaticOperator end
+
+"""
+    X(lane)
+
+The ``σ_1`` Pauli matrix gate.
+"""
+abstract type X <: StaticOperator end
+
+"""
+    Y(lane)
+
+The ``σ_2`` Pauli matrix gate.
+"""
+abstract type Y <: StaticOperator end
+
+"""
+    Z(lane)
+
+The ``σ_3`` Pauli matrix gate.
+"""
+abstract type Z <: StaticOperator end
+
+"""
+    H(lane)
+
+The Hadamard gate.
+"""
+abstract type H <: StaticOperator end
+
+"""
+    S(lane)
+
+The ``S`` gate or ``\\frac{π}{2}`` rotation around Z-axis.
+"""
+abstract type S <: StaticOperator end
+
+"""
+    Sd(lane)
+
+The ``S^\\dagger`` gate or ``-\\frac{π}{2}`` rotation around Z-axis.
+"""
+abstract type Sd <: StaticOperator end
+
+"""
+    T(lane)
+
+The ``T`` gate or ``\\frac{π}{4}`` rotation around Z-axis.
+"""
+abstract type T <: StaticOperator end
+
+"""
+    Td(lane)
+
+The ``T^\\dagger`` gate or ``-\\frac{π}{4}`` rotation around Z-axis.
+"""
+abstract type Td <: StaticOperator end
+
 for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td]
-    @eval abstract type $Op <: StaticOperator end
     @eval Base.length(::Type{$Op}) = 1
 end
 
+"""
+    Rx(lane, θ)
+
+The ``\\theta`` rotation around the X-axis gate.
+"""
 abstract type Rx <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
+
+"""
+    Ry(lane, θ)
+
+The ``\\theta`` rotation around the Y-axis gate.
+"""
 abstract type Ry <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
+
+"""
+    Rz(lane, θ)
+
+The ``\\theta`` rotation around the Z-axis gate.
+
+# Notes
+
+  - The `U1` gate is an alias of `Rz`.
+"""
 abstract type Rz <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
 
 for Op in [:Rx, :Ry, :Rz]
@@ -34,15 +126,35 @@ end
 
 const U1 = Rz
 
+"""
+    U2(lane, ϕ, λ)
+
+The ``U2`` gate.
+"""
 abstract type U2 <: Operator{NamedTuple{(:ϕ, :λ),Tuple{Float64,Float64}}} end
 Base.length(::Type{U2}) = 1
 
+"""
+    U3(lane, θ, ϕ, λ)
+
+The ``U3`` gate.
+"""
 abstract type U3 <: Operator{NamedTuple{(:θ, :ϕ, :λ),Tuple{Float64,Float64,Float64}}} end
 Base.length(::Type{U3}) = 1
 
+"""
+    Swap(lane1, lane2)
+
+The SWAP gate.
+"""
 abstract type Swap <: StaticOperator end
 Base.length(::Type{Swap}) = 2
 
+"""
+    Control(lane, op::Gate)
+
+A controlled gate.
+"""
 abstract type Control{Op<:Operator} <: Operator{NamedTuple{(:target,),Tuple{Operator}}} end
 Base.length(::Type{Control{T}}) where {T<:Operator} = 1 + length(T)
 parameters(::Type{Control{Op}}) where {Op} = parameters(Op)
