@@ -1,4 +1,4 @@
-export Gate
+export Gate, Operator
 export lanes
 export X, Y, Z, H, S, Sd, T, Td
 export isparametric, parameters
