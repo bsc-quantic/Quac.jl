@@ -90,6 +90,7 @@ for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td, :U2, :U3, :Rx, :Ry, :Rz, :Swap]
 end
 
 Control{Op}(lanes...; params...) where {Op} = Gate{Control{Op}}(lanes...; params...)
+Control(lane, op::Gate{Op}) where {Op} = Gate{Control{Op}}(lane, lanes(op)...; parameters(op)...)
 
 lanes(g::Gate) = g.lanes
 Base.length(::Type{Gate{Op}}) where {Op} = length(Op)
