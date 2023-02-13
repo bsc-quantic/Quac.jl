@@ -1,33 +1,28 @@
-import Base: adjoint, rand
-using Base: front, tail
-
 export Gate
 export lanes
 export X, Y, Z, H, S, Sd, T, Td
-export ParametricGate
 export isparametric, parameters
 export Rx, Ry, Rz, U1, U2, U3
 export Control, Swap
 export CX, CY, CZ, CRx, CRy, CRz
-export control, target, op
+export control, target, operator
+export Pauli, Phase
 
 """
-    Gate
+    Operator
 
-Type of gates. Any gate type must fulfill the following requirements:
-
-  - A `lane` field (or property) of type `T <: Union{Int, NTuple{N,Int}} where {N}`
-    
-      + This requirement can be bypassed by specializing `lanes`.
-
-  - A specialized method for `Base.adjoint(::Type{T})` where `T` is the gate type.
+Parent type of quantum operators.
 """
-abstract type Gate end
+abstract type Operator{Params<:NamedTuple} end
 
-function lanes end
+# NOTE useful type piracy
+Base.keys(::Type{<:NamedTuple{K}}) where {K} = K
 
-lanes(x::Gate) = (x.lane...,)
-Base.adjoint(x::T) where {T<:Gate} = Base.adjoint(T)(lanes(x)...)
+# `Operator` with no parameters
+const StaticOperator = Operator{NamedTuple{(),Tuple{}}}
+
+parameters(::Type{<:Operator{Params}}) where {Params} = Params
+isparametric(::Type{T}) where {T<:Operator} = parameters(T) !== NamedTuple{(),Tuple{}}
 
 """
     I(lane)
@@ -38,145 +33,84 @@ The ``σ_0`` Pauli matrix gate.
 
 Due to name clashes with `LinearAlgebra.I`, `Quac.I` is not exported by default.
 """
-struct I <: Gate
-    lane::Int
-end
+abstract type I <: StaticOperator end
 
 """
     X(lane)
 
 The ``σ_1`` Pauli matrix gate.
 """
-struct X <: Gate
-    lane::Int
-end
+abstract type X <: StaticOperator end
 
 """
     Y(lane)
 
 The ``σ_2`` Pauli matrix gate.
 """
-struct Y <: Gate
-    lane::Int
-end
+abstract type Y <: StaticOperator end
 
 """
     Z(lane)
 
 The ``σ_3`` Pauli matrix gate.
 """
-struct Z <: Gate
-    lane::Int
-end
-
-const Pauli = Union{I,X,Y,Z}
+abstract type Z <: StaticOperator end
 
 """
     H(lane)
 
 The Hadamard gate.
 """
-struct H <: Gate
-    lane::Int
-end
-
-for G in [I, X, Y, Z, H]
-    @eval Base.adjoint(::Type{$G}) = $G
-end
+abstract type H <: StaticOperator end
 
 """
     S(lane)
 
 The ``S`` gate or ``\\frac{π}{2}`` rotation around Z-axis.
 """
-struct S <: Gate
-    lane::Int
-end
-
-Base.adjoint(::Type{S}) = Sd
+abstract type S <: StaticOperator end
 
 """
     Sd(lane)
 
 The ``S^\\dagger`` gate or ``-\\frac{π}{2}`` rotation around Z-axis.
 """
-struct Sd <: Gate
-    lane::Int
-end
-
-Base.adjoint(::Type{Sd}) = S
+abstract type Sd <: StaticOperator end
 
 """
     T(lane)
 
 The ``T`` gate or ``\\frac{π}{4}`` rotation around Z-axis.
 """
-struct T <: Gate
-    lane::Int
-end
-
-Base.adjoint(::Type{T}) = Td
+abstract type T <: StaticOperator end
 
 """
     Td(lane)
 
 The ``T^\\dagger`` gate or ``-\\frac{π}{4}`` rotation around Z-axis.
 """
-struct Td <: Gate
-    lane::Int
+abstract type Td <: StaticOperator end
+
+for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td]
+    @eval Base.length(::Type{$Op}) = 1
 end
 
-Base.adjoint(::Type{Td}) = T
-
 """
-    ParametricGate
-
-The type of parametric gates.
-"""
-abstract type ParametricGate <: Gate end
-
-isparametric(::T) where {T<:Gate} = isparametric(T)
-
-isparametric(::Type{<:Gate}) = false
-isparametric(::Type{<:ParametricGate}) = true
-
-parameters(::Type{T}) where {T<:ParametricGate} = fieldtype(T, :param).parameters[1]
-parameters(x::T) where {T<:ParametricGate} = x.param
-
-Base.propertynames(::Type{T}) where {T<:ParametricGate} = parameters(T)
-Base.propertynames(x::T) where {T<:ParametricGate} = parameters(T)
-
-Base.getindex(x::T, key::Symbol) where {T<:ParametricGate} = parameters(x)[key]
-
-Base.adjoint(::Type{T}) where {T<:ParametricGate} = T
-Base.adjoint(x::T) where {T<:ParametricGate} =
-    Base.adjoint(T)(lanes(x)..., NamedTuple{parameters(T)}(.-(values(parameters(x)))))
-
-Base.rand(::NamedTuple{N,T}) where {N,T} = NamedTuple{N}(rand(type) for type in T.parameters)
-Base.rand(::Type{T}, lane::Int) where {T<:ParametricGate} = T(lane, rand(fieldtype(T, :param)))
-
-"""
-    Rx(lane, (θ,))
+    Rx(lane, θ)
 
 The ``\\theta`` rotation around the X-axis gate.
 """
-struct Rx <: ParametricGate
-    lane::Int
-    param::NamedTuple{(:θ,),Tuple{Float32}}
-end
+abstract type Rx <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
 
 """
-    Ry(lane, (θ,))
+    Ry(lane, θ)
 
 The ``\\theta`` rotation around the Y-axis gate.
 """
-struct Ry <: ParametricGate
-    lane::Int
-    param::NamedTuple{(:θ,),Tuple{Float32}}
-end
+abstract type Ry <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
 
 """
-    Rz(lane, (θ,))
+    Rz(lane, θ)
 
 The ``\\theta`` rotation around the Z-axis gate.
 
@@ -184,94 +118,129 @@ The ``\\theta`` rotation around the Z-axis gate.
 
   - The `U1` gate is an alias of `Rz`.
 """
-struct Rz <: ParametricGate
-    lane::Int
-    param::NamedTuple{(:θ,),Tuple{Float32}}
+abstract type Rz <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
+
+for Op in [:Rx, :Ry, :Rz]
+    @eval Base.length(::Type{$Op}) = 1
 end
 
 const U1 = Rz
 
 """
-    U2(lane, (ϕ, λ))
+    U2(lane, ϕ, λ)
 
 The ``U2`` gate.
 """
-struct U2 <: ParametricGate
-    lane::Int
-    param::NamedTuple{(:ϕ, :λ),Tuple{Float32,Float32}}
-end
+abstract type U2 <: Operator{NamedTuple{(:ϕ, :λ),Tuple{Float64,Float64}}} end
+Base.length(::Type{U2}) = 1
 
 """
-    U3(lane, (θ, ϕ, λ))
+    U3(lane, θ, ϕ, λ)
 
 The ``U3`` gate.
 """
-struct U3 <: ParametricGate
-    lane::Int
-    param::NamedTuple{(:θ, :ϕ, :λ),Tuple{Float32,Float32,Float32}}
-end
-
-for G in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, U2, U3]
-    @eval lanes(::Type{$G}) = 1
-end
-
-const Phase = Union{Z,S,Sd,T,Td,Rz}
-
-"""
-    Control(lane, op::Gate)
-
-A controlled gate.
-"""
-struct Control{T<:Gate} <: Gate
-    lane::Int
-    op::T
-end
-Control{T}(control::Integer, target::Integer; kwargs...) where {T<:Gate} = Control{T}(control, T(target; kwargs...))
-# Control{T}(args...) where {T} = Control{T}(args[1], T(args[2:end]...))
-Control(args...) = Control(front(args), last(args))
-Control(control::NTuple{1,<:Integer}, target::T) where {T<:Gate} = Control{T}(only(control), target)
-Control(control::NTuple{N,<:Integer}, target::T) where {N,T<:Gate} = Control(first(control), Control(tail(control), target))
-
-CX(control, target) = Control(control, X(target))
-CY(control, target) = Control(control, Y(target))
-CZ(control, target) = Control(control, Z(target))
-CRx(control, target, θ) = Control(control, Rx(target, θ))
-CRy(control, target, θ) = Control(control, Ry(target, θ))
-CRz(control, target, θ) = Control(control, Rz(target, θ))
-
-control(g::Control{T}) where {T} = (g.lane,)
-control(g::Control{T}) where {T<:Control} = (g.lane, control(g.op)...)
-target(g::Control{T}) where {T} = lanes(g.op)
-target(g::Control{T}) where {T<:Control} = target(g.op)
-lanes(g::Control{T}) where {T} = (control(g)..., target(g)...)
-lanes(::Type{Control{T}}) where {T} = 1 + lanes(T)
-
-op(g::Control{T}) where {T} = g.op
-op(g::Control{T}) where {T<:Control} = op(g.op)
-op(::Type{Control{T}}) where {T} = T
-op(::Type{Control{T}}) where {T<:Control} = op(T)
-
-Base.adjoint(::Type{Control{T}}) where {T<:Gate} = Control{adjoint(T)}
-Base.adjoint(g::Control{T}) where {T<:Gate} = Control(g.lane, op(g)')
-
-const Toffoli{T} = Control{Control{T}}
-
-isparametric(::Type{Control{T}}) where {T} = isparametric(T)
-parameters(g::Control) = parameters(op(g))
-parameters(::Type{T}) where {T<:Control} = parameters(op(T))
+abstract type U3 <: Operator{NamedTuple{(:θ, :ϕ, :λ),Tuple{Float64,Float64,Float64}}} end
+Base.length(::Type{U3}) = 1
 
 """
     Swap(lane1, lane2)
 
 The SWAP gate.
 """
-struct Swap <: Gate
-    lane::NTuple{2,Int}
+abstract type Swap <: StaticOperator end
+Base.length(::Type{Swap}) = 2
 
-    function Swap(a, b)
-        new((a, b))
+"""
+    Control(lane, op::Gate)
+
+A controlled gate.
+"""
+abstract type Control{Op<:Operator} <: Operator{NamedTuple{(:target,),Tuple{Operator}}} end
+Base.length(::Type{Control{T}}) where {T<:Operator} = 1 + length(T)
+parameters(::Type{Control{Op}}) where {Op} = parameters(Op)
+
+for Op in [:X, :Y, :Z, :Rx, :Ry, :Rz]
+    @eval const $(Symbol("C" * String(Op))) = Control{$Op}
+end
+
+# adjoints
+for Op in [:I, :X, :Y, :Z, :Rx, :Ry, :Rz, :H, :Swap]
+    @eval Base.adjoint(::Type{$Op}) = $Op
+end
+
+Base.adjoint(::Type{S}) = Sd
+Base.adjoint(::Type{Sd}) = S
+Base.adjoint(::Type{T}) = Td
+Base.adjoint(::Type{Td}) = T
+
+Base.adjoint(::Type{Control{Op}}) where {Op} = Control{adjoint(Op)}
+
+# operator sets
+const Pauli = Union{I,X,Y,Z}
+const Phase = Union{I,Z,S,Sd,T,Td,Rz}
+
+"""
+    Gate{Operator}(lanes...; parameters...)
+
+An `Operator` located at some `lanes` and configured with some `parameters`.
+"""
+struct Gate{Op<:Operator,N,Params}
+    lanes::NTuple{N,Int}
+    parameters::Params
+
+    function Gate{Op}(lanes...; params...) where {Op<:Operator}
+        N = length(Op)
+        P = parameters(Op)
+        params = NamedTuple{tuple(keys(params)...),Tuple{typeof.(collect(values(params)))...}}((values(params)...,))
+        new{Op,N,P}(lanes, params)
     end
 end
 
-Base.adjoint(::Type{Swap}) = Swap
-lanes(::Type{Swap}) = 2
+# constructor aliases
+for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td, :U2, :U3, :Rx, :Ry, :Rz, :Swap]
+    @eval $Op(lanes...; params...) = Gate{$Op}(lanes...; params...)
+end
+
+Control{Op}(lanes...; params...) where {Op} = Gate{Control{Op}}(lanes...; params...)
+Control(lane, op::Gate{Op}) where {Op} = Gate{Control{Op}}(lane, lanes(op)...; parameters(op)...)
+
+lanes(g::Gate) = g.lanes
+Base.length(::Type{Gate{Op}}) where {Op} = length(Op)
+operator(::Type{<:Gate{Op}}) where {Op} = Op
+operator(::Gate{Op}) where {Op} = operator(Gate{Op})
+
+function Base.summary(io::IO, gate::Gate)
+    flatten = Iterators.flatten
+    map = Iterators.map
+
+    Op = operator(gate)
+    Args = join(flatten((lanes(gate), map(x -> "$(x[1])=$(x[2])", pairs(parameters(gate))))), ",")
+    print(io, "$Op($Args)")
+end
+
+Base.show(io::IO, ::MIME"text/plain", gate::Gate) = summary(io, gate)
+
+parameters(g::Gate) = g.parameters
+parameters(::Type{<:Gate{Op}}) where {Op} = parameters(Op)
+Base.propertynames(::Type{<:Gate{Op}}) where {Op} = (keys(parameters(Op))...,)
+Base.propertynames(::G) where {G<:Gate{Op}} where {Op} = propertynames(G)
+Base.getproperty(g::Gate{Op}, i::Symbol) where {Op} = i ∈ propertynames(g) ? parameters(g)[i] : getfield(g, i)
+
+Base.adjoint(::Type{<:Gate{Op}}) where {Op} = Gate{adjoint(Op)}
+Base.adjoint(::Type{Gate{Op,N,P}}) where {Op,N,P} = Gate{adjoint(Op),N,P}
+Base.adjoint(g::Gate{Op}) where {Op} = Gate{Op'}(lanes(g)...; [key => -val for (key, val) in pairs(parameters(g))]...)
+
+# NOTE useful type piracy
+Base.rand(::Type{NamedTuple{N,T}}) where {N,T} = NamedTuple{N}(rand(type) for type in T.parameters)
+
+Base.rand(::Type{Op}) where {Op<:Operator} = rand(parameters(Op))
+Base.rand(::Type{Gate{Op}}, lanes::Integer...) where {Op} = Gate{Op}(lanes...; rand(Op)...)
+
+# Gate{Control}
+targettype(::Type{Op}) where {Op<:Operator} = Op
+targettype(::Type{Control{Op}}) where {Op} = Op
+targettype(::Type{Control{Op}}) where {Op<:Control} = targettype(Op)
+targettype(::Type{<:Gate{Op}}) where {Op} = targettype(Op)
+
+control(g::G) where {G<:Gate{<:Control}} = lanes(g)[1:end-length(targettype(G))]
+target(g::G) where {G<:Gate{<:Control}} = lanes(g)[end-length(targettype(G))+1:end]

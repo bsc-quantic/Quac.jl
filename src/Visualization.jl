@@ -1,5 +1,15 @@
 using Luxor
 using MathTeXEngine
+using LaTeXStrings
+
+texname(::Type{Op}) where {Op<:Operator} = LaTeXString(String(nameof(Op)))
+
+texname(::Type{Sd}) = L"S^\dagger"
+texname(::Type{Td}) = L"T^\dagger"
+
+texname(::Type{Rx}) = L"R_X"
+texname(::Type{Ry}) = L"R_Y"
+texname(::Type{Rz}) = L"R_Z"
 
 function draw end
 export draw
@@ -8,7 +18,7 @@ function draw(circuit::Circuit; kwargs...)
     n = lanes(circuit)
 
     if isempty(circuit)
-        return vcat([draw(I; kwargs...) for _ in 1:n]...)
+        return vcat([draw(Gate{I}(lane); kwargs...) for lane in 1:n]...)
     end
 
     # split moments if gates overlap in 1D
@@ -38,7 +48,7 @@ function draw(circuit::Circuit; kwargs...)
         (min, max) = extrema(mapreduce(lanes, ∪, moment))
         moment = [map(I, filter(<(min), 1:n))..., moment..., map(I, filter(>(max), 1:n))...]
 
-        mapreduce(x->draw(x; kwargs...), vcat, moment)
+        mapreduce(x -> draw(x; kwargs...), vcat, moment)
     end
 end
 
@@ -47,24 +57,21 @@ function Base.show(io::IO, ::MIME"image/svg+xml", circuit::Circuit)
     print(io, svgstring())
 end
 
-function draw(gate::Gate; top::Bool = false, bottom::Bool = false, kwargs...)
-    n = (length ∘ lanes)(gate)
-
-    if n == 1
-        if gate isa I
-            draw(I; kwargs...)
-        else
-            draw_block(; top = top, bottom = bottom, kwargs...)
-        end
-    else
-        a, b = extrema(lanes(gate))
-        n = b - a + 1
-        vcat(draw_block(; top = top, kwargs...), fill(draw_multiblock_mid(; kwargs...), (n - 2))..., draw_block(; bottom = bottom, kwargs...))
-    end
+function draw(gate::Gate{Op,1,P}; kwargs...) where {Op,P}
+    draw_block(; top = false, bottom = false)
 end
 
-draw(::I) = draw(I)
-function draw(::Type{I}; background = nothing)
+function draw(gate::Gate{Op,N,P}; kwargs...) where {Op,N,P}
+    a, b = extrema(lanes(gate))
+    n = b - a + 1
+    vcat(
+        draw_block(; top = true, bottom = false, kwargs...),
+        fill(draw_multiblock_mid(; kwargs...), (n - 2))...,
+        draw_block(; top = false, bottom = true, kwargs...),
+    )
+end
+
+function draw(::Gate{I,1,NamedTuple{(),Tuple{}}}; background = nothing)
     @drawsvg begin
         (background !== nothing) && Luxor.background(background)
         origin()
@@ -72,18 +79,16 @@ function draw(::Type{I}; background = nothing)
     end 50 50
 end
 
-for (T, N) in [(X, "X"), (Y, "Y"), (Z, "Z"), (H, "H"), (S, "S"), (Sd, L"S^\dagger"), (T, "T"), (Td, L"T^\dagger")]
-    @eval begin
-        draw(::$T; kwargs...) = draw($T; kwargs...)
-        draw(::Type{$T}; kwargs...) = draw_block($N; kwargs...)
-    end
+for Op in [X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz]
+    @eval draw(::Gate{$Op,1,P}; kwargs...) where {P} = draw_block(texname($Op); kwargs...)
 end
 
-function draw(gate::Control; kwargs...)
+function draw(gate::Gate{<:Control}; kwargs...)
     c = control(gate)
     t = target(gate)
     r = range(extrema(lanes(gate))...)
 
+    # TODO Control{Swap}
     @assert length(t) == 1
 
     vcat(
@@ -96,7 +101,12 @@ function draw(gate::Control; kwargs...)
                 draw_cross(; kwargs...)
             end for lane in r if lane < only(t)
         ]...,
-        draw(op(gate); top = !any(<(only(t)), c), bottom = !any(>(only(t)), c), kwargs...),
+        draw(
+            Gate{targettype(operator(gate))}(target(gate)...; parameters(gate)...);
+            top = !any(<(only(t)), c),
+            bottom = !any(>(only(t)), c),
+            kwargs...,
+        ),
         [
             if lane == last(r)
                 draw_copy(:bottom; kwargs...)

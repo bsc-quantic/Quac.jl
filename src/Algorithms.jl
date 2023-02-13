@@ -16,7 +16,7 @@ function QFT(n::Int)
 
         for control in target+1:n
             m = control - target
-            push!(circuit, CRz(control, target, (θ = 2π / 2^m,)))
+            push!(circuit, CRz(control, target, θ = 2π / 2^m))
         end
     end
 
