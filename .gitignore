@@ -147,3 +147,4 @@ $RECYCLE.BIN/
 .vscode/settings.json
 .julia
 *.dylib
+*.pdf
