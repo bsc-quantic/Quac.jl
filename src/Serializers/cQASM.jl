@@ -1,105 +1,178 @@
 module cQASM
-using PikaParser: seq, token, satisfy, many, some, tie, first, make_grammar, flatten
 
-rules = Dict(
-    :space => satisfy(c -> c ∈ (' ', '\t')),
-    :digit => satisfy(isdigit),
-    :natural => some(:digit),
-    :float => seq(:natural, :token('.'), many(:natural)),
-    :letter => satisfy(isascii),
-    :qname => seq(token("q["), natural, token(']')),
-    :bname => seq(token("b["), natural, token(']')),
-    :name => tie(seq(isletter, many(satisfy(c -> isletter(c) || isdigit(c))))), # TODO 
-    :id => first(:name, :qname, :bname),
-    # comments
-    :comment => seq(token('#'), many(satisfy(isprint))),
-    # keywords
-    :version => seq(token("version"), :space, :float),
-    :qubits => seq(token("qubits"), :space, :natural),
-    :map => seq(token("map"), :space, :id, many(:space), token(','), many(:space), :id),
-    # quantum gates
-    :i => seq(token("i"), some(:space), :id),
-    :x => seq(token("x"), some(:space), :id),
-    :y => seq(token("y"), some(:space), :id),
-    :z => seq(token("z"), some(:space), :id),
-    :h => seq(token("h"), some(:space), :id),
-    :rx => seq(token("rx"), some(:space), :id, many(:space), :token(','), many(:space), :float),
-    :ry => seq(token("ry"), some(:space), :id, many(:space), :token(','), many(:space), :float),
-    :rz => seq(token("rz"), some(:space), :id, many(:space), :token(','), many(:space), :float),
-    :x90 => seq(token("x90"), some(:space), :id),
-    :y90 => seq(token("y90"), some(:space), :id),
-    :mx90 => seq(token("mx90"), some(:space), :id),
-    :my90 => seq(token("my90"), some(:space), :id),
-    :s => seq(token("s"), some(:space), :id),
-    :sdag => seq(token("sdag"), some(:space), :id),
-    :t => seq(token("t"), some(:space), :id),
-    :tdag => seq(token("tdag"), some(:space), :id),
-    :cnot => seq(token("cnot"), some(:space), :id, many(:space), :token(','), many(space), :id),
-    :toffoli => seq(
-        token("toffoli"),
-        some(:space),
-        :id,
-        many(:space),
-        :token(','),
-        many(space),
-        :id,
-        many(:space),
-        token(','),
-        many(:space),
-        :id,
-    ),
-    :cz => seq(token("cz"), some(:space), :id, many(:space), :token(','), many(space), :id),
-    :swap => seq(token("swap", some(:space), :id, many(:space), :token(','), many(:space), :id)),
-    :crk => seq(
-        token("crk"),
-        some(:space),
-        :id,
-        many(:space),
-        :token(','),
-        many(space),
-        :id,
-        many(:space),
-        token(','),
-        many(:space),
-        :natural,
-    ),
-    :cr => seq(
-        token("cr"),
-        some(:space),
-        :id,
-        many(:space),
-        :token(','),
-        many(space),
-        :id,
-        many(:space),
-        token(','),
-        many(:space),
-        :float,
-    ),
-    :cx => seq(token("c-x"), some(:space), :id, many(:space), :token(','), many(space), :id),
-    :cy => seq(token("c-z"), some(:space), :id, many(:space), :token(','), many(space), :id),
-    # state preparation and measurement
-    :prep_x => seq(token("prep_x"), some(:space), :id),
-    :prep_y => seq(token("prep_y"), some(:space), :id),
-    :prep_z => seq(token("prep_z"), some(:space), :id),
-    :measure_x => seq(token("measure_x"), some(:space), :id),
-    :measure_y => seq(token("measure_y"), some(:space), :id),
-    :measure_z => seq(token("measure_z"), some(:space), :id),
-    :measure_all => token("measure_all"),
-    :measure_parity => seq(
-        token("measure_parity"),
-        some(:space),
-        :id,
-        token(','),
-        first('x', 'y', 'z'),
-        token(','),
-        :id,
-        token(','),
-        first('x', 'y', 'z'),
-    ),
-    # other
-    :not => seq(token("not"), some(:space), :id),
-    :display => token("display"),
-)
+export getInstructions
+
+# First imports
+import Automa
+import Automa.RegExp: @re_str
+const re = Automa.RegExp;
+
+machine = let
+    ## Define cQASM syntax ##
+
+    # 1.1 Base strings
+    initLine = "^[\t ]*"
+    endLine = "[\t ]*\$"
+    newLine = "\r?\n"
+    zeroOrMoreSpaces = "[\t ]*"
+    oneOrMoreSpaces = "[\t ]+"
+    zeroOrMoreDigits = "[0-9]*"
+    oneOrMoreDigits = "[0-9]+"
+    
+    natural = oneOrMoreDigits
+    float_custom = natural * "\\." * natural
+    angle = float_custom
+
+    tag = "[a-z_][a-z0-9_]*"
+    idStreamSingle = zeroOrMoreSpaces * oneOrMoreDigits * "(:" * oneOrMoreDigits * ")?" * zeroOrMoreSpaces
+    idStreamMultiple = "(" * idStreamSingle * ")(," * idStreamSingle * ")*"
+    qubitIDStream = "q\\[" * idStreamMultiple * "\\]"
+    bitIDStream = "b\\[" * idStreamMultiple * "\\]"
+    qid = "(" * tag * "|" * qubitIDStream * ")"
+    bid = "(" * tag * "|" * bitIDStream * ")"
+
+    controlBits = "(" * bid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * ")+"
+
+    # 1.2 Gates
+    # One qubit gates
+    for name in [:i, :h, :x, :y, :z, :x90, :y90, :mx90, :my90, :s, :sdag, :t]
+        regexStr = re.parse(String(name) * oneOrMoreSpaces * qid)
+        @eval $name = $regexStr
+
+        c_regexStr = re.parse("c-" * String(name) * oneOrMoreSpaces * controlBits * zeroOrMoreSpaces * qid)
+        @eval $(Symbol("c_" * String(name))) = $c_regexStr
+    end
+
+    # Two qubit gates
+    for name in [:cnot, :cz, :swap]
+        regexStr = re.parse(String(name) * oneOrMoreSpaces * qid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * qid)
+        @eval $name = $regexStr
+
+        c_regexStr = re.parse("c-" * String(name) * oneOrMoreSpaces * controlBits * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * qid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * qid)
+        @eval $(Symbol("c_" * String(name))) = $c_regexStr
+    end
+
+    # Three qubit gates
+    for name in [:toffoli]
+        regexStr = re.parse(String(name) * oneOrMoreSpaces * qid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * qid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * qid)
+        @eval $name = $regexStr
+
+        c_regexStr = re.parse("c-" * String(name) * oneOrMoreSpaces * controlBits * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * qid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * qid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * qid)
+        @eval $(Symbol("c_" * String(name))) = $c_regexStr
+    end
+
+    # Rotation gates
+    for name in [:rx, :ry, :rz, :cr]
+        regexStr = re.parse(String(name) * oneOrMoreSpaces * qid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * angle)
+        @eval $name = $regexStr
+
+        c_regexStr = re.parse("c-" * String(name) * oneOrMoreSpaces * controlBits * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * qid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * angle)
+        @eval $(Symbol("c_" * String(name))) = $c_regexStr
+    end
+
+    # Another unique gates
+    crk = re.parse("crk" * oneOrMoreSpaces * qid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * qid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * natural)
+    c_crk = re.parse("c-crk" * oneOrMoreSpaces * bid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * qid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * qid * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * natural)
+
+    # 1.3 Composed statements
+    version = re.parse("version" * oneOrMoreSpaces * "(" * natural * "|" * float_custom * ")")
+    numberQubits = re.parse("qubits" * oneOrMoreSpaces * natural)
+    comment = re.parse("#.*")
+    # gate =  i   | h     | x     | y     | z     | rx    | ry    | rz    | x90   | y90   | mx90  | my90  | s     | sdag  | t     | cnot  | toffoli   | cz    | swap  | crk   | cr |
+    #         c_i | c_h   | c_x   | c_y   | c_z   | c_rx  | c_ry  | c_rz  | c_x90 | c_y90 | c_mx90| c_my90| c_s   | c_sdag| c_t   | c_cnot| c_toffoli | c_cz  | c_swap| c_crk | c_cr
+    # prepState = re"prep_[xyz]" * oneOrMoreSpaces * qid
+    # map = re"map" * oneOrMoreSpaces * (bid | qid) * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * tag
+    # measurement = re"measure_(?:[xyz]|all)|measure$" * oneOrMoreSpaces * qid
+    # display = re"display" * oneOrMoreSpaces * bitName
+
+    # statement = initLine * (version | numberQubits | comment | gate | prepState | map | measurement | display) * endLine
+    line = re.alt(version, numberQubits, comment) * re.parse(newLine)
+    cqasmCode = re.rep(line)
+
+    line.actions[:enter] = [:lineEnter]
+    line.actions[:exit] = [:lineExit]
+
+    function paint_machine(regexp)
+        machine = Automa.compile(regexp)
+        write("C:/Users/German/Documents/Work/Quac.jl/src/Serializers/csv.dot", Automa.machine2dot(machine))
+    end;
+
+    # Compile the regex to a FSM
+    Automa.compile(cqasmCode)
+end;
+
+actions = Dict(
+    :lineEnter => quote
+        mark = p
+    end,
+    :lineExit = quote
+        statement = String(data[mark:p - 1])
+    end,
+);
+
+# actions = Dict(
+#     :enter => :(mark= p),
+#     :exit_header => :(header = String(data[mark+1:p-1])),
+#     :exit_seqline => quote
+#         doff = length(seqbuffer) + 1
+#         resize!(seqbuffer, length(seqbuffer) + p - mark)
+#         copyto!(seqbuffer, doff, data, mark, p-mark)
+#     end,
+#     :exit_record => quote
+#         sequence = LongSequence{A}(seqbuffer)
+#         empty!(seqbuffer)
+#         record = FastaRecord(header, sequence)
+#         push!(records, record)
+#     end,
+# );
+
+# context = Automa.CodeGenContext();
+# @eval function parse_fasta(::Type{A}, data::Union{String,Vector{UInt8}}) where {A <: Alphabet}
+#     mark = 0
+#     records = FastaRecord{A}[]
+#     header = ""
+#     sequence = LongSequence{A}()
+#     seqbuffer = UInt8[]
+
+    
+#     (Automa.generate_init_code(context, machine))
+#     p_end = p_eof = lastindex(data)
+#     (Automa.generate_exec_code(context, machine, actions))
+
+#     iszero(cs) || error("failed to parse on byte ", p)
+#     return records
+# end;
+
+# g = make_grammar([:expr], flatten(rules, String))
+
+# input = "i q[0]"
+# p = parse(g, input)
+
+context = Automa.CodeGenContext();
+
+@eval function parseCQASMCode(data::Union{String,Vector{UInt8}})
+    mark = 0
+    statementsSet = Array{String}[] # This should let to push! new arrays inside, probably it is ok already.
+
+
+
+
+    $(Automa.generate_init_code(context, machine))
+
+    p_end = p_eof = lastindex(data)
+
+    $(Automa.generate_exec_code(context, machine, actions))
+
+    iszero(cs) || error("failed to parse on byte ", p)
+    return nothing
+end;
+
+# function parseCQASMCode(code::String)
+    # instructions = split(lstrip(rstrip(fileStr)), "\n")
+    # for inst in instructions
+    #     println("Parsing instruction: " , inst)
+    #     parseInstruction(inst)
+    # end
+# end
 
 end
