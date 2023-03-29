@@ -160,7 +160,7 @@ context = Automa.CodeGenContext();
 
     $(Automa.generate_exec_code(context, machine, actions))
 
-    iszero(cs) || error("failed to parse on byte ", p)
+    iszero(cs) || error("failed to parse on byte ", p, "\n[last chunk '", data[mark:p - 1], "' from string:\n'", data, "']")
     return statementsSet
 end;
 
