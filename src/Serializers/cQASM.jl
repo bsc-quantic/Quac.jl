@@ -99,24 +99,20 @@ machine = let
     createGates(:crk, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
 
     # 1.3 Composed statements
-    # version = re.parse("version" * oneOrMoreSpaces * "(" * natural * "|" * float_custom * ")")
-
     version = re.cat("version", oneOrMoreSpaces, re.alt(natural, float_custom))
     numberQubits = re.cat("qubits", oneOrMoreSpaces, natural)
     #comment = re.parse("#[a-zA-Z0-9_\t ]*")
     comment = re.parse("#[a-zA-Z0-9#[!\"#\$%&'()*+,\\-./:;<=>?@\\[\\]\\^_`{|}~]*\t ]*")
     gate = re.alt(i, h, x, y, z, x90, y90, mx90, my90, s, sdag, t,
-                    c_i, c_h, c_x, c_y, c_z, c_x90, c_y90, c_mx90, c_my90, c_s, c_sdag, c_t)
-    # gate = re.alt(  i, h, x, y, z, x90, y90, mx90, my90, s, sdag, t,
-    #                 c_i, c_h, c_x, c_y, c_z, c_x90, c_y90, c_mx90, c_my90, c_s, c_sdag, c_t,
-    #                 cnot, cz, swap,
-    #                 c_cnot, c_cz, c_swap,
-    #                 toffoli,
-    #                 c_toffoli,
-    #                 rx, ry, rz, cr,
-    #                 c_rx, c_ry, c_rz, c_cr
-    #                 crk,
-    #                 c_crk)
+                    c_i, c_h, c_x, c_y, c_z, c_x90, c_y90, c_mx90, c_my90, c_s, c_sdag, c_t,
+                    cnot, cz, swap,
+                    c_cnot, c_cz, c_swap,
+                    toffoli,
+                    c_toffoli,
+                    rx, ry, rz, cr,
+                    c_rx, c_ry, c_rz, c_cr,
+                    crk,
+                    c_crk)
     # prepState = re"prep_[xyz]" * oneOrMoreSpaces * qid
     # map = re"map" * oneOrMoreSpaces * (bid | qid) * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * tag
     # measurement = re"measure_(?:[xyz]|all)|measure$" * oneOrMoreSpaces * qid
@@ -147,7 +143,7 @@ actions = Dict(
 context = Automa.CodeGenContext();
 
 @eval function parseCQASMCode(data::String)
-    data = data * "\n"
+    data = lowercase(data * "\n")
 
     mark = 1
     statementInstr = ""
@@ -160,7 +156,7 @@ context = Automa.CodeGenContext();
 
     $(Automa.generate_exec_code(context, machine, actions))
 
-    iszero(cs) || error("failed to parse on byte ", p, "\n[last chunk '", data[mark:p - 1], "' from string:\n'", data, "']")
+    iszero(cs) || return string("failed to parse on byte ", p, "  [last chunk '", data[mark:p - 1], "' from string: '", data, "']")
     return statementsSet
 end;
 
