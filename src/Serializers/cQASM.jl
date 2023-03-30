@@ -51,7 +51,7 @@ machine = let
         paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, qid), :paramsEnter, :paramsExit)
         
         c_gateNameRegEx = addActionToRegEx(re.parse("c-" * String(name)), :instrEnter, :instrExit)
-        c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, zeroOrMoreSpaces, qid), :paramsEnter, :paramsExit)
+        c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, qid), :paramsEnter, :paramsExit)
 
         createGates(name, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
     end
@@ -62,7 +62,7 @@ machine = let
         paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid), :paramsEnter, :paramsExit)
 
         c_gateNameRegEx = addActionToRegEx(re.parse("c-" * String(name)), :instrEnter, :instrExit)
-        c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid), :paramsEnter, :paramsExit)
+        c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid), :paramsEnter, :paramsExit)
 
         createGates(name, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
     end
@@ -73,7 +73,7 @@ machine = let
         paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid), :paramsEnter, :paramsExit)
 
         c_gateNameRegEx = addActionToRegEx(re.parse("c-" * String(name)), :instrEnter, :instrExit)
-        c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid), :paramsEnter, :paramsExit)
+        c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid), :paramsEnter, :paramsExit)
 
         createGates(name, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
     end
@@ -84,7 +84,7 @@ machine = let
         paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, angle), :paramsEnter, :paramsExit)
 
         c_gateNameRegEx = addActionToRegEx(re.parse("c-" * String(name)), :instrEnter, :instrExit)
-        c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, zeroOrMoreSpaces,",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, angle), :paramsEnter, :paramsExit)
+        c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, angle), :paramsEnter, :paramsExit)
 
         createGates(name, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
     end
@@ -94,7 +94,7 @@ machine = let
     paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, natural), :paramsEnter, :paramsExit)
 
     c_gateNameRegEx = addActionToRegEx(re.parse("c-crk"), :instrEnter, :instrExit)
-    c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, bid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, natural), :paramsEnter, :paramsExit)
+    c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, natural), :paramsEnter, :paramsExit)
 
     createGates(:crk, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
 

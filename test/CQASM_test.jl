@@ -83,11 +83,47 @@
         end
 
         @testset "rotation" begin
-            
+            for entry in [
+                "rx q[0],3.14" => "rx",
+                "ry q[0],3.14" => "ry",
+                "rz q[0],3.14" => "rz",
+            ]
+                @test parseCQASMCode(entry.first)[1][1] == entry.second
+            end
+
+            for entry in [
+                "rx bit1,0.71" => [["rx", "bit1", "0.71"]],
+                "rx quentin2,0.71" => [["rx", "quentin2", "0.71"]],
+                "rx tagname,0.71" => [["rx", "tagname", "0.71"]],
+                "rx _,0.71" => [["rx", "_", "0.71"]],
+                "rx _12,0.71" => [["rx", "_12", "0.71"]],
+                "rx q,0.71" => [["rx", "q", "0.71"]],
+                "rx q4,0.71" => [["rx", "q4", "0.71"]],
+                "rx q[9],0.71" => [["rx", "q[9]", "0.71"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
         end
 
         @testset "unique" begin
-            
+            for entry in [
+                "crk q[0],q[1],5" => "crk",
+            ]
+                @test parseCQASMCode(entry.first)[1][1] == entry.second
+            end
+
+            for entry in [
+                "crk bit1,bit2,3" => [["crk", "bit1", "bit2", "3"]],
+                "crk quentin2,quentin1,3" => [["crk", "quentin2", "quentin1", "3"]],
+                "crk tagname,tagname2,3" => [["crk", "tagname", "tagname2", "3"]],
+                "crk _,_2,3" => [["crk", "_", "_2", "3"]],
+                "crk _12,_122,3" => [["crk", "_12", "_122", "3"]],
+                "crk q,q2,3" => [["crk", "q", "q2", "3"]],
+                "crk q4,q2,3" => [["crk", "q4", "q2", "3"]],
+                "crk q[9],q[2],3" => [["crk", "q[9]", "q[2]", "3"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
         end
 
         @testset "bit_controlled_one_qubit" begin
@@ -123,19 +159,91 @@
         end
 
         @testset "bit_controlled_two_qubit" begin
-            
+            for entry in [
+                "c-cnot b[3],q[0],q[1]" => "c-cnot",
+                "c-cz b[3],q[0],q[1]" => "c-cz",
+                "c-swap b[3],q[0],q[1]" => "c-swap",
+            ]
+                @test parseCQASMCode(entry.first)[1][1] == entry.second
+            end
+
+            for entry in [
+                "c-cnot bit0,bit1,bit2" => [["c-cnot", "bit0", "bit1", "bit2"]],
+                "c-cnot quentin0,quentin2,quentin1" => [["c-cnot", "quentin0", "quentin2", "quentin1"]],
+                "c-cnot tagname0,tagname,tagname2" => [["c-cnot", "tagname0", "tagname", "tagname2"]],
+                "c-cnot _,_0,_2" => [["c-cnot", "_", "_0", "_2"]],
+                "c-cnot _120,_12,_122" => [["c-cnot", "_120", "_12", "_122"]],
+                "c-cnot q,q0,q2" => [["c-cnot", "q", "q0", "q2"]],
+                "c-cnot q40,q4,q2" => [["c-cnot", "q40", "q4", "q2"]],
+                "c-cnot b[0],q[9],q[2]" => [["c-cnot", "b[0]", "q[9]", "q[2]"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
         end
 
         @testset "bit_controlled_three_qubit" begin
-            
+            for entry in [
+                "c-toffoli b[4],q[0],q[1],q[2]" => "c-toffoli",
+            ]
+                @test parseCQASMCode(entry.first)[1][1] == entry.second
+            end
+
+            for entry in [
+                "c-toffoli bit0,bit1,bit2,bit3" => [["c-toffoli", "bit0", "bit1", "bit2", "bit3"]],
+                "c-toffoli quentin0,quentin2,quentin1,quentin3" => [["c-toffoli", "quentin0", "quentin2", "quentin1", "quentin3"]],
+                "c-toffoli tagname0,tagname,tagname2,tagname3" => [["c-toffoli", "tagname0", "tagname", "tagname2", "tagname3"]],
+                "c-toffoli _,_0,_2,_3" => [["c-toffoli", "_", "_0", "_2", "_3"]],
+                "c-toffoli _120,_12,_122,_123" => [["c-toffoli", "_120", "_12", "_122", "_123"]],
+                "c-toffoli q,q0,q2,q3" => [["c-toffoli", "q", "q0", "q2", "q3"]],
+                "c-toffoli q40,q4,q2,q3" => [["c-toffoli", "q40", "q4", "q2", "q3"]],
+                "c-toffoli b[0],q[9],q[2],q[3]" => [["c-toffoli", "b[0]", "q[9]", "q[2]", "q[3]"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
         end
 
         @testset "bit_controlled_rotation" begin
-            
+            for entry in [
+                "c-rx b[1],q[0],3.14" => "c-rx",
+                "c-ry b[1],q[0],3.14" => "c-ry",
+                "c-rz b[1],q[0],3.14" => "c-rz",
+            ]
+                @test parseCQASMCode(entry.first)[1][1] == entry.second
+            end
+
+            for entry in [
+                "c-rx bit0,bit1,0.71" => [["c-rx", "bit0", "bit1", "0.71"]],
+                "c-rx quentin0,quentin2,0.71" => [["c-rx", "quentin0", "quentin2", "0.71"]],
+                "c-rx tagname0,tagname,0.71" => [["c-rx", "tagname0", "tagname", "0.71"]],
+                "c-rx _,_0,0.71" => [["c-rx", "_", "_0", "0.71"]],
+                "c-rx _12,_120,0.71" => [["c-rx", "_12", "_120", "0.71"]],
+                "c-rx q,q0,0.71" => [["c-rx", "q", "q0", "0.71"]],
+                "c-rx q4,q40,0.71" => [["c-rx", "q4", "q40", "0.71"]],
+                "c-rx b[0],q[9],0.71" => [["c-rx", "b[0]", "q[9]", "0.71"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
         end
 
         @testset "bit_controlled_unique" begin
-            
+            for entry in [
+                "c-crk b[0],q[0],q[1],5" => "c-crk",
+            ]
+                @test parseCQASMCode(entry.first)[1][1] == entry.second
+            end
+
+            for entry in [
+                "c-crk bit0,bit1,bit2,3" => [["c-crk", "bit0", "bit1", "bit2", "3"]],
+                "c-crk quentin0,quentin2,quentin1,3" => [["c-crk", "quentin0", "quentin2", "quentin1", "3"]],
+                "c-crk tagname0,tagname,tagname2,3" => [["c-crk", "tagname0", "tagname", "tagname2", "3"]],
+                "c-crk _,_0,_2,3" => [["c-crk", "_", "_0", "_2", "3"]],
+                "c-crk _12,_120,_122,3" => [["c-crk", "_12", "_120", "_122", "3"]],
+                "c-crk q,q0,q2,3" => [["c-crk", "q", "q0", "q2", "3"]],
+                "c-crk q4,q40,q2,3" => [["c-crk", "q4", "q40", "q2", "3"]],
+                "c-crk b[0],q[9],q[2],3" => [["c-crk", "b[0]", "q[9]", "q[2]", "3"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
         end
 
     end
