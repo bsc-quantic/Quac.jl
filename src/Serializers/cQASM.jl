@@ -16,9 +16,13 @@ machine = let
         return strRegEx
     end
 
-    function createGates(gate::Symbol, gateName, params, c_gateName, c_params)
-        @eval $gate = re.cat($gateName, $params)
-        @eval $(Symbol("c_" * String(gate))) = re.cat($c_gateName, $c_params)
+    function createStatement(statement::Symbol, statementName, params)
+        @eval $statement = re.cat($statementName, $params)
+    end
+
+    function createStatement(statement::Symbol, statementName, params, c_statementName, c_params)
+        @eval $statement = re.cat($statementName, $params)
+        @eval $(Symbol("c_" * String(statement))) = re.cat($c_statementName, $c_params)
     end
 
     ## Define cQASM syntax ##
@@ -47,62 +51,96 @@ machine = let
     # 1.2 Gates
     # One qubit gates
     for name in [:i, :h, :x, :y, :z, :x90, :y90, :mx90, :my90, :s, :sdag, :t]
-        gateNameRegEx = addActionToRegEx(re.parse(String(name)), :instrEnter, :instrExit)
+        gateNameRegEx = addActionToRegEx(re.parse(String(name)), :statementEnter, :statementExit)
         paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, qid), :paramsEnter, :paramsExit)
         
-        c_gateNameRegEx = addActionToRegEx(re.parse("c-" * String(name)), :instrEnter, :instrExit)
+        c_gateNameRegEx = addActionToRegEx(re.parse("c-" * String(name)), :statementEnter, :statementExit)
         c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, qid), :paramsEnter, :paramsExit)
 
-        createGates(name, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
+        createStatement(name, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
     end
 
     # Two qubit gates
     for name in [:cnot, :cz, :swap]
-        gateNameRegEx = addActionToRegEx(re.parse(String(name)), :instrEnter, :instrExit)
+        gateNameRegEx = addActionToRegEx(re.parse(String(name)), :statementEnter, :statementExit)
         paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid), :paramsEnter, :paramsExit)
 
-        c_gateNameRegEx = addActionToRegEx(re.parse("c-" * String(name)), :instrEnter, :instrExit)
+        c_gateNameRegEx = addActionToRegEx(re.parse("c-" * String(name)), :statementEnter, :statementExit)
         c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid), :paramsEnter, :paramsExit)
 
-        createGates(name, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
+        createStatement(name, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
     end
 
     # Three qubit gates
     for name in [:toffoli]
-        gateNameRegEx = addActionToRegEx(re.parse(String(name)), :instrEnter, :instrExit)
+        gateNameRegEx = addActionToRegEx(re.parse(String(name)), :statementEnter, :statementExit)
         paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid), :paramsEnter, :paramsExit)
 
-        c_gateNameRegEx = addActionToRegEx(re.parse("c-" * String(name)), :instrEnter, :instrExit)
+        c_gateNameRegEx = addActionToRegEx(re.parse("c-" * String(name)), :statementEnter, :statementExit)
         c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid), :paramsEnter, :paramsExit)
 
-        createGates(name, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
+        createStatement(name, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
     end
 
     # Rotation gates
     for name in [:rx, :ry, :rz, :cr]
-        gateNameRegEx = addActionToRegEx(re.parse(String(name)), :instrEnter, :instrExit)
+        gateNameRegEx = addActionToRegEx(re.parse(String(name)), :statementEnter, :statementExit)
         paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, angle), :paramsEnter, :paramsExit)
 
-        c_gateNameRegEx = addActionToRegEx(re.parse("c-" * String(name)), :instrEnter, :instrExit)
+        c_gateNameRegEx = addActionToRegEx(re.parse("c-" * String(name)), :statementEnter, :statementExit)
         c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, angle), :paramsEnter, :paramsExit)
 
-        createGates(name, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
+        createStatement(name, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
     end
 
     # Another unique gates
-    gateNameRegEx = addActionToRegEx(re.parse("crk"), :instrEnter, :instrExit)
+    gateNameRegEx = addActionToRegEx(re.parse("crk"), :statementEnter, :statementExit)
     paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, natural), :paramsEnter, :paramsExit)
 
-    c_gateNameRegEx = addActionToRegEx(re.parse("c-crk"), :instrEnter, :instrExit)
+    c_gateNameRegEx = addActionToRegEx(re.parse("c-crk"), :statementEnter, :statementExit)
     c_paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, controlBits, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, natural), :paramsEnter, :paramsExit)
 
-    createGates(:crk, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
+    createStatement(:crk, gateNameRegEx, paramsRegEx, c_gateNameRegEx, c_paramsRegEx)
 
-    # 1.3 Composed statements
-    version = re.cat("version", oneOrMoreSpaces, re.alt(natural, float_custom))
-    numberQubits = re.cat("qubits", oneOrMoreSpaces, natural)
-    #comment = re.parse("#[a-zA-Z0-9_\t ]*")
-    comment = re.parse("#[a-zA-Z0-9#[!\"#\$%&'()*+,\\-./:;<=>?@\\[\\]\\^_`{|}~]*\t ]*")
+    # 1.3 Misc statements
+    versionName = addActionToRegEx(re.parse("version"), :statementEnter, :statementExit)
+    versionParams = addActionToRegEx(re.cat(oneOrMoreSpaces, re.alt(natural, float_custom)), :paramsEnter, :paramsExit)
+    version = re.cat(versionName, versionParams)
+
+    numberQubitsName = addActionToRegEx(re.parse("qubits"), :statementEnter, :statementExit)
+    numberQubitsParams = addActionToRegEx(re.cat(oneOrMoreSpaces, natural), :paramsEnter, :paramsExit)
+    numberQubits = re.cat(numberQubitsName, numberQubitsParams)
+    
+    comment = re.parse(raw"#[a-zA-Z0-9#!¡?$%&'()*+.,:;\-/\\_<>=@\[\]^`´{}|~ ]*")    # ToDo: as it is now, comments does not include the chars " and ¿, and maybe some more...
+
+    mappingName = addActionToRegEx(re.parse("map"), :statementEnter, :statementExit)
+    mappingParams = addActionToRegEx(re.cat(oneOrMoreSpaces, re.alt(bid, qid), zeroOrMoreSpaces, ",", zeroOrMoreSpaces, tag), :paramsEnter, :paramsExit)
+    mapping = re.cat(mappingName, mappingParams)
+
+    prepName = addActionToRegEx(re.parse("prep_[xyz]"), :statementEnter, :statementExit)
+    prepParams = addActionToRegEx(re.cat(oneOrMoreSpaces, qid), :paramsEnter, :paramsExit)
+    prep = re.cat(prepName, prepParams)
+
+    # for name in [:prep_x, :prep_y, :prep_z]
+    #     statementNameRegEx = addActionToRegEx(re.parse(String(name)), :statementEnter, :statementExit)
+    #     paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, qid), :paramsEnter, :paramsExit)
+
+    #     createStatement(name, statementNameRegEx, paramsRegEx)
+    # end
+
+    measureXYZName = addActionToRegEx(re.cat("measure", re.opt("_[xyz]")), :statementEnter, :statementExit)
+    measureXYZParams = addActionToRegEx(re.cat(oneOrMoreSpaces, qid), :paramsEnter, :paramsExit)
+    measureXYZ = re.cat(measureXYZName, measureXYZParams)
+
+    measureAllName = addActionToRegEx(re.parse("measure_all"), :statementEnter, :measureAllExit)
+    measureAll = re.cat(measureAllName)
+
+    measure_parityName = addActionToRegEx(re.parse("measure_parity"), :statementEnter, :statementExit)
+    measure_parityParams = addActionToRegEx(re.cat(oneOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, "[xyz]", zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, "[xyz]"), :paramsEnter, :paramsExit)
+    measure_parity = re.cat(measure_parityName, measure_parityParams)
+
+    measure = re.alt(measureXYZ, measureAll, measure_parity)
+
     gate = re.alt(i, h, x, y, z, x90, y90, mx90, my90, s, sdag, t,
                     c_i, c_h, c_x, c_y, c_z, c_x90, c_y90, c_mx90, c_my90, c_s, c_sdag, c_t,
                     cnot, cz, swap,
@@ -113,14 +151,10 @@ machine = let
                     c_rx, c_ry, c_rz, c_cr,
                     crk,
                     c_crk)
-    # prepState = re"prep_[xyz]" * oneOrMoreSpaces * qid
-    # map = re"map" * oneOrMoreSpaces * (bid | qid) * zeroOrMoreSpaces * "," * zeroOrMoreSpaces * tag
-    # measurement = re"measure_(?:[xyz]|all)|measure$" * oneOrMoreSpaces * qid
+    # measurement = re"measure_(?:[xyz]|all)|measure" * oneOrMoreSpaces * qid
     # display = re"display" * oneOrMoreSpaces * bitName
 
-    # statement = initLine * (version | numberQubits | comment | gate | prepState | map | measurement | display) * endLine
-    line = re.cat(re.alt(version, numberQubits, comment, gate), zeroOrMoreSpaces, newLine)
-    # line = re.alt(version, numberQubits, comment, oneQubitGate, twoQubitGate, threeQubitGate, rotationGate, uniqueGate) * re.parse(newLine)
+    line = re.cat(re.alt(version, numberQubits, comment, mapping, prep, measure, gate), zeroOrMoreSpaces, re.opt(comment), newLine)
     cqasmCode = re.rep(re.alt(line, re.cat(zeroOrMoreSpaces, newLine)))
 
     # Compile the regex to a FSM
@@ -128,16 +162,19 @@ machine = let
 end;
 
 actions = Dict(
-    :instrEnter => :(mark = p),
-    :instrExit => :(statementInstr = String(data[mark:p - 1])),
+    :statementEnter => :(mark = p),
+    :statementExit => :(statementInstr = String(data[mark:p - 1])),
+
     :paramsEnter => :(mark = p),
     :paramsExit => quote
         statementParams = String(data[mark:p - 1])
         statementParamsSplit = String.(split(replace(statementParams, r"[\t ]" => ""), ","))
 
-        statement = pushfirst!(statementParamsSplit, statementInstr)
-        push!(statementsSet, statement)
+        statementArray = pushfirst!(statementParamsSplit, statementInstr)
+        push!(statementsSet, statementArray)
     end,
+    
+    :measureAllExit => :(push!(statementsSet, ["measure_all"])),
 );
 
 context = Automa.CodeGenContext();
@@ -160,7 +197,7 @@ context = Automa.CodeGenContext();
     return statementsSet
 end;
 
-parseCQASMCode(String(readchomp("src/Serializers/test1.cq")))
+parseCQASMCode(String(readchomp("src/Serializers/test2.cq")))
 
 
 function paint_machine(regexp)

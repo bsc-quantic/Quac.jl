@@ -2,7 +2,17 @@
     using Quac.cQASM
 
     @testset "cQASM_generic" begin
-
+        # for entry in [
+        #     "version 1" => [["version", "1"]],
+        #     "version 2.3" => [["version", "2.3"]],
+        #     "qubits 4" => [["qubits", "4"]],
+        #     "qubits 52" => [["qubits", "52"]],
+        #     "i tagname" => [["i", "tagname"]],
+        #     "i _" => [["i", "_"]],
+        #     "i _12" => [["i", "_12"]],
+        # ]
+        #     @test parseCQASMCode(entry.first) == entry.second
+        # end
     end
 
     @testset "cQASM_gates" begin
