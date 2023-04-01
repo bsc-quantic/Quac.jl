@@ -121,25 +121,27 @@ machine = let
     prepParams = addActionToRegEx(re.cat(oneOrMoreSpaces, qid), :paramsEnter, :paramsExit)
     prep = re.cat(prepName, prepParams)
 
-    # for name in [:prep_x, :prep_y, :prep_z]
-    #     statementNameRegEx = addActionToRegEx(re.parse(String(name)), :statementEnter, :statementExit)
-    #     paramsRegEx = addActionToRegEx(re.cat(oneOrMoreSpaces, qid), :paramsEnter, :paramsExit)
-
-    #     createStatement(name, statementNameRegEx, paramsRegEx)
-    # end
-
-    measureXYZName = addActionToRegEx(re.cat("measure", re.opt("_[xyz]")), :statementEnter, :statementExit)
+    measureXYZName = addActionToRegEx(re.cat("measure", re.opt(re"_[xyz]")), :statementEnter, :statementExit)
     measureXYZParams = addActionToRegEx(re.cat(oneOrMoreSpaces, qid), :paramsEnter, :paramsExit)
     measureXYZ = re.cat(measureXYZName, measureXYZParams)
 
-    measureAllName = addActionToRegEx(re.parse("measure_all"), :statementEnter, :measureAllExit)
-    measureAll = re.cat(measureAllName)
+    measureAll = addActionToRegEx(re.parse("measure_all"), :statementEnter, :measureAllExit)
 
     measure_parityName = addActionToRegEx(re.parse("measure_parity"), :statementEnter, :statementExit)
-    measure_parityParams = addActionToRegEx(re.cat(oneOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, "[xyz]", zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, "[xyz]"), :paramsEnter, :paramsExit)
+    measure_parityParams = addActionToRegEx(re.cat(oneOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, re"[xyz]", zeroOrMoreSpaces, ",", zeroOrMoreSpaces, qid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces, re"[xyz]"), :paramsEnter, :paramsExit)
     measure_parity = re.cat(measure_parityName, measure_parityParams)
 
     measure = re.alt(measureXYZ, measureAll, measure_parity)
+
+    # displayAll = addActionToRegEx(re.parse("display"), :statementEnter, :displayAllExit)
+
+    display = addActionToRegEx(re.cat("display", re.opt(re.cat(oneOrMoreSpaces, bid))), :statementEnter, :displayExit)
+
+    # displayBitName = addActionToRegEx(re.parse("display"), :statementEnter, :statementExit)
+    # displayBitParams = addActionToRegEx(re.cat(oneOrMoreSpaces, bid), :paramsEnter, :paramsExit)
+    # displayBit = re.cat(displayBitName, displayBitParams)
+
+    # display = re.alt(displayAll, displayBit)
 
     gate = re.alt(i, h, x, y, z, x90, y90, mx90, my90, s, sdag, t,
                     c_i, c_h, c_x, c_y, c_z, c_x90, c_y90, c_mx90, c_my90, c_s, c_sdag, c_t,
@@ -151,10 +153,8 @@ machine = let
                     c_rx, c_ry, c_rz, c_cr,
                     crk,
                     c_crk)
-    # measurement = re"measure_(?:[xyz]|all)|measure" * oneOrMoreSpaces * qid
-    # display = re"display" * oneOrMoreSpaces * bitName
 
-    line = re.cat(re.alt(version, numberQubits, comment, mapping, prep, measure, gate), zeroOrMoreSpaces, re.opt(comment), newLine)
+    line = re.cat(re.alt(display), zeroOrMoreSpaces, re.opt(comment), newLine)
     cqasmCode = re.rep(re.alt(line, re.cat(zeroOrMoreSpaces, newLine)))
 
     # Compile the regex to a FSM
@@ -175,6 +175,14 @@ actions = Dict(
     end,
     
     :measureAllExit => :(push!(statementsSet, ["measure_all"])),
+    :displayExit => quote
+        statement = String(data[mark:p - 1])
+        statementSplit = String.(split(statement))
+
+        if length(statementSplit) > 1 pop!(statementsSet) end   # This is bc a FSM cannot look forward, so it cannot handle multiple dispatch (the 'display' command is MD). So the FSM needed to add the "display" keyword as it encountered it along the flow. Now, if that statement have parameters, you should rm the previously added entry and add the actual one with parameters.
+
+        push!(statementsSet, statementSplit)
+    end,
 );
 
 context = Automa.CodeGenContext();
@@ -204,44 +212,5 @@ function paint_machine(regexp)
     machine = Automa.compile(regexp)
     write("C:/Users/German/Documents/Work/Quac.jl/src/Serializers/csv.dot", Automa.machine2dot(machine))
 end;
-
-# actions = Dict(
-#     :enter => :(mark= p),
-#     :exit_header => :(header = String(data[mark+1:p-1])),
-#     :exit_seqline => quote
-#         doff = length(seqbuffer) + 1
-#         resize!(seqbuffer, length(seqbuffer) + p - mark)
-#         copyto!(seqbuffer, doff, data, mark, p-mark)
-#     end,
-#     :exit_record => quote
-#         sequence = LongSequence{A}(seqbuffer)
-#         empty!(seqbuffer)
-#         record = FastaRecord(header, sequence)
-#         push!(records, record)
-#     end,
-# );
-
-# context = Automa.CodeGenContext();
-# @eval function parse_fasta(::Type{A}, data::Union{String,Vector{UInt8}}) where {A <: Alphabet}
-#     mark = 0
-#     records = FastaRecord{A}[]
-#     header = ""
-#     sequence = LongSequence{A}()
-#     seqbuffer = UInt8[]
-
-    
-#     (Automa.generate_init_code(context, machine))
-#     p_end = p_eof = lastindex(data)
-#     (Automa.generate_exec_code(context, machine, actions))
-
-#     iszero(cs) || error("failed to parse on byte ", p)
-#     return records
-# end;
-
-# g = make_grammar([:expr], flatten(rules, String))
-
-# input = "i q[0]"
-# p = parse(g, input)
-
 
 end
