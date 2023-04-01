@@ -9,7 +9,7 @@ const re = Automa.RegExp;
 
 machine = let
     # Define generic methods
-    function addActionToRegEx(strRegEx, enterAction, exitAction)
+    function addActionToRegEx(strRegEx, enterAction::Symbol, exitAction::Symbol)
         strRegEx.actions[:enter] = [enterAction]
         strRegEx.actions[:exit] = [exitAction]
     
@@ -37,8 +37,10 @@ machine = let
     natural = oneOrMoreDigits
     float_custom = re.cat(natural, ".", natural)
     angle = float_custom
+    
+    varName = re"[a-z_][a-z0-9_]*"
 
-    tag = re"[a-z_][a-z0-9_]*"
+    tag = varName
     idStreamSingle = re.cat(zeroOrMoreSpaces, oneOrMoreDigits, re.opt(re.cat(":", oneOrMoreDigits)), zeroOrMoreSpaces)
     idStreamMultiple = re.cat(idStreamSingle, re.rep(re.cat(",", idStreamSingle)))
     qubitIDStream = re.cat("q[", idStreamMultiple, "]")
@@ -111,7 +113,7 @@ machine = let
     numberQubitsParams = addActionToRegEx(re.cat(oneOrMoreSpaces, natural), :paramsEnter, :paramsExit)
     numberQubits = re.cat(numberQubitsName, numberQubitsParams)
     
-    comment = re.parse(raw"#[a-zA-Z0-9#!¡?$%&'()*+.,:;\-/\\_<>=@\[\]^`´{}|~ ]*")    # ToDo: as it is now, comments does not include the chars " and ¿, and maybe some more...
+    comment = re.parse(raw"#[a-zA-Z0-9#!?$%&'()*+.,:;\-/\\_<>=@\[\]^`{}|~ ]*")    # ToDo: as it is now, comments does not include the chars ["¡¿´], and maybe some more...
 
     mappingName = addActionToRegEx(re.parse("map"), :statementEnter, :statementExit)
     mappingParams = addActionToRegEx(re.cat(oneOrMoreSpaces, re.alt(bid, qid), zeroOrMoreSpaces, ",", zeroOrMoreSpaces, tag), :paramsEnter, :paramsExit)
@@ -133,15 +135,9 @@ machine = let
 
     measure = re.alt(measureXYZ, measureAll, measure_parity)
 
-    # displayAll = addActionToRegEx(re.parse("display"), :statementEnter, :displayAllExit)
-
     display = addActionToRegEx(re.cat("display", re.opt(re.cat(oneOrMoreSpaces, bid))), :statementEnter, :displayExit)
 
-    # displayBitName = addActionToRegEx(re.parse("display"), :statementEnter, :statementExit)
-    # displayBitParams = addActionToRegEx(re.cat(oneOrMoreSpaces, bid), :paramsEnter, :paramsExit)
-    # displayBit = re.cat(displayBitName, displayBitParams)
-
-    # display = re.alt(displayAll, displayBit)
+    subcircuit = addActionToRegEx(re.cat(".", varName, re.opt(re.cat("(", natural, ")"))), :statementEnter, :subcircuitExit)
 
     gate = re.alt(i, h, x, y, z, x90, y90, mx90, my90, s, sdag, t,
                     c_i, c_h, c_x, c_y, c_z, c_x90, c_y90, c_mx90, c_my90, c_s, c_sdag, c_t,
@@ -154,7 +150,7 @@ machine = let
                     crk,
                     c_crk)
 
-    line = re.cat(re.alt(display), zeroOrMoreSpaces, re.opt(comment), newLine)
+    line = re.cat(re.alt(version, numberQubits, comment, mapping, prep, measure, display, subcircuit, gate), zeroOrMoreSpaces, re.opt(comment), newLine)
     cqasmCode = re.rep(re.alt(line, re.cat(zeroOrMoreSpaces, newLine)))
 
     # Compile the regex to a FSM
@@ -177,12 +173,19 @@ actions = Dict(
     :measureAllExit => :(push!(statementsSet, ["measure_all"])),
     :displayExit => quote
         statement = String(data[mark:p - 1])
-        statementSplit = String.(split(statement))
-
-        if length(statementSplit) > 1 pop!(statementsSet) end   # This is bc a FSM cannot look forward, so it cannot handle multiple dispatch (the 'display' command is MD). So the FSM needed to add the "display" keyword as it encountered it along the flow. Now, if that statement have parameters, you should rm the previously added entry and add the actual one with parameters.
-
-        push!(statementsSet, statementSplit)
+        statementTrimmed = replace(statement, r"[\t ]" => "")
+        if length(statementTrimmed) == length("display")
+            push!(statementsSet, ["display"])
+        else
+            pop!(statementsSet)     # This is bc a FSM cannot look forward, so it cannot handle multiple dispatch (the 'display' command is MD). So the FSM needed to add the "display" keyword as it encountered it along the flow. Now, if that statement have parameters, you should rm the previously added entry and add the actual one with parameters.
+            push!(statementsSet, ["display", statementTrimmed[length("display") + 1:end]])
+        end
     end,
+    :subcircuitExit => quote
+        statementInstr = String(data[mark:p - 1])
+
+        push!(statementsSet, [statementInstr])
+    end
 );
 
 context = Automa.CodeGenContext();
@@ -205,7 +208,7 @@ context = Automa.CodeGenContext();
     return statementsSet
 end;
 
-parseCQASMCode(String(readchomp("src/Serializers/test2.cq")))
+parseCQASMCode(String(readchomp("src/Serializers/test1.cq")))
 
 
 function paint_machine(regexp)

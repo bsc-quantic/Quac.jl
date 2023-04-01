@@ -2,17 +2,27 @@
     using Quac.cQASM
 
     @testset "cQASM_generic" begin
-        # for entry in [
-        #     "version 1" => [["version", "1"]],
-        #     "version 2.3" => [["version", "2.3"]],
-        #     "qubits 4" => [["qubits", "4"]],
-        #     "qubits 52" => [["qubits", "52"]],
-        #     "i tagname" => [["i", "tagname"]],
-        #     "i _" => [["i", "_"]],
-        #     "i _12" => [["i", "_12"]],
-        # ]
-        #     @test parseCQASMCode(entry.first) == entry.second
-        # end
+        for entry in [
+            "version 1" => [["version", "1"]],
+            "version 2.3" => [["version", "2.3"]],
+            "qubits 4" => [["qubits", "4"]],
+            "qubits 52" => [["qubits", "52"]],
+            "map q[0],data" => [["map", "q[0]", "data"]],
+            "map b[1],bit1" => [["map", "b[1]", "bit1"]],
+            "prep_z q[3]" => [["prep_z", "q[3]"]],
+            "prep_x q[12]" => [["prep_x", "q[12]"]],
+            "measure_x q[4]" => [["measure_x", "q[4]"]],
+            "measure_z q[32]" => [["measure_z", "q[32]"]],
+            "measure q[5]" => [["measure", "q[5]"]],
+            "measure_all" => [["measure_all"]],
+            "measure_parity q[6],y,q[7],z" => [["measure_parity", "q[6]", "y", "q[7]", "z"]],
+            "display" => [["display"]],
+            "display b[0]" => [["display", "b[0]"]],
+        ]
+            @test parseCQASMCode(entry.first) == entry.second
+        end
+
+        @test parseCQASMCode("# this is a comment") == Vector{String}[]
     end
 
     @testset "cQASM_gates" begin
@@ -66,6 +76,7 @@
                 "cnot q,q2" => [["cnot", "q", "q2"]],
                 "cnot q4,q2" => [["cnot", "q4", "q2"]],
                 "cnot q[9],q[2]" => [["cnot", "q[9]", "q[2]"]],
+                "cnot qubit9,q[2]" => [["cnot", "qubit9", "q[2]"]],
             ]
                 @test parseCQASMCode(entry.first) == entry.second
             end
@@ -258,7 +269,69 @@
 
     end
 
-    @testset "cQASM_misc" begin
-        
+    @testset "cQASM_extreme_cases" begin
+        @testset "spaces" begin
+            for entry in [
+                "swap   qubit9 , q[  2 ] " => [["swap", "qubit9", "q[2]"]],
+                "crk q[9],qubit2,3 " => [["crk", "q[9]", "qubit2", "3"]],
+                "c-i bit1 ,    qubit2   " => [["c-i", "bit1", "qubit2"]],
+                "c-toffoli   b[ 0] , q[ 9 ],  q[2  ] , q[ 3 ] " => [["c-toffoli", "b[0]", "q[9]", "q[2]", "q[3]"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
+
+            for entry in [
+                "version 1 " => [["version", "1"]],
+                "version  2.3  " => [["version", "2.3"]],
+                "qubits  4 " => [["qubits", "4"]],
+                "qubits  52  " => [["qubits", "52"]],
+                "map  q[ 0],  data" => [["map", "q[0]", "data"]],
+                "map b[ 1 ] ,bit1" => [["map", "b[1]", "bit1"]],
+                "prep_z  q[3 ] " => [["prep_z", "q[3]"]],
+                "prep_x q[ 12 ]" => [["prep_x", "q[12]"]],
+                "measure_x  q[4 ]  " => [["measure_x", "q[4]"]],
+                "measure_z    q[ 32]" => [["measure_z", "q[32]"]],
+                "measure  q[ 5 ]" => [["measure", "q[5]"]],
+                "measure_all " => [["measure_all"]],
+                "measure_parity    q[ 6],  y , q[ 7 ]    , z" => [["measure_parity", "q[6]", "y", "q[7]", "z"]],
+                "display" => [["display"]],
+                "display  b[ 0 ] " => [["display", "b[0]"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
+        end
+
+        @testset "comments" begin
+            for entry in [
+                "swap   qubit9 , q[  2 ]   # This is a comment   " => [["swap", "qubit9", "q[2]"]],
+                "crk q[9],qubit2,3# This is another comment" => [["crk", "q[9]", "qubit2", "3"]],
+                "c-i bit1 ,    qubit2 # This a third comment" => [["c-i", "bit1", "qubit2"]],
+                "c-toffoli   b[ 0] , q[ 9 ],  q[2  ] , q[ 3 ]#Toomanycommentsinthiscode" => [["c-toffoli", "b[0]", "q[9]", "q[2]", "q[3]"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
+
+            for entry in [
+                "version 1 # Comment1" => [["version", "1"]],
+                "version  2.3# Comment 2" => [["version", "2.3"]],
+                "qubits  4      # Comment 3 and counting" => [["qubits", "4"]],
+                "qubits  52  # A bit tired reading sooo much" => [["qubits", "52"]],
+                "map  q[ 0],  data#This reminds me of Deep Rock Galactic dwarves comments" => [["map", "q[0]", "data"]],
+                "map b[ 1 ] ,bit1#IJUSTDON'TKNOWWHATI'MDOING" => [["map", "b[1]", "bit1"]],
+                "prep_z  q[3 ] #JUST cHeckInGG rAandOoOm things" => [["prep_z", "q[3]"]],
+                "prep_x q[ 12 ]# I guess this is enough" => [["prep_x", "q[12]"]],
+                "display # no, it wasn't" => [["display"]],
+                raw"display  b[ 0 ]#Checking weird chars now... #!?$%&'()*+.,:;-/_<>=@[]^`{}|~\\" => [["display", "b[0]"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
+        end
+
+        @testset "extended_features" begin
+            # multiple params (with : and ,)
+            # multi controlled gates (e.g. c-i cbit1,  cbit2   ,  bit3,qubit4)
+            # multi statements
+        end
     end
+    # Add complete examples, 1 or 2 will be enough
 end
