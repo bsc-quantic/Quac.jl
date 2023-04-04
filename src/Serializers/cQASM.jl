@@ -9,7 +9,7 @@ const re = Automa.RegExp;
 
 machine = let
     # Define generic methods
-    function addActionToRegEx(strRegEx, enterAction::Symbol, exitAction::Symbol)
+    function addActionToRegEx(strRegEx, enterAction, exitAction)
         strRegEx.actions[:enter] = [enterAction]
         strRegEx.actions[:exit] = [exitAction]
     
@@ -137,7 +137,8 @@ machine = let
 
     display = addActionToRegEx(re.cat("display", re.opt(re.cat(oneOrMoreSpaces, bid))), :statementEnter, :displayExit)
 
-    subcircuit = addActionToRegEx(re.cat(".", varName, re.opt(re.cat("(", natural, ")"))), :statementEnter, :subcircuitExit)
+    subCircuitNumberIters = addActionToRegEx(re"[0-9]+", :numberItersEnter, :numberItersExit)
+    subcircuit = addActionToRegEx(re.cat(".", varName, re.opt(re.cat("(", subCircuitNumberIters, ")"))), :statementEnter, :subcircuitExit)
 
     gate = re.alt(i, h, x, y, z, x90, y90, mx90, my90, s, sdag, t,
                     c_i, c_h, c_x, c_y, c_z, c_x90, c_y90, c_mx90, c_my90, c_s, c_sdag, c_t,
@@ -150,7 +151,7 @@ machine = let
                     crk,
                     c_crk)
 
-    line = re.cat(re.alt(version, numberQubits, comment, mapping, prep, measure, display, subcircuit, gate), zeroOrMoreSpaces, re.opt(comment), newLine)
+    line = re.cat(zeroOrMoreSpaces, re.alt(version, numberQubits, comment, mapping, prep, measure , display, subcircuit, gate), zeroOrMoreSpaces, re.opt(comment), newLine)
     cqasmCode = re.rep(re.alt(line, re.cat(zeroOrMoreSpaces, newLine)))
 
     # Compile the regex to a FSM
@@ -181,11 +182,18 @@ actions = Dict(
             push!(statementsSet, ["display", statementTrimmed[length("display") + 1:end]])
         end
     end,
+    :numberItersEnter => :(mark2 = p),
+    :numberItersExit => :(subStatement = data[mark2:p - 1]),
     :subcircuitExit => quote
         statementInstr = String(data[mark:p - 1])
+        statementInstr = split(statementInstr, "(")[1]
 
-        push!(statementsSet, [statementInstr])
-    end
+        if length(subStatement) > 0
+            push!(statementsSet, [statementInstr, subStatement])
+        else
+            push!(statementsSet, [statementInstr])
+        end
+    end,
 );
 
 context = Automa.CodeGenContext();
@@ -193,9 +201,8 @@ context = Automa.CodeGenContext();
 @eval function parseCQASMCode(data::String)
     data = lowercase(data * "\n")
 
-    mark = 1
-    statementInstr = ""
-    statementParams = ""
+    mark = mark2 = 1
+    statementInstr = statementParams = subStatement = ""
     statementsSet = Vector{String}[]
 
     $(Automa.generate_init_code(context, machine))

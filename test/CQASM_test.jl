@@ -18,6 +18,8 @@
             "measure_parity q[6],y,q[7],z" => [["measure_parity", "q[6]", "y", "q[7]", "z"]],
             "display" => [["display"]],
             "display b[0]" => [["display", "b[0]"]],
+            ".init" => [[".init"]],
+            ".grover(3)" => [[".grover", "3"]]
         ]
             @test parseCQASMCode(entry.first) == entry.second
         end
@@ -270,32 +272,63 @@
     end
 
     @testset "cQASM_extreme_cases" begin
-        @testset "spaces" begin
+        @testset "multi_binary_controlled" begin
             for entry in [
-                "swap   qubit9 , q[  2 ] " => [["swap", "qubit9", "q[2]"]],
-                "crk q[9],qubit2,3 " => [["crk", "q[9]", "qubit2", "3"]],
-                "c-i bit1 ,    qubit2   " => [["c-i", "bit1", "qubit2"]],
-                "c-toffoli   b[ 0] , q[ 9 ],  q[2  ] , q[ 3 ] " => [["c-toffoli", "b[0]", "q[9]", "q[2]", "q[3]"]],
+                "c-x b[0],b[1],b[2],b[3],q[4]" => [["c-x", "b[0]", "b[1]", "b[2]", "b[3]", "q[4]"]],
+                "c-rx b[0],b[1],b[2],q[3],3.14" => [["c-rx", "b[0]", "b[1]", "b[2]", "q[3]", "3.14"]],
+                "c-mx90 b[0],b[1],b[2],b[3],q[4]" => [["c-mx90", "b[0]", "b[1]", "b[2]", "b[3]", "q[4]"]],
+                "c-sdag b[0],b[1],q[2]" => [["c-sdag", "b[0]", "b[1]", "q[2]"]],
+                "c-cnot b[0],b[1],b[2],b[3],b[4],q[5],q[6]" => [["c-cnot", "b[0]", "b[1]", "b[2]", "b[3]", "b[4]", "q[5]", "q[6]"]],
+                "c-toffoli b[0],b[1],b[2],b[3],q[4],q[5],q[6]" => [["c-toffoli", "b[0]", "b[1]", "b[2]", "b[3]", "q[4]", "q[5]", "q[6]"]],
+                "c-swap b[0],b[1],b[2],q[3],q[4]" => [["c-swap", "b[0]", "b[1]", "b[2]", "q[3]", "q[4]"]],
+                "c-crk b[0],b[1],b[2],b[3],b[4],b[5],q[6],q[7],4" => [["c-crk", "b[0]", "b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "q[6]", "q[7]", "4"]],
             ]
                 @test parseCQASMCode(entry.first) == entry.second
             end
 
             for entry in [
-                "version 1 " => [["version", "1"]],
-                "version  2.3  " => [["version", "2.3"]],
-                "qubits  4 " => [["qubits", "4"]],
-                "qubits  52  " => [["qubits", "52"]],
-                "map  q[ 0],  data" => [["map", "q[0]", "data"]],
-                "map b[ 1 ] ,bit1" => [["map", "b[1]", "bit1"]],
-                "prep_z  q[3 ] " => [["prep_z", "q[3]"]],
+                "c-x b[0],bit1,b[2],bit3,q[4]" => [["c-x", "b[0]", "bit1", "b[2]", "bit3", "q[4]"]],
+                "c-rx b[0],bit1,b[2],q[3],3.14" => [["c-rx", "b[0]", "bit1", "b[2]", "q[3]", "3.14"]],
+                "c-mx90 b[0],bit1,b[2],bit3,q[4]" => [["c-mx90", "b[0]", "bit1", "b[2]", "bit3", "q[4]"]],
+                "c-sdag b[0],bit1,q[2]" => [["c-sdag", "b[0]", "bit1", "q[2]"]],
+                "c-cnot bit0,b[1],bit2,b[3],b[4],q[5],q[6]" => [["c-cnot", "bit0", "b[1]", "bit2", "b[3]", "b[4]", "q[5]", "q[6]"]],
+                "c-toffoli bit0,b[1],bit2,bit3,q[4],q[5],q[6]" => [["c-toffoli", "bit0", "b[1]", "bit2", "bit3", "q[4]", "q[5]", "q[6]"]],
+                "c-swap bit0,b[1],bit2,q[3],q[4]" => [["c-swap", "bit0", "b[1]", "bit2", "q[3]", "q[4]"]],
+                "c-crk bit0,b[1],bit2,bit3,b[4],bit5,q[6],q[7],4" => [["c-crk", "bit0", "b[1]", "bit2", "bit3", "b[4]", "bit5", "q[6]", "q[7]", "4"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
+            # multiple params (with : and ,)
+            # multi statements
+            # subcircuits whole examples
+        end
+
+        @testset "spaces" begin
+            for entry in [
+                " swap   qubit9 , q[  2 ] " => [["swap", "qubit9", "q[2]"]],
+                "  crk q[9],qubit2,3 " => [["crk", "q[9]", "qubit2", "3"]],
+                "c-i bit1 ,    qubit2   " => [["c-i", "bit1", "qubit2"]],
+                "    c-toffoli   b[ 0] , q[ 9 ],  q[2  ] , q[ 3 ] " => [["c-toffoli", "b[0]", "q[9]", "q[2]", "q[3]"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
+
+            for entry in [
+                " version 1 " => [["version", "1"]],
+                "  version  2.3  " => [["version", "2.3"]],
+                " qubits  4 " => [["qubits", "4"]],
+                "  qubits  52  " => [["qubits", "52"]],
+                " map  q[ 0],  data" => [["map", "q[0]", "data"]],
+                "  map b[ 1 ] ,bit1" => [["map", "b[1]", "bit1"]],
+                " prep_z  q[3 ] " => [["prep_z", "q[3]"]],
                 "prep_x q[ 12 ]" => [["prep_x", "q[12]"]],
-                "measure_x  q[4 ]  " => [["measure_x", "q[4]"]],
-                "measure_z    q[ 32]" => [["measure_z", "q[32]"]],
-                "measure  q[ 5 ]" => [["measure", "q[5]"]],
-                "measure_all " => [["measure_all"]],
-                "measure_parity    q[ 6],  y , q[ 7 ]    , z" => [["measure_parity", "q[6]", "y", "q[7]", "z"]],
+                "  measure_x  q[4 ]  " => [["measure_x", "q[4]"]],
+                "   measure_z    q[ 32]" => [["measure_z", "q[32]"]],
+                " measure  q[ 5 ]" => [["measure", "q[5]"]],
+                " measure_all " => [["measure_all"]],
+                "   measure_parity    q[ 6],  y , q[ 7 ]    , z" => [["measure_parity", "q[6]", "y", "q[7]", "z"]],
                 "display" => [["display"]],
-                "display  b[ 0 ] " => [["display", "b[0]"]],
+                " display  b[ 0 ] " => [["display", "b[0]"]],
             ]
                 @test parseCQASMCode(entry.first) == entry.second
             end
@@ -325,12 +358,6 @@
             ]
                 @test parseCQASMCode(entry.first) == entry.second
             end
-        end
-
-        @testset "extended_features" begin
-            # multiple params (with : and ,)
-            # multi controlled gates (e.g. c-i cbit1,  cbit2   ,  bit3,qubit4)
-            # multi statements
         end
     end
     # Add complete examples, 1 or 2 will be enough
