@@ -291,13 +291,15 @@ machine = let
     subCircuitNumberIters = addActionToRegEx(re"[0-9]+", :numberItersEnter, :numberItersExit)
     subcircuit = addActionToRegEx(re.cat(".", varName, re.opt(re.cat("(", subCircuitNumberIters, ")"))), :statementEnter, :subcircuitExit)
 
+    multistatement = addActionToRegEx(re"{[a-zA-Z0-9\t |\-_\[\]]*}", :multiStatementEnter, :multiStatementExit)
+
     gate = re.alt(  one_qubit_gates_regExp_non_controlled, one_qubit_gates_regExp_bit_controlled,
                     two_qubit_gates_regExp_non_controlled, two_qubit_gates_regExp_bit_controlled,
                     three_qubit_gates_regExp_non_controlled, three_qubit_gates_regExp_bit_controlled,
                     rotation_gates_regExp_non_controlled, rotation_gates_regExp_bit_controlled,
                     unique_gates_regExp_non_controlled, unique_gates_regExp_bit_controlled)
 
-    allStatements = re.cat(zeroOrMoreSpaces, re.alt(version, numberQubits, comment, mapping, prep, measure, display, subcircuit, gate), zeroOrMoreSpaces)
+    allStatements = re.cat(zeroOrMoreSpaces, re.alt(version, numberQubits, comment, mapping, prep, measure, display, subcircuit, multistatement, gate), zeroOrMoreSpaces)
 
     # # This will include the multi statement specification:
     # parallelStatement = re.cat(zeroOrMoreSpaces, re.alt(mapping, prep, measure, display, gate), zeroOrMoreSpaces)
@@ -348,13 +350,16 @@ actions = Dict(
             push!(statementsSet, [statementInstr])
         end
     end,
+    :multiStatementEnter => :(mark = p),
+    :multiStatementExit => quote
+        multiStatement = String(data[mark:p - 1])
+        push!(statementsSet, [multiStatement])
+    end,
 );
 
 context = Automa.CodeGenContext();
 
-@eval function parseCQASMCode(data::String)
-    data = lowercase(data * "\n")
-
+@eval function parseSingleStatement(data::String)
     mark = mark2 = 1
     statementInstr = statementParams = subStatement = ""
     statementsSet = Vector{String}[]
@@ -367,7 +372,35 @@ context = Automa.CodeGenContext();
 
     iszero(cs) || return string("failed to parse on byte ", p, "  [last chunk '", data[mark:p - 1], "' from string '", data, "']")
     return statementsSet
+end
+
+function parseMultiStatement(statementsSet::Vector{Array{String, 1}})
+    resultingSet = Vector{String}[]
+    for statementVector in statementsSet
+        statement = statementVector[1]
+        if statement[1] == '{'
+            parallelStatements = replace(statement, r"[{}]" => "", "|" => "\n")
+            multiStatementsSet = parseSingleStatement(parallelStatements * "\n")
+
+            push!(resultingSet, reduce(vcat, multiStatementsSet))
+        else
+            push!(resultingSet, statementVector)
+        end
+    end
+
+    return resultingSet
+end
+
+function parseCQASMCode(data::String)
+    data = lowercase(data * "\n")
+
+    statementsSet = parseSingleStatement(data)
+    statementsSet = parseMultiStatement(statementsSet)
+
+    return statementsSet
 end;
+
+
 
 a = parseCQASMCode(String(readchomp("src/Serializers/test1.cq")))
 

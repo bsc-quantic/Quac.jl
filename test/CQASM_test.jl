@@ -370,6 +370,9 @@
         @testset "Multi Statements" begin
             for entry in [
                 "{h q[0]|h q[1]|h q[2]|h q[3]|h oracle}" => [["h", "q[0]", "|", "h", "q[1]", "|", "h", "q[2]", "|", "h", "q[3]", "|", "h", "oracle"]],
+                "{ prep_z q[0] | prep_z q[1] | prep_z q[2] }" => [["prep_z", "q[0]", "|", "prep_z", "q[1]", "|", "prep_z", "q[2]"]],
+                "{ measure q[0] | measure q[1] | measure q[2] }" => [["measure", "q[0]", "|", "measure", "q[1]", "|", "measure", "q[2]"]],
+                "{ h q[0] | prep_z q[1] | measure q[2] }" => [["h", "q[0]", "|", "prep_z", "q[1]", "|", "measure", "q[2]"]],
                 "{ x q[0] | x q[1] | x q[2] | x q[3] }" => [["x", "q[0]", "|", "x", "q[1]", "|", "x", "q[2]", "|", "x", "q[3]"]],
                 "{ c-i b1,q2 | c-swap b[0],q[1],q[2] | toffoli b[0],b[2],b[21],q3,q[6],q[10] }" => [["c-i", "b1", "q2", "|", "c-swap", "b[0]", "q[1]", "q[2]", "|", "toffoli", "b[0]", "b[2]", "b[21]", "q3", "q[6]", "q[10]"]],
                 "{  c-i  b1, q2 |  c-swap b[0 ],  q[ 1] ,q[ 2 ]   | toffoli b[ 0] , b[  2] ,b[21   ] ,  q3,  q[   6 ], q[ 10    ]   }" => [["c-i", "b1", "q2", "|", "c-swap", "b[0]", "q[1]", "q[2]", "|", "toffoli", "b[0]", "b[2]", "b[21]", "q3", "q[6]", "q[10]"]],
