@@ -298,9 +298,6 @@
             ]
                 @test parseCQASMCode(entry.first) == entry.second
             end
-            # multiple params (with : and ,)
-            # multi statements
-            # subcircuits whole examples
         end
 
         @testset "spaces" begin
@@ -359,6 +356,40 @@
                 @test parseCQASMCode(entry.first) == entry.second
             end
         end
+
+        @testset "subcircuits" begin
+            for entry in [
+                ".init" => [[".init"]],
+                ".measure(45)" => [[".measure", "45"]],
+                ".grover(3)" => [[".grover", "3"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
+        end
+
+        @testset "Multi Statements" begin
+            for entry in [
+                "{h q[0]|h q[1]|h q[2]|h q[3]|h oracle}" => [["h", "q[0]", "|", "h", "q[1]", "|", "h", "q[2]", "|", "h", "q[3]", "|", "h", "oracle"]],
+                "{ x q[0] | x q[1] | x q[2] | x q[3] }" => [["x", "q[0]", "|", "x", "q[1]", "|", "x", "q[2]", "|", "x", "q[3]"]],
+                "{ c-i b1,q2 | c-swap b[0],q[1],q[2] | toffoli b[0],b[2],b[21],q3,q[6],q[10] }" => [["c-i", "b1", "q2", "|", "c-swap", "b[0]", "q[1]", "q[2]", "|", "toffoli", "b[0]", "b[2]", "b[21]", "q3", "q[6]", "q[10]"]],
+                "{  c-i  b1, q2 |  c-swap b[0 ],  q[ 1] ,q[ 2 ]   | toffoli b[ 0] , b[  2] ,b[21   ] ,  q3,  q[   6 ], q[ 10    ]   }" => [["c-i", "b1", "q2", "|", "c-swap", "b[0]", "q[1]", "q[2]", "|", "toffoli", "b[0]", "b[2]", "b[21]", "q3", "q[6]", "q[10]"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
+        end
+
+        @testset "Single gate - multiple qubits" begin
+            for entry in [
+                "h q[0:2]" => [["h", "q[0]", "q[1]", "q[2]"]],
+                "c-i b[0:2],rbit5,b[3],qbit7" => [["c-i", "b[0]", "b[1]", "b[2]", "rbit5", "b[3]", "qbit7"]],
+                "c-i b[0:2,4,6:10,3,14],rbit20,b[17],qbit22" => [["c-i", "b[0]", "b[1]", "b[2]", "b[4]", "b[6]", "b[7]", "b[8]", "b[9]", "b[10]", "b[3]", "b[14]", "rbit20", "b[17]", "qbit22"]],
+                "c-i   b[ 0:2 , 4, 7:9], rbit1,  b[3], qbit2" =>[["c-i", "b[0]", "b[1]", "b[2]", "b[4]", "b[7]", "b[8]", "b[9]"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
+        end
     end
     # Add complete examples, 1 or 2 will be enough
 end
+
+# subcircuits whole examples

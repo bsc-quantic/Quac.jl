@@ -149,15 +149,6 @@ machine = let
         return strRegEx
     end
 
-    function createStatement(statementSymbol, statementName, params)
-        @eval $statement = re.cat($statementName, $params)
-    end
-
-    function createStatement(statementSymbol, statementName, params, c_statementName, c_params)
-        @eval $statement = re.cat($statementName, $params)
-        @eval $(Symbol("c_" * String(statement))) = re.cat($c_statementName, $c_params)
-    end
-
     ## Define cQASM syntax ##
 
     # 1.1 Base strings
@@ -306,7 +297,15 @@ machine = let
                     rotation_gates_regExp_non_controlled, rotation_gates_regExp_bit_controlled,
                     unique_gates_regExp_non_controlled, unique_gates_regExp_bit_controlled)
 
-    line = re.cat(zeroOrMoreSpaces, re.alt(version, numberQubits, comment, mapping, prep, measure, display, subcircuit, gate), zeroOrMoreSpaces, re.opt(comment), newLine)
+    allStatements = re.cat(zeroOrMoreSpaces, re.alt(version, numberQubits, comment, mapping, prep, measure, display, subcircuit, gate), zeroOrMoreSpaces)
+
+    # # This will include the multi statement specification:
+    # parallelStatement = re.cat(zeroOrMoreSpaces, re.alt(mapping, prep, measure, display, gate), zeroOrMoreSpaces)
+    # allParallelStatements = re.cat(zeroOrMoreSpaces, "{", parallelStatement, re.rep1(re.cat("|", parallelStatement)), "}")
+    # # You should uncomment the following line and comment the line below!
+    # line = re.cat(re.alt(allStatements, allParallelStatements), re.opt(comment), newLine)
+
+    line = re.cat(allStatements, re.opt(comment), newLine)
     cqasmCode = re.rep(re.alt(line, re.cat(zeroOrMoreSpaces, newLine)))
 
     # Compile the regex to a FSM
