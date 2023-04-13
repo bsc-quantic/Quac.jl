@@ -291,7 +291,7 @@ machine = let
     subCircuitNumberIters = addActionToRegEx(re"[0-9]+", :numberItersEnter, :numberItersExit)
     subcircuit = addActionToRegEx(re.cat(".", varName, re.opt(re.cat("(", subCircuitNumberIters, ")"))), :statementEnter, :subcircuitExit)
 
-    multistatement = addActionToRegEx(re"{[a-zA-Z0-9\t |\-_\[\]]*}", :multiStatementEnter, :multiStatementExit)
+    multistatement = addActionToRegEx(re"{[a-zA-Z0-9\t |\-_\[\],]*}", :multiStatementEnter, :multiStatementExit)
 
     gate = re.alt(  one_qubit_gates_regExp_non_controlled, one_qubit_gates_regExp_bit_controlled,
                     two_qubit_gates_regExp_non_controlled, two_qubit_gates_regExp_bit_controlled,
@@ -370,7 +370,7 @@ context = Automa.CodeGenContext();
 
     $(Automa.generate_exec_code(context, machine, actions))
 
-    iszero(cs) || return string("failed to parse on byte ", p, "  [last chunk '", data[mark:p - 1], "' from string '", data, "']")
+    iszero(cs) || error("failed to parse on byte ", p, "  [last chunk '", data[mark:p - 1], "' from string '", data, "']")
     return statementsSet
 end
 
@@ -382,7 +382,8 @@ function parseMultiStatement(statementsSet::Vector{Array{String, 1}})
             parallelStatements = replace(statement, r"[{}]" => "", "|" => "\n")
             multiStatementsSet = parseSingleStatement(parallelStatements * "\n")
 
-            push!(resultingSet, reduce(vcat, multiStatementsSet))
+            barSeparatedStatement = reduce(vcat, [vcat(statement, "|") for statement in multiStatementsSet])
+            push!(resultingSet, barSeparatedStatement[1:length(barSeparatedStatement) - 1])
         else
             push!(resultingSet, statementVector)
         end

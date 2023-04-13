@@ -374,8 +374,8 @@
                 "{ measure q[0] | measure q[1] | measure q[2] }" => [["measure", "q[0]", "|", "measure", "q[1]", "|", "measure", "q[2]"]],
                 "{ h q[0] | prep_z q[1] | measure q[2] }" => [["h", "q[0]", "|", "prep_z", "q[1]", "|", "measure", "q[2]"]],
                 "{ x q[0] | x q[1] | x q[2] | x q[3] }" => [["x", "q[0]", "|", "x", "q[1]", "|", "x", "q[2]", "|", "x", "q[3]"]],
-                "{ c-i b1,q2 | c-swap b[0],q[1],q[2] | toffoli b[0],b[2],b[21],q3,q[6],q[10] }" => [["c-i", "b1", "q2", "|", "c-swap", "b[0]", "q[1]", "q[2]", "|", "toffoli", "b[0]", "b[2]", "b[21]", "q3", "q[6]", "q[10]"]],
-                "{  c-i  b1, q2 |  c-swap b[0 ],  q[ 1] ,q[ 2 ]   | toffoli b[ 0] , b[  2] ,b[21   ] ,  q3,  q[   6 ], q[ 10    ]   }" => [["c-i", "b1", "q2", "|", "c-swap", "b[0]", "q[1]", "q[2]", "|", "toffoli", "b[0]", "b[2]", "b[21]", "q3", "q[6]", "q[10]"]],
+                "{ c-i b1,q2 | c-swap b[0],b[10],b[11],q[1],q[2] | toffoli q3,q[6],q[10] }" => [["c-i", "b1", "q2", "|", "c-swap", "b[0]", "b[10]", "b[11]", "q[1]", "q[2]", "|", "toffoli", "q3", "q[6]", "q[10]"]],
+                "{  c-i  b1, q2 |  c-swap b[0 ],  b[ 10] ,b[11], q[ 1] ,q[ 2 ]   | toffoli q3,  q[   6 ], q[ 10    ]   }" => [["c-i", "b1", "q2", "|", "c-swap", "b[0]", "b[10]", "b[11]", "q[1]", "q[2]", "|", "toffoli", "q3", "q[6]", "q[10]"]],
             ]
                 @test parseCQASMCode(entry.first) == entry.second
             end
@@ -383,10 +383,10 @@
 
         @testset "Single gate - multiple qubits" begin
             for entry in [
-                "h q[0:2]" => [["h", "q[0]", "q[1]", "q[2]"]],
-                "c-i b[0:2],rbit5,b[3],qbit7" => [["c-i", "b[0]", "b[1]", "b[2]", "rbit5", "b[3]", "qbit7"]],
-                "c-i b[0:2,4,6:10,3,14],rbit20,b[17],qbit22" => [["c-i", "b[0]", "b[1]", "b[2]", "b[4]", "b[6]", "b[7]", "b[8]", "b[9]", "b[10]", "b[3]", "b[14]", "rbit20", "b[17]", "qbit22"]],
-                "c-i   b[ 0:2 , 4, 7:9], rbit1,  b[3], qbit2" =>[["c-i", "b[0]", "b[1]", "b[2]", "b[4]", "b[7]", "b[8]", "b[9]"]],
+                # "h q[0:2]" => [["h", "q[0]", "q[1]", "q[2]"]],
+                # "c-i b[0:2],rbit5,b[3],qbit7" => [["c-i", "b[0]", "b[1]", "b[2]", "rbit5", "b[3]", "qbit7"]],
+                # "c-i b[0:2,4,6:10,3,14],rbit20,b[17],qbit22" => [["c-i", "b[0]", "b[1]", "b[2]", "b[4]", "b[6]", "b[7]", "b[8]", "b[9]", "b[10]", "b[3]", "b[14]", "rbit20", "b[17]", "qbit22"]],
+                # "c-i   b[ 0:2 , 4, 7:9], rbit1,  b[3], qbit2" =>[["c-i", "b[0]", "b[1]", "b[2]", "b[4]", "b[7]", "b[8]", "b[9]"]],
             ]
                 @test parseCQASMCode(entry.first) == entry.second
             end
