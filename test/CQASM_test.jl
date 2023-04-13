@@ -168,6 +168,8 @@
             end
 
             for entry in [
+                "c-i b,q[1]" => [["c-i", "b", "q[1]"]],
+                "c-i b1,q[1]" => [["c-i", "b1", "q[1]"]],
                 "c-i bit1,q[1]" => [["c-i", "bit1", "q[1]"]],
                 "c-i quentin2,q[1]" => [["c-i", "quentin2", "q[1]"]],
                 "c-i tagname,q[1]" => [["c-i", "tagname", "q[1]"]],
@@ -191,6 +193,8 @@
             end
 
             for entry in [
+                "c-cnot b,b,bit2" => [["c-cnot", "b", "b", "bit2"]],
+                "c-cnot b,b1,bit2" => [["c-cnot", "b", "b1", "bit2"]],
                 "c-cnot bit0,bit1,bit2" => [["c-cnot", "bit0", "bit1", "bit2"]],
                 "c-cnot quentin0,quentin2,quentin1" => [["c-cnot", "quentin0", "quentin2", "quentin1"]],
                 "c-cnot tagname0,tagname,tagname2" => [["c-cnot", "tagname0", "tagname", "tagname2"]],
@@ -212,6 +216,8 @@
             end
 
             for entry in [
+                "c-toffoli b,b,b2,bit3" => [["c-toffoli", "b", "b", "b2", "bit3"]],
+                "c-toffoli bit0,bit1,bit2,bit3" => [["c-toffoli", "bit0", "bit1", "bit2", "bit3"]],
                 "c-toffoli bit0,bit1,bit2,bit3" => [["c-toffoli", "bit0", "bit1", "bit2", "bit3"]],
                 "c-toffoli quentin0,quentin2,quentin1,quentin3" => [["c-toffoli", "quentin0", "quentin2", "quentin1", "quentin3"]],
                 "c-toffoli tagname0,tagname,tagname2,tagname3" => [["c-toffoli", "tagname0", "tagname", "tagname2", "tagname3"]],
@@ -235,6 +241,7 @@
             end
 
             for entry in [
+                "c-rx b,b1,0.71" => [["c-rx", "b", "b1", "0.71"]],
                 "c-rx bit0,bit1,0.71" => [["c-rx", "bit0", "bit1", "0.71"]],
                 "c-rx quentin0,quentin2,0.71" => [["c-rx", "quentin0", "quentin2", "0.71"]],
                 "c-rx tagname0,tagname,0.71" => [["c-rx", "tagname0", "tagname", "0.71"]],
@@ -256,6 +263,7 @@
             end
 
             for entry in [
+                "c-crk b,b1,b,3" => [["c-crk", "b", "b1", "b", "3"]],
                 "c-crk bit0,bit1,bit2,3" => [["c-crk", "bit0", "bit1", "bit2", "3"]],
                 "c-crk quentin0,quentin2,quentin1,3" => [["c-crk", "quentin0", "quentin2", "quentin1", "3"]],
                 "c-crk tagname0,tagname,tagname2,3" => [["c-crk", "tagname0", "tagname", "tagname2", "3"]],
