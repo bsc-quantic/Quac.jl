@@ -389,15 +389,29 @@
             end
         end
 
-        @testset "Single gate - multiple qubits" begin
+        @testset "Multiple qubits specification" begin
             for entry in [
-                # "h q[0:2]" => [["h", "q[0]", "q[1]", "q[2]"]],
-                # "c-i b[0:2],rbit5,b[3],qbit7" => [["c-i", "b[0]", "b[1]", "b[2]", "rbit5", "b[3]", "qbit7"]],
-                # "c-i b[0:2,4,6:10,3,14],rbit20,b[17],qbit22" => [["c-i", "b[0]", "b[1]", "b[2]", "b[4]", "b[6]", "b[7]", "b[8]", "b[9]", "b[10]", "b[3]", "b[14]", "rbit20", "b[17]", "qbit22"]],
-                # "c-i   b[ 0:2 , 4, 7:9], rbit1,  b[3], qbit2" =>[["c-i", "b[0]", "b[1]", "b[2]", "b[4]", "b[7]", "b[8]", "b[9]"]],
+                "h q[0:2]" => [["h", "q[0:2]"]],
+                "h q[0:2,5]" => [["h", "q[0:2&5]"]],
             ]
                 @test parseCQASMCode(entry.first) == entry.second
             end
+
+            for entry in [
+                "c-i b[0:2],qbit3" => [["c-i", "b[0:2]", "qbit3"]],
+                "c-i b[1,4:6,9],q[11]" => [["c-i", "b[1&4:6&9]", "q[11]"]],
+                "c-i b[0:2,4:6,9:13],q[20]" => [["c-i", "b[0:2&4:6&9:13]", "q[20]"]],
+
+                "c-i   b[ 0:2 , 4, 7:9], rbit1,  b[3], qbit2" =>[["c-i", "b[0:2&4&7:9]", "rbit1", "b[3]", "qbit2"]],
+                "c-swap b[0:2, 6, 8:10], qbit1 , q[2]" => [["c-swap", "b[0:2&6&8:10]", "qbit1", "q[2]"]],
+            ]
+                @test parseCQASMCode(entry.first) == entry.second
+            end
+
+            #  Alternatives for this section of the parser:
+            # "h q[0:2]" => [["h", "q[0]", "|", "h", "q[1]", "|", "h", "q[2]"]],
+            # "c-i b[0:2],rbit5,b[3],qbit7" => [["c-i", "b[0]", "b[1]", "b[2]", "rbit5", "b[3]", "qbit7"]],
+            # "c-i b[0:2,4,6:10,3,14],rbit20,b[17],qbit22" => [["c-i", "b[0]", "b[1]", "b[2]", "b[4]", "b[6]", "b[7]", "b[8]", "b[9]", "b[10]", "b[3]", "b[14]", "rbit20", "b[17]", "qbit22"]],
         end
     end
     # Add complete examples, 1 or 2 will be enough

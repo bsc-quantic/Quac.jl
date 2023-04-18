@@ -142,7 +142,7 @@ const re = Automa.RegExp;
 
 machine = let
     # Define generic methods
-    function addActionToRegEx(strRegEx, enterAction, exitAction)
+    function addActionToRegEx(strRegEx, enterAction, exitAction=:nothingAction)
         strRegEx.actions[:enter] = [enterAction]
         strRegEx.actions[:exit] = [exitAction]
     
@@ -164,13 +164,21 @@ machine = let
     
     varName = re"[a-z_][a-z0-9_]*"
 
+    lbracket = addActionToRegEx(re"\[", :lbracketEnter, :lbracketExit)
+    rbracket = addActionToRegEx(re"\]", :rbracketEnter, :rbracketExit)
+    colon = addActionToRegEx(re":", :colonEnter)
+    comma = addActionToRegEx(re",", :commaEnter)
+    
     tag = varName
-    idStreamSingle = re.cat(zeroOrMoreSpaces, oneOrMoreDigits, re.opt(re.cat("", oneOrMoreDigits)), zeroOrMoreSpaces)
-    idStreamMultiple = re.cat(idStreamSingle, re.rep(re.cat(",", idStreamSingle)))
-    qubitIDStream = re.cat("q[", idStreamMultiple, "]")
-    bitIDStream = re.cat("b[", idStreamMultiple, "]")
+    idStreamSingle = re.cat(zeroOrMoreSpaces, oneOrMoreDigits, re.opt(re.cat(colon, oneOrMoreDigits)), zeroOrMoreSpaces)
+    idStreamMultiple = re.cat(idStreamSingle, re.rep(re.cat(comma, idStreamSingle)))
+    qubitIDStream = re.cat("q", lbracket, idStreamMultiple, rbracket)
+    bitIDStream = re.cat("b", lbracket, idStreamMultiple, rbracket)
     qid = re.alt(tag, qubitIDStream)
     bid = re.alt(tag, bitIDStream)
+
+    lbracket = re"\["
+    addActionToRegEx(lbracket, :hey, :heyExit)
 
     controlBits = re.rep1(re.cat(bid, zeroOrMoreSpaces, ",", zeroOrMoreSpaces))
 
@@ -301,12 +309,6 @@ machine = let
 
     allStatements = re.cat(zeroOrMoreSpaces, re.alt(version, numberQubits, comment, mapping, prep, measure, display, subcircuit, multistatement, gate), zeroOrMoreSpaces)
 
-    # # This will include the multi statement specification:
-    # parallelStatement = re.cat(zeroOrMoreSpaces, re.alt(mapping, prep, measure, display, gate), zeroOrMoreSpaces)
-    # allParallelStatements = re.cat(zeroOrMoreSpaces, "{", parallelStatement, re.rep1(re.cat("|", parallelStatement)), "}")
-    # # You should uncomment the following line and comment the line below!
-    # line = re.cat(re.alt(allStatements, allParallelStatements), re.opt(comment), newLine)
-
     line = re.cat(allStatements, re.opt(comment), newLine)
     cqasmCode = re.rep(re.alt(line, re.cat(zeroOrMoreSpaces, newLine)))
 
@@ -314,14 +316,42 @@ machine = let
     Automa.compile(cqasmCode)
 end;
 
+function fixRanges(statementParams)
+    statementParamsFixed = ""
+
+    insideBrackets = false
+    for char in statementParams
+        if char == '[' insideBrackets = true
+        elseif char == ']' insideBrackets = false
+        end
+
+        if char == ',' && insideBrackets statementParamsFixed *= '&'
+        else statementParamsFixed *= char
+        end
+    end
+    
+    return statementParamsFixed
+end
+
 actions = Dict(
+    :nothingAction => :(),
+
+    :lbracketEnter => :(),
+    :lbracketExit => :(),
+    :rbracketEnter => :(),
+    :rbracketExit => :(),
+    :colonEnter => :(),
+    :commaEnter => :(),
+
     :statementEnter => :(mark = p),
     :statementExit => :(statementInstr = String(data[mark:p - 1])),
 
     :paramsEnter => :(mark = p),
     :paramsExit => quote
         statementParams = String(data[mark:p - 1])
-        statementParamsSplit = String.(split(replace(statementParams, r"[\t ]" => ""), ","))
+
+        statementParamsFixed = fixRanges(statementParams)                       # Needed to keep multiple qubits specification (e.g. q[0:2,4,7])
+        statementParamsSplit = String.(split(replace(statementParamsFixed, r"[\t ]" => ""), ","))
 
         statementArray = pushfirst!(statementParamsSplit, statementInstr)
         push!(statementsSet, statementArray)
@@ -404,7 +434,6 @@ end;
 
 
 a = parseCQASMCode(String(readchomp("src/Serializers/test1.cq")))
-
 
 function paint_machine(regexp::Automa.RegExp.RE)
     machine = Automa.compile(regexp)
