@@ -1,144 +1,11 @@
 module cQASM
 
 export parseCQASMCode
-# export buildTree
 
 # First imports
 import Automa
 import Automa.RegExp: @re_str
 const re = Automa.RegExp;
-
-# oneQubitGate = re"i|h|x|y|z|x90|y90|mx90|my90|s|sdag|t"
-# twoQubitGate = re"cnot|cz|swap"
-# threeQubitGate = re"toffoli"
-# rotationGate = re"rx|ry|rz|cr"
-# uniqueGate = re"crk"
-# oneQubitGate_bc = re"c-i|c-h|c-x|c-y|c-z|c-x90|c-y90|c-mx90|c-my90|c-s|c-sdag|c-t"
-# twoQubitGate_bc = re"c-cnot|c-cz|c-swap"
-# threeQubitGate_bc = re"c-toffoli"
-# rotationGate_bc = re"c-rx|c-ry|c-rz|c-cr"
-# uniqueGate_bc = re"c-crk"
-
-# keyword = re"version|qubits|map|prep|measure|display"
-# identifier = re"[A-Za-z_][0-9A-Za-z_]*"
-# comment = re"#[^\r\n]*"
-# newline = re"\r?\n"
-
-# minijulia = Automa.compile(
-#     re","               => :(emit(:comma)),
-#     re":"               => :(emit(:colon)),
-#     re"\."              => :(emit(:dot)),
-#     re"\("              => :(emit(:lparen)),
-#     re"\)"              => :(emit(:rparen)),
-#     re"\["              => :(emit(:lbracket)),
-#     re"]"               => :(emit(:rbracket)),
-#     re"{"               => :(emit(:lbrace)),
-#     re"}"               => :(emit(:rbrace)),
-#     re"\|"              => :(emit(:vbar)),
-#     re"[0-9]+\.[0-9]+"  => :(emit(:float)),
-#     re"[0-9]+"          => :(emit(:integer)),
-#     re"[\t ]+"          => :(emit(:spaces)),
-
-#     oneQubitGate        => :(emit(:oneQubitGate)),
-#     twoQubitGate        => :(emit(:twoQubitGate)),
-#     threeQubitGate      => :(emit(:threeQubitGate)),
-#     rotationGate        => :(emit(:rotationGate)),
-#     uniqueGate          => :(emit(:uniqueGate)),
-#     oneQubitGate_bc     => :(emit(:oneQubitGate_bc)),
-#     twoQubitGate_bc     => :(emit(:twoQubitGate_bc)),
-#     threeQubitGate_bc   => :(emit(:threeQubitGate_bc)),
-#     rotationGate_bc     => :(emit(:rotationGate_bc)),
-#     uniqueGate_bc       => :(emit(:uniqueGate_bc)),
-
-#     keyword             => :(emit(:keyword)),
-#     identifier          => :(emit(:identifier)),
-#     comment             => :(emit(:comment)),
-#     newline             => :(emit(:newline)),
-# )
-
-# context = Automa.CodeGenContext()
-
-# @eval function tokenize(data)
-#     $(Automa.generate_init_code(context, minijulia))
-#     p_end = p_eof = sizeof(data)
-#     tokens = Tuple{Symbol,String}[]
-#     emit(kind) = push!(tokens, (kind, data[ts:te]))
-#     while p ≤ p_eof && cs > 0
-#         $(Automa.generate_exec_code(context, minijulia))
-#     end
-#     if cs < 0
-#         error("failed to tokenize: " * data[ts:te])
-#     end
-#     return tokens
-# end
-
-# a = tokenize(readchomp("src/Serializers/test2.cq"))
-
-# struct TreeState
-#     inside_parens::Bool
-# end
-
-# function buildTree(data)
-#     tokens = tokenize(data)
-
-#     function look_for(::Type{T}, ownType) where T
-#         println(tokens[1])
-#     end
-
-#     function lookFor(::Type{Float64})
-
-#     end
-
-#     function lookFor(::Type{String})
-
-#     end
-
-#     while !isempty(tokens)
-#         token = popfirst!(tokens)
-#         println(token)
-
-#         symbol = token[1]
-#         string = token[2]
-
-#         if symbol == :comma
-    
-#         elseif symbol == :colon
-#         elseif symbol == :dot
-#         elseif symbol == :lparen
-#         elseif symbol == :rparen
-#         elseif symbol == :lbracket
-#         elseif symbol == :rbracket
-#         elseif symbol == :lbrace
-#             insideBraces = true
-#         elseif symbol == :rbrace
-#             insideBraces = false
-#         elseif symbol == :vbar
-#             if insideBraces
-#                 # return [reset all variables]
-#             end
-#         elseif symbol == :integer
-#         elseif symbol == :spaces
-#             popfirst!(tokens)
-#         elseif symbol == :keyword
-#             if string == "version "
-#                 lookfor(Float64)
-#             elseif string == "qubit "
-#             end
-#         elseif symbol == :identifier
-#         elseif symbol == :comment
-#         elseif symbol == :newline
-#             # return [reset all variables]
-#         end
-
-#     end
-# end
-
-
-
-
-
-
-
 
 machine = let
     # Define generic methods
@@ -168,7 +35,7 @@ machine = let
     rbracket = addActionToRegEx(re"\]", :rbracketEnter, :rbracketExit)
     colon = addActionToRegEx(re":", :colonEnter)
     comma = addActionToRegEx(re",", :commaEnter)
-    
+
     tag = varName
     idStreamSingle = re.cat(zeroOrMoreSpaces, oneOrMoreDigits, re.opt(re.cat(colon, oneOrMoreDigits)), zeroOrMoreSpaces)
     idStreamMultiple = re.cat(idStreamSingle, re.rep(re.cat(comma, idStreamSingle)))
@@ -350,7 +217,7 @@ actions = Dict(
     :paramsExit => quote
         statementParams = String(data[mark:p - 1])
 
-        statementParamsFixed = fixRanges(statementParams)                       # Needed to keep multiple qubits specification (e.g. q[0:2,4,7])
+        statementParamsFixed = fixRanges(statementParams)       # Needed to keep multiple qubits specification (e.g. q[0:2,4,7])
         statementParamsSplit = String.(split(replace(statementParamsFixed, r"[\t ]" => ""), ","))
 
         statementArray = pushfirst!(statementParamsSplit, statementInstr)
@@ -364,7 +231,7 @@ actions = Dict(
         if length(statementTrimmed) == length("display")
             push!(statementsSet, ["display"])
         else
-            pop!(statementsSet)     # This is bc a FSM cannot look forward, so it cannot handle multiple dispatch (the 'display' command is MD). So the FSM needed to add the "display" keyword as it encountered it along the flow. Now, if that statement have parameters, you should rm the previously added entry and add the actual one with parameters.
+            pop!(statementsSet)         # This is bc a FSM cannot look forward, so it cannot handle multiple dispatch (the 'display' command is MD). So the FSM needed to add the "display" keyword as it encountered it along the flow. Now, if that statement have parameters, you should rm the previously added entry and add the actual one with parameters.
             push!(statementsSet, ["display", statementTrimmed[length("display") + 1:end]])
         end
     end,
@@ -432,8 +299,8 @@ function parseCQASMCode(data::String)
 end;
 
 
-
-a = parseCQASMCode(String(readchomp("src/Serializers/test1.cq")))
+# e.g.:
+# a = parseCQASMCode(String(readchomp("src/Serializers/test1.cq")))
 
 function paint_machine(regexp::Automa.RegExp.RE)
     machine = Automa.compile(regexp)
