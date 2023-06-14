@@ -11,6 +11,8 @@ texname(::Type{Rx}) = L"R_X"
 texname(::Type{Ry}) = L"R_Y"
 texname(::Type{Rz}) = L"R_Z"
 
+texname(::Type{Hz}) = L"H_Z"
+texname(::Type{FSim}) = L"F_S"
 function draw end
 export draw
 
@@ -79,7 +81,7 @@ function draw(::Gate{I,1,NamedTuple{(),Tuple{}}}; background = nothing)
     end 50 50
 end
 
-for Op in [X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz]
+for Op in [X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Hz, FSim]
     @eval draw(::Gate{$Op,1,P}; kwargs...) where {P} = draw_block(texname($Op); kwargs...)
 end
 
