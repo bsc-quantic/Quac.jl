@@ -143,6 +143,14 @@ abstract type U3 <: Operator{NamedTuple{(:θ, :ϕ, :λ),Tuple{Float64,Float64,Fl
 Base.length(::Type{U3}) = 1
 
 """
+    Hz(lane, θ, ϕ)
+
+The Hz (PhasedXPow) gate, equivalent to ``Z^ϕ X^θ Z^{-ϕ}``.
+"""
+abstract type Hz <: Operator{NamedTuple{(:θ, :ϕ),Tuple{Float64,Float64}}} end
+Base.length(::Type{Hz}) = 1
+
+"""
     Swap(lane1, lane2)
 
 The SWAP gate.
@@ -157,14 +165,6 @@ The FSim (Fermionic Simulation) gate.
 """
 abstract type FSim <: Operator{NamedTuple{(:θ, :ϕ),Tuple{Float64,Float64}}} end
 Base.length(::Type{FSim}) = 2
-
-"""
-    Hz(lane, θ, ϕ)
-
-The Hz (PhasedXPow) gate, equivalent to Z^ϕ·X^θ·Z^(-ϕ).
-"""
-abstract type Hz <: Operator{NamedTuple{(:θ, :ϕ),Tuple{Float64,Float64}}} end
-Base.length(::Type{Hz}) = 1
 
 """
     Control(lane, op::Gate)
