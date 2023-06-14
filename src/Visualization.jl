@@ -154,8 +154,8 @@ function draw_multiblock_mid(; background = nothing)
         line(Point(25, 0), Point(15, 0), action = :stroke)
 
         # vertical lines
-        line(Point(-15, -25), Point(-15, 25), action = :stroke)
-        line(Point(15, -25), Point(15, 25), action = :stroke)
+        line(Point(-25, 0), Point(25, 0), action = :stroke)
+        line(Point(0, -25), Point(0, 25), action = :stroke)
     end 50 50
 end
 
