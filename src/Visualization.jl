@@ -12,7 +12,9 @@ texname(::Type{Ry}) = L"R_Y"
 texname(::Type{Rz}) = L"R_Z"
 
 texname(::Type{Hz}) = L"H_Z"
+
 texname(::Type{FSim}) = L"F_S"
+
 function draw end
 export draw
 
