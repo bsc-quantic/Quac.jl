@@ -16,7 +16,7 @@ function parse_single_qubit_gate(gate_string, target_qubit)
     elseif gate_type == "y"
         Y(target_qubit)
     else
-        error("Unknown gate type: $gate_type")
+        throw(ErrorException("Unknown gate type: $gate_type"))
     end
 end
 
@@ -28,7 +28,7 @@ function parse_single_qubit_gate_with_param(gate_string, target_qubit)
     if gate_type == "rz"
         Rz(target_qubit; θ = param)
     else
-        error("Unknown gate type: $gate_type")
+        throw(ErrorException("Unknown gate type: $gate_type"))
     end
 end
 
@@ -42,7 +42,7 @@ function parse_two_qubit_gate(gate_string, target_qubit1, target_qubit2)
     if gate_type == "fsim"
         return FSim(target_qubit1, target_qubit2; θ = param1, ϕ = param2)
     else
-        error("Unknown gate type: $gate_type")
+        throw(ErrorException("Unknown gate type: $gate_type"))
     end
 end
 
@@ -73,7 +73,7 @@ function parse_qflex_circuit(file_name; sites = nothing)
                     gate = parse_single_qubit_gate_with_param(gate_string, mapping[parse(Int, data[!, 3][i])])
                 end
             else
-                error("Unknown gate format: $gate_string")
+                throw(ErrorException("Unknown gate format: $gate_string"))
             end
             push!(circ, gate)
         end
