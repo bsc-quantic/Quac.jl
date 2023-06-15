@@ -4,17 +4,17 @@ using DataFrames
 export parse_qflex_circuit
 
 function parse_single_qubit_gate(gate_string, target_qubit)
-    gate_parts = split(gate_string, "_")
-    gate_type = gate_parts[1]
+    gate_type = first(split(gate_string, "_"))
 
     if gate_type == "hz"
-        return Hz(target_qubit; θ=0.25, ϕ=0.5)  # Assuming constant parameters for Hz gate
+        # NOTE assume constant parameters for Hz gate
+        Hz(target_qubit; θ = 0.25, ϕ = 0.5)
     elseif gate_type == "sd"
-        return Sd(target_qubit)
+        Sd(target_qubit)
     elseif gate_type == "x"
-        return X(target_qubit)
+        X(target_qubit)
     elseif gate_type == "y"
-        return Y(target_qubit)
+        Y(target_qubit)
     else
         error("Unknown gate type: $gate_type")
     end
@@ -26,7 +26,7 @@ function parse_single_qubit_gate_with_param(gate_string, target_qubit)
     param = parse(Float64, replace(gate_parts[2], ")" => ""))
 
     if gate_type == "rz"
-        return Rz(target_qubit; θ=param)
+        Rz(target_qubit; θ = param)
     else
         error("Unknown gate type: $gate_type")
     end
@@ -40,14 +40,14 @@ function parse_two_qubit_gate(gate_string, target_qubit1, target_qubit2)
     param2 = parse(Float64, params_parts[2])
 
     if gate_type == "fsim"
-        return FSim(target_qubit1, target_qubit2; θ=param1, ϕ=param2)
+        return FSim(target_qubit1, target_qubit2; θ = param1, ϕ = param2)
     else
         error("Unknown gate type: $gate_type")
     end
 end
 
-function parse_qflex_circuit(file_name; sites=nothing)
-    data = CSV.read(file_name, DataFrame, delim=" ", header=false)
+function parse_qflex_circuit(file_name; sites = nothing)
+    data = CSV.read(file_name, DataFrame, delim = " ", header = false)
     n_qubits = data[!, 1][1]  # First line indicates the number of qubits
     circ = Circuit(n_qubits)
 
@@ -64,7 +64,11 @@ function parse_qflex_circuit(file_name; sites=nothing)
                 gate = parse_single_qubit_gate(gate_string, mapping[parse(Int, data[!, 3][i])])
             elseif count(c -> c == '(', gate_string) > 0
                 if count(c -> c == ',', gate_string) > 0
-                    gate = parse_two_qubit_gate(gate_string*data[!, 3][i], mapping[data[!, 4][i]], mapping[data[!, 5][i]])
+                    gate = parse_two_qubit_gate(
+                        gate_string * data[!, 3][i],
+                        mapping[data[!, 4][i]],
+                        mapping[data[!, 5][i]],
+                    )
                 else
                     gate = parse_single_qubit_gate_with_param(gate_string, mapping[parse(Int, data[!, 3][i])])
                 end
