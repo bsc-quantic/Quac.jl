@@ -2,8 +2,8 @@ export Gate, Operator
 export lanes
 export X, Y, Z, H, S, Sd, T, Td
 export isparametric, parameters
-export Rx, Ry, Rz, U1, U2, U3, Hz
-export Control, Swap, FSim
+export Rx, Ry, Rz, U1, U2, U3
+export Control, Swap
 export CX, CY, CZ, CRx, CRy, CRz
 export control, target, operator
 export Pauli, Phase
@@ -151,22 +151,6 @@ abstract type Swap <: StaticOperator end
 Base.length(::Type{Swap}) = 2
 
 """
-    FSim(lane1, lane2, θ, ϕ)
-
-The FSim (Fermionic Simulation) gate.
-"""
-abstract type FSim <: Operator{NamedTuple{(:θ, :ϕ),Tuple{Float64,Float64}}} end
-Base.length(::Type{FSim}) = 2
-
-"""
-    Hz(lane, θ, ϕ)
-
-The Hz (PhasedXPow) gate, equivalent to Z^ϕ·X^θ·Z^(-ϕ).
-"""
-abstract type Hz <: Operator{NamedTuple{(:θ, :ϕ),Tuple{Float64,Float64}}} end
-Base.length(::Type{Hz}) = 1
-
-"""
     Control(lane, op::Gate)
 
 A controlled gate.
@@ -193,7 +177,7 @@ Base.adjoint(::Type{Control{Op}}) where {Op} = Control{adjoint(Op)}
 
 # operator sets
 const Pauli = Union{I,X,Y,Z}
-const Phase = Union{I,Z,S,Sd,T,Td,Rz,Hz,FSim}
+const Phase = Union{I,Z,S,Sd,T,Td,Rz}
 
 """
     Gate{Operator}(lanes...; parameters...)
@@ -213,7 +197,7 @@ struct Gate{Op<:Operator,N,Params}
 end
 
 # constructor aliases
-for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td, :U2, :U3, :Rx, :Ry, :Rz, :Swap, :Hz, :FSim]
+for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td, :U2, :U3, :Rx, :Ry, :Rz, :Swap]
     @eval $Op(lanes...; params...) = Gate{$Op}(lanes...; params...)
 end
 
