@@ -52,9 +52,24 @@ Matrix{T}(g::G) where {T,G<:Gate{U2}} = 1 / sqrt(2) * Matrix{T}([
     1 -cis(g.λ)
     cis(g.ϕ) cis(g.ϕ + g.λ)
 ])
+
 Matrix{T}(g::G) where {T,G<:Gate{U3}} = Matrix{T}([
     cos(g.θ / 2) -cis(g.λ)*sin(g.θ / 2)
     cis(g.ϕ)*sin(g.θ / 2) cis(g.ϕ + g.λ)*cos(g.θ / 2)
+])
+
+Matrix{T}(g::G) where {T,G<:Gate{Hz}} = Matrix{T}(
+    [
+        exp(1im * π * g.θ / 2)*cos(π * g.θ / 2) -1im*exp(-1im * π * (g.θ / 2 - g.ϕ))*sin(π * g.θ / 2)
+        -1im*exp(-1im * π * (g.θ / 2 + g.ϕ))*sin(π * g.θ / 2) exp(1im * π * g.θ / 2)*cos(π * g.θ / 2)
+    ],
+)
+
+Matrix{T}(g::G) where {T,G<:Gate{FSim}} = Matrix{T}([
+    1 0 0 0
+    0 cos(g.θ) -1im*sin(g.ϕ) 0
+    0 -1im*sin(g.ϕ) cos(g.θ) 0
+    0 0 0 1
 ])
 
 function Matrix{T}(::Type{Gate{Op}}) where {T,Op<:Control}
