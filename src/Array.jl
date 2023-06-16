@@ -106,12 +106,10 @@ end
 
 # NOTE multidimensional `Array` literal concatenation was introduced in 1.7
 # TODO clean code when we stop supporting Julia 1.6
-Array{T,4}(::Type{<:Gate{Swap}}) where {T} =
-    if VERSION >= v"1.7"
-        Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
-    else
-        reshape(Matrix{T}(Gate{Swap}), (2, 2, 2, 2))
-    end
+Array{T,4}(::Type{<:Gate{Swap}}) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
+
+Array{T,4}(g::G) where {T,G<:Gate{FSim}} =
+    Array{T}([1; 0;; 0; 0;;; 0; cos(g.θ);; -1im*sin(g.ϕ); 0;;;; 0; -1im*sin(g.ϕ);; cos(g.θ); 0;;; 0; 0;; 0; 1])
 
 Array{T}(::Type{Gate{C}}) where {T,C<:Control} =
     Array{T,2 * length(C)}(reshape(Matrix{T}(Gate{C}), fill(2, 2 * length(C))...))
