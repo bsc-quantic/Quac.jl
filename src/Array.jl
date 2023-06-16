@@ -60,8 +60,8 @@ Matrix{T}(g::G) where {T,G<:Gate{U3}} = Matrix{T}([
 
 Matrix{T}(g::G) where {T,G<:Gate{Hz}} = Matrix{T}(
     [
-        exp(1im * π * g.θ / 2)*cos(π * g.θ / 2) -1im*exp(-1im * π * (g.θ / 2 - g.ϕ))*sin(π * g.θ / 2)
-        -1im*exp(-1im * π * (g.θ / 2 + g.ϕ))*sin(π * g.θ / 2) exp(1im * π * g.θ / 2)*cos(π * g.θ / 2)
+        cis(g.θ / 2)*cos(g.θ / 2) -1im*cis(-g.θ / 2 + g.ϕ)*sin(g.θ / 2)
+        -1im*cis(-g.θ / 2 - g.ϕ)*sin(g.θ / 2) cis(g.θ / 2)*cos(g.θ / 2)
     ],
 )
 
