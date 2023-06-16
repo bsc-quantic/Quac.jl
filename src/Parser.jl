@@ -14,20 +14,25 @@ function parse_qflex(filename; sites = nothing)
             isempty(line) && continue
 
             gate = if (capture = match(r"x_1_2 (?<target>\d+)", line); !isnothing(capture))
-                Rx(mapping[capture["target"]]; θ = π / 2)
+                Rx(mapping[parse(Int, capture["target"])]; θ = π / 2)
             elseif (capture = match(r"y_1_2 (?<target>\d+)", line); !isnothing(capture))
-                Ry(mapping[capture["target"]]; θ = π / 2)
+                Ry(mapping[parse(Int, capture["target"])]; θ = π / 2)
             elseif (capture = match(r"hz_1_2 (?<target>\d+)", line); !isnothing(capture))
                 # NOTE assume constant parameters for Hz gate
-                Hz(mapping[capture["target"]]; θ = π / 4, ϕ = π / 2) # TODO ?
+                Hz(mapping[parse(Int, capture["target"])]; θ = π / 4, ϕ = π / 2) # TODO ?
             elseif (capture = match(r"rz\((?<θ>[-]\d+\.\d+)\) (?<target>\d+)", line); !isnothing(capture))
-                Rz(mapping[capture["target"]]; θ = capture["θ"])
+                Rz(mapping[parse(Int, capture["target"])]; θ = parse(Float32, capture["θ"]))
             elseif (
                 capture =
                     match(r"fsim\((?<θ>[-]\d+\.\d+),[ ](?<ϕ>[-]\d+\.\d+)\) (?<source>\d+) (?<target>\d+)", line);
                 !isnothing(capture)
             )
-                FSim(mapping[capture["source"]], mapping[capture["target"]]; θ = capture["θ"], ϕ = capture["ϕ"])
+                FSim(
+                    mapping[parse(Int, capture["source"])],
+                    mapping[parse(Int, capture["target"])];
+                    θ = parse(Float32, capture["θ"]),
+                    ϕ = parse(Float32, capture["ϕ"]),
+                )
             else
                 error(ErrorException("invalid code: $line"))
             end
