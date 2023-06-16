@@ -20,11 +20,13 @@ function parse_qflex(filename; sites = nothing)
             elseif (capture = match(r"hz_1_2 (?<target>\d+)", line); !isnothing(capture))
                 # NOTE assume constant parameters for Hz gate
                 Hz(mapping[parse(Int, capture["target"])]; θ = π / 4, ϕ = π / 2) # TODO ?
-            elseif (capture = match(r"rz\((?<θ>[-]\d+\.\d+)\) (?<target>\d+)", line); !isnothing(capture))
+            elseif (capture = match(r"rz\((?<θ>(?:-|)\d+\.\d+)\) (?<target>\d+)", line); !isnothing(capture))
                 Rz(mapping[parse(Int, capture["target"])]; θ = parse(Float32, capture["θ"]))
             elseif (
-                capture =
-                    match(r"fsim\((?<θ>[-]\d+\.\d+),[ ](?<ϕ>[-]\d+\.\d+)\) (?<source>\d+) (?<target>\d+)", line);
+                capture = match(
+                    r"fsim\((?<θ>(?:-|)\d+\.\d+),(?: |)(?<ϕ>(?:-|)\d+\.\d+)\) (?<source>\d+) (?<target>\d+)",
+                    line,
+                );
                 !isnothing(capture)
             )
                 FSim(
