@@ -10,7 +10,7 @@ function parse_qflex(filename; sites = nothing)
 
         for line in readlines(io)
             # remove trailing spaces, newline characters and moment number
-            line = lstrip(isnumeric, strip(line))
+            line = lstrip(x -> isnumeric(x) || isspace(x), rstrip(line))
             isempty(line) && continue
 
             gate = if (capture = match(r"x_1_2 (?<target>\d+)", line); !isnothing(capture))
