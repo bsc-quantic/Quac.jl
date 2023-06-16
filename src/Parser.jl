@@ -14,18 +14,20 @@ function parse_qflex(filename; sites = nothing)
             isempty(line) && continue
 
             gate = if (capture = match(r"x_1_2 (?<target>\d+)", line); !isnothing(capture))
-                Rx(mapping[capture.target]; θ = π / 2)
-            elseif (capture = match(r"y_1_2 (?<target>\d+)"); !isnothing(capture))
-                Ry(mapping[capture.target]; θ = π / 2)
-            elseif (capture = match(r"hz_1_2 (?<target>\d+)"); !isnothing(capture))
+                Rx(mapping[capture["target"]]; θ = π / 2)
+            elseif (capture = match(r"y_1_2 (?<target>\d+)", line); !isnothing(capture))
+                Ry(mapping[capture["target"]]; θ = π / 2)
+            elseif (capture = match(r"hz_1_2 (?<target>\d+)", line); !isnothing(capture))
                 # NOTE assume constant parameters for Hz gate
-                Hz(target_qubit; θ = 0.25, ϕ = 0.5)
-                Hz(mapping[capture.target]; θ = π / 2, ϕ = π / 2) # TODO ?
-            elseif (capture = match(r"rz\((?<θ>[-]\d+\.\d+)\) (?<target>\d+)"); !isnothing(capture))
-                Rz(mapping[capture.target]; θ = capture.θ)
-            elseif (capture = match(r"fsim\((?<θ>[-]\d+\.\d+),[ ](?<ϕ>[-]\d+\.\d+)\) (?<source>\d+) (?<target>\d+)");
-                !isnothing(capture))
-                FSim(mapping[capture.source], mapping[capture.target]; θ = capture.θ, ϕ = capture.ϕ)
+                Hz(mapping[capture["target"]]; θ = π / 4, ϕ = π / 2) # TODO ?
+            elseif (capture = match(r"rz\((?<θ>[-]\d+\.\d+)\) (?<target>\d+)", line); !isnothing(capture))
+                Rz(mapping[capture["target"]]; θ = capture["θ"])
+            elseif (
+                capture =
+                    match(r"fsim\((?<θ>[-]\d+\.\d+),[ ](?<ϕ>[-]\d+\.\d+)\) (?<source>\d+) (?<target>\d+)", line);
+                !isnothing(capture)
+            )
+                FSim(mapping[capture["source"]], mapping[capture["target"]]; θ = capture["θ"], ϕ = capture["ϕ"])
             else
                 error(ErrorException("invalid code: $line"))
             end
