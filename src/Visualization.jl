@@ -1,28 +1,73 @@
-using Luxor
-using MathTeXEngine
-using LaTeXStrings
+using Cobweb: h
 
-texname(::Type{Op}) where {Op<:Operator} = LaTeXString(String(nameof(Op)))
+texname(::Type{Op}) where {Op<:Operator} = String(nameof(Op))
 
-texname(::Type{Sd}) = L"S^\dagger"
-texname(::Type{Td}) = L"T^\dagger"
+texname(::Type{Sd}) = """S<tspan font-size="60%" baseline-shift="super">†</tspan>"""
+texname(::Type{Td}) = """T<tspan font-size="60%" baseline-shift="super">†</tspan>"""
 
-texname(::Type{Rx}) = L"R_X"
-texname(::Type{Ry}) = L"R_Y"
-texname(::Type{Rz}) = L"R_Z"
+texname(::Type{Rx}) = """R<tspan font-size="60%" baseline-shift="sub">X</tspan>"""
+texname(::Type{Ry}) = """R<tspan font-size="60%" baseline-shift="sub">Y</tspan>"""
+texname(::Type{Rz}) = """R<tspan font-size="60%" baseline-shift="sub">Z</tspan>"""
 
-texname(::Type{Hz}) = L"H_Z"
+texname(::Type{Hz}) = """H<tspan font-size="60%" baseline-shift="sub">Z</tspan>"""
 
-texname(::Type{FSim}) = L"F_S"
+texname(::Type{FSim}) = """F<tspan font-size="60%" baseline-shift="sub">S</tspan>"""
 
 function draw end
 export draw
+
+const DRAWING_STYLE = h.style(
+    """
+    .wire {
+        stroke: black;
+        stroke-width: 2px;
+    }
+
+    .lane {}
+    .virtual {}
+
+    .block {
+        stroke: black;
+        fill: white;
+    }
+
+    text {
+        text-anchor: middle;
+        dominant-baseline: central;
+    }
+""",
+    type = "text/css",
+)
+
+function __svg_vcat_blocks(blocks...)
+    container = h.svg(width = maximum(x -> x.width, blocks), height = sum(x -> parse(Int, x.height), blocks))
+
+    for (block, y) in zip(blocks, Iterators.flatten([0, cumsum(Iterators.map(x -> parse(Int, x.height), blocks))]))
+        block.y = y
+        push!(container, block)
+    end
+
+    return container
+end
+
+function __svg_hcat_blocks(blocks...)
+    container = h.svg(height = maximum(x -> x.height, blocks), width = sum(x -> parse(Int, x.width), blocks))
+
+    for (block, x) in zip(blocks, Iterators.flatten([0, Iterators.map(x -> parse(Int, x.width), blocks)]))
+        block.x = x
+        push!(container, block)
+    end
+
+    return container
+end
 
 function draw(circuit::Circuit; kwargs...)
     n = lanes(circuit)
 
     if isempty(circuit)
-        return vcat([draw(Gate{I}(lane); kwargs...) for lane in 1:n]...)
+        svg = __svg_vcat_blocks([draw(Gate{I}(lane); kwargs...) for lane in 1:n]...)
+        push!(svg, DRAWING_STYLE)
+        return svg
     end
 
     # split moments if gates overlap in 1D
@@ -48,40 +93,34 @@ function draw(circuit::Circuit; kwargs...)
         return ms
     end |> Iterators.flatten |> collect
 
-    return mapreduce(hcat, _moments) do moment
+    svg = mapreduce(__svg_hcat_blocks, _moments) do moment
         (min, max) = extrema(mapreduce(lanes, ∪, moment))
         moment = [map(I, filter(<(min), 1:n))..., moment..., map(I, filter(>(max), 1:n))...]
 
-        mapreduce(x -> draw(x; kwargs...), vcat, moment)
+        mapreduce(x -> draw(x; kwargs...), __svg_vcat_blocks, moment)
     end
+
+    push!(svg, DRAWING_STYLE)
+
+    return svg
 end
 
-function Base.show(io::IO, ::MIME"image/svg+xml", circuit::Circuit)
-    _ = draw(circuit)
-    print(io, svgstring())
-end
+Base.show(io::IO, ::MIME"image/svg+xml", circuit::Circuit) = print(io, draw(circuit))
 
-function draw(gate::Gate{Op,1,P}; kwargs...) where {Op,P}
-    draw_block(; top = false, bottom = false)
-end
+draw(gate::Gate{Op,1,P}) where {Op,P} = draw_block(; top = false, bottom = false)
 
-function draw(gate::Gate{Op,N,P}; kwargs...) where {Op,N,P}
+function draw(gate::Gate{Op,N,P}) where {Op,N,P}
     a, b = extrema(lanes(gate))
     n = b - a + 1
-    vcat(
-        draw_block(; top = true, bottom = false, kwargs...),
-        fill(draw_multiblock_mid(; kwargs...), (n - 2))...,
-        draw_block(; top = false, bottom = true, kwargs...),
+    __svg_vcat_blocks(
+        draw_block(; top = true, bottom = false),
+        fill(draw_multiblock_mid(), (n - 2))...,
+        draw_block(; top = false, bottom = true),
     )
 end
 
-function draw(::Gate{I,1,NamedTuple{(),Tuple{}}}; background = nothing)
-    @drawsvg begin
-        (background !== nothing) && Luxor.background(background)
-        origin()
-        line(Point(-25, 0), Point(25, 0), action = :stroke)
-    end 50 50
-end
+draw(::Gate{I,1,NamedTuple{(),Tuple{}}}) =
+    h.svg(h.line."wire lane"(; x1 = -25, y1 = 0, x2 = 25, y2 = 0), viewBox = "-25 -25 50 50", width = 50, height = 50)
 
 for Op in [X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Hz, FSim]
     @eval draw(::Gate{$Op,1,P}; kwargs...) where {P} = draw_block(texname($Op); kwargs...)
@@ -95,14 +134,14 @@ function draw(gate::Gate{<:Control}; kwargs...)
     # TODO Control{Swap}
     @assert length(t) == 1
 
-    vcat(
+    __svg_vcat_blocks(
         [
             if lane == first(r)
-                draw_copy(:top; kwargs...)
+                draw_copy(:top)
             elseif lane ∈ c
-                draw_copy(:mid; kwargs...)
+                draw_copy(:mid)
             else
-                draw_cross(; kwargs...)
+                draw_cross()
             end for lane in r if lane < only(t)
         ]...,
         draw(
@@ -113,83 +152,66 @@ function draw(gate::Gate{<:Control}; kwargs...)
         ),
         [
             if lane == last(r)
-                draw_copy(:bottom; kwargs...)
+                draw_copy(:bottom)
             elseif lane ∈ c
-                draw_copy(:mid; kwargs...)
+                draw_copy(:mid)
             else
-                draw_cross(; kwargs...)
+                draw_cross()
             end for lane in r if lane > only(t)
         ]...,
     )
 end
 
-function draw_block(label = ""; top::Bool = false, bottom::Bool = false, background = nothing)
-    @drawsvg begin
-        (background !== nothing) && Luxor.background(background)
-        origin()
-
-        # lane wire
-        line(Point(-25, 0), Point(-15, 0), action = :stroke)
-        line(Point(25, 0), Point(15, 0), action = :stroke)
-
-        # control connectors
-        if top
-            line(Point(0, 25), Point(0, 15), action = :stroke)
-        end
-        if bottom
-            line(Point(0, -25), Point(0, -15), action = :stroke)
-        end
-
-        rect(-15, -15, 30, 30, action = :stroke)
-
-        # label
-        fontsize(16)
-        text(label, Point(0, 0), valign = :middle, halign = :center)
-    end 50 50
+function draw_block(label = ""; top::Bool = false, bottom::Bool = false)
+    drawing = h.svg(
+        h.line."wire lane"(x1 = -25, y1 = 0, x2 = -15, y2 = 0),
+        h.line."wire lane"(x1 = 25, y1 = 0, x2 = 15, y2 = 0),
+        h.rect."block"(x = -15, y = -15, width = 30, height = 30),
+        h.text."label"(label, x = 0, y = 0),
+        viewBox = "-25 -25 50 50",
+        width = 50,
+        height = 50,
+    )
+    top && push!(drawing, h.line."wire virtual"(x1 = 0, y1 = 25, x2 = 0, y2 = 15))
+    bottom && push!(drawing, h.line."wire virtual"(x1 = 0, y1 = -25, x2 = 0, y2 = -15))
+    return drawing
 end
 
-function draw_multiblock_mid(; background = nothing)
-    @drawsvg begin
-        (background !== nothing) && Luxor.background(background)
-        origin()
+draw_multiblock_mid() = h.svg(
+    h.line."wire lane"(x1 = -25, y1 = 0, x2 = -15, y2 = 0),
+    h.line."wire lane"(x1 = 25, y1 = 0, x2 = 15, y2 = 0),
+    h.line(x1 = -25, y1 = 0, x2 = 25, y2 = 0), # TODO assign class. fill?
+    h.line(x1 = 0, y1 = -25, x2 = 0, y2 = 25), # TODO assign class. fill?
+    viewBox = "-25 -25 50 50",
+    width = 50,
+    height = 50,
+)
 
-        # lane wire
-        line(Point(-25, 0), Point(-15, 0), action = :stroke)
-        line(Point(25, 0), Point(15, 0), action = :stroke)
+draw_cross() = h.svg(
+    h.line."wire lane"(x1 = -25, y1 = 0, x2 = 25, y2 = 0),
+    h.line."wire virtual"(x1 = 0, y1 = -25, x2 = 0, y2 = 25),
+    viewBox = "-25 -25 50 50",
+    width = 50,
+    height = 50,
+)
 
-        # vertical lines
-        line(Point(-25, 0), Point(25, 0), action = :stroke)
-        line(Point(0, -25), Point(0, 25), action = :stroke)
-    end 50 50
-end
+function draw_copy(dir::Symbol)
+    (a, b) = if dir === :top
+        0, 25
+    elseif dir === :bottom
+        0, -25
+    elseif dir === :mid
+        25, -25
+    else
+        throw(ArgumentError("`dir`=$dir is invalid"))
+    end
 
-function draw_cross(; background = nothing)
-    @drawsvg begin
-        (background !== nothing) && Luxor.background(background)
-        origin()
-
-        line(Point(-25, 0), Point(25, 0), action = :stroke)
-        line(Point(0, -25), Point(0, 25), action = :stroke)
-    end 50 50
-end
-
-function draw_copy(dir::Symbol; background = nothing)
-    @drawsvg begin
-        (background !== nothing) && Luxor.background(background)
-        origin()
-        line(Point(-25, 0), Point(25, 0), action = :stroke)
-
-        circle(0, 0, 5, action = :fill)
-
-        (a, b) = if dir == :top
-            Point(0, 0), Point(0, 25)
-        elseif dir == :bottom
-            Point(0, 0), Point(0, -25)
-        elseif dir == :mid
-            Point(0, 25), Point(0, -25)
-        else
-            throw(ArgumentError("`dir`=$dir is invalid"))
-        end
-        line(a, b, action = :stroke)
-    end 50 50
+    h.svg(
+        h.line."wire lane"(x1 = -25, y1 = 0, x2 = 25, y2 = 0),
+        h.circle."copy"(cx = 0, cy = 0, r = 5),
+        h.line."wire virtual"(x1 = 0, y1 = a, x2 = 0, y2 = b),
+        viewBox = "-25 -25 50 50",
+        width = 50,
+        height = 50,
+    )
 end
