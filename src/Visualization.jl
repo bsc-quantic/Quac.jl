@@ -13,9 +13,6 @@ texname(::Type{Hz}) = """H<tspan font-size="60%" baseline-shift="sub">Z</tspan>"
 
 texname(::Type{FSim}) = """F<tspan font-size="60%" baseline-shift="sub">S</tspan>"""
 
-function draw end
-export draw
-
 const DEFAULT_STYLE = h.style(
     """
     .wire {
@@ -61,11 +58,11 @@ function __svg_hcat_blocks(blocks...)
     return container
 end
 
-function draw(circuit::Circuit; kwargs...)
+function __svg(circuit::Circuit; kwargs...)
     n = lanes(circuit)
 
     if isempty(circuit)
-        svg = __svg_vcat_blocks([draw(Gate{I}(lane); kwargs...) for lane in 1:n]...)
+        svg = __svg_vcat_blocks([__svg(Gate{I}(lane); kwargs...) for lane in 1:n]...)
         push!(svg, DEFAULT_STYLE)
         return svg
     end
@@ -97,7 +94,7 @@ function draw(circuit::Circuit; kwargs...)
         (min, max) = extrema(mapreduce(lanes, ∪, moment))
         moment = [map(I, filter(<(min), 1:n))..., moment..., map(I, filter(>(max), 1:n))...]
 
-        mapreduce(x -> draw(x; kwargs...), __svg_vcat_blocks, moment)
+        mapreduce(x -> __svg(x; kwargs...), __svg_vcat_blocks, moment)
     end
 
     push!(svg, DEFAULT_STYLE)
@@ -105,28 +102,28 @@ function draw(circuit::Circuit; kwargs...)
     return svg
 end
 
-Base.show(io::IO, ::MIME"image/svg+xml", circuit::Circuit) = print(io, draw(circuit))
+Base.show(io::IO, ::MIME"image/svg+xml", circuit::Circuit) = print(io, __svg(circuit))
 
-draw(gate::Gate{Op,1,P}) where {Op,P} = draw_block(; top = false, bottom = false)
+__svg(gate::Gate{Op,1,P}) where {Op,P} = __svg_block(; top = false, bottom = false)
 
-function draw(gate::Gate{Op,N,P}) where {Op,N,P}
+function __svg(gate::Gate{Op,N,P}) where {Op,N,P}
     a, b = extrema(lanes(gate))
     n = b - a + 1
     __svg_vcat_blocks(
-        draw_block(; top = true, bottom = false),
-        fill(draw_multiblock_mid(), (n - 2))...,
-        draw_block(; top = false, bottom = true),
+        __svg_block(; top = true, bottom = false),
+        fill(__svg_multiblock_mid(), (n - 2))...,
+        __svg_block(; top = false, bottom = true),
     )
 end
 
-draw(::Gate{I,1,NamedTuple{(),Tuple{}}}) =
+__svg(::Gate{I,1,NamedTuple{(),Tuple{}}}) =
     h.svg(h.line."wire lane"(; x1 = -25, y1 = 0, x2 = 25, y2 = 0), viewBox = "-25 -25 50 50", width = 50, height = 50)
 
 for Op in [X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Hz, FSim]
-    @eval draw(::Gate{$Op,1,P}; kwargs...) where {P} = draw_block(texname($Op); kwargs...)
+    @eval __svg(::Gate{$Op,1,P}; kwargs...) where {P} = __svg_block(texname($Op); kwargs...)
 end
 
-function draw(gate::Gate{<:Control}; kwargs...)
+function __svg(gate::Gate{<:Control}; kwargs...)
     c = control(gate)
     t = target(gate)
     r = range(extrema(lanes(gate))...)
@@ -137,14 +134,14 @@ function draw(gate::Gate{<:Control}; kwargs...)
     __svg_vcat_blocks(
         [
             if lane == first(r)
-                draw_copy(:top)
+                __svg_copy(:top)
             elseif lane ∈ c
-                draw_copy(:mid)
+                __svg_copy(:mid)
             else
-                draw_cross()
+                __svg_cross()
             end for lane in r if lane < only(t)
         ]...,
-        draw(
+        __svg(
             Gate{targettype(operator(gate))}(target(gate)...; parameters(gate)...);
             top = !any(<(only(t)), c),
             bottom = !any(>(only(t)), c),
@@ -152,17 +149,17 @@ function draw(gate::Gate{<:Control}; kwargs...)
         ),
         [
             if lane == last(r)
-                draw_copy(:bottom)
+                __svg_copy(:bottom)
             elseif lane ∈ c
-                draw_copy(:mid)
+                __svg_copy(:mid)
             else
-                draw_cross()
+                __svg_cross()
             end for lane in r if lane > only(t)
         ]...,
     )
 end
 
-function draw_block(label = ""; top::Bool = false, bottom::Bool = false)
+function __svg_block(label = ""; top::Bool = false, bottom::Bool = false)
     drawing = h.svg(
         h.line."wire lane"(x1 = -25, y1 = 0, x2 = -15, y2 = 0),
         h.line."wire lane"(x1 = 25, y1 = 0, x2 = 15, y2 = 0),
@@ -177,7 +174,7 @@ function draw_block(label = ""; top::Bool = false, bottom::Bool = false)
     return drawing
 end
 
-draw_multiblock_mid() = h.svg(
+__svg_multiblock_mid() = h.svg(
     h.line."wire lane"(x1 = -25, y1 = 0, x2 = -15, y2 = 0),
     h.line."wire lane"(x1 = 25, y1 = 0, x2 = 15, y2 = 0),
     h.line(x1 = -25, y1 = 0, x2 = 25, y2 = 0), # TODO assign class. fill?
@@ -187,7 +184,7 @@ draw_multiblock_mid() = h.svg(
     height = 50,
 )
 
-draw_cross() = h.svg(
+__svg_cross() = h.svg(
     h.line."wire lane"(x1 = -25, y1 = 0, x2 = 25, y2 = 0),
     h.line."wire virtual"(x1 = 0, y1 = -25, x2 = 0, y2 = 25),
     viewBox = "-25 -25 50 50",
@@ -195,7 +192,7 @@ draw_cross() = h.svg(
     height = 50,
 )
 
-function draw_copy(dir::Symbol)
+function __svg_copy(dir::Symbol)
     (a, b) = if dir === :top
         0, 25
     elseif dir === :bottom
