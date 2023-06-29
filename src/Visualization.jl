@@ -28,7 +28,7 @@ const DRAWING_STYLE = h.style(
 
     .block {
         stroke: black;
-        fill: white;
+        fill: transparent;
     }
 
     text {
