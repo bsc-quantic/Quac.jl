@@ -10,6 +10,7 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 SimpleWeightedGraphs = "47aef6b3-ad0c-573a-a1e2-d07658019622"
 
 [compat]
+Cobweb = "0.5"
 Combinatorics = "1.0.0"
 SimpleWeightedGraphs = "1.2"
 julia = "1.8"
