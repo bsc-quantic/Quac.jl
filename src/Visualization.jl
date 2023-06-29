@@ -1,5 +1,9 @@
 using Cobweb: h
 
+function svg end
+
+Base.show(io::IO, ::MIME"image/svg+xml", circuit::Circuit) = print(io, svg(circuit))
+
 texname(::Type{Op}) where {Op<:Operator} = String(nameof(Op))
 
 texname(::Type{Sd}) = """S<tspan font-size="60%" baseline-shift="super">†</tspan>"""
@@ -58,11 +62,11 @@ function __svg_hcat_blocks(blocks...)
     return container
 end
 
-function __svg(circuit::Circuit; kwargs...)
+function svg(circuit::Circuit; kwargs...)
     n = lanes(circuit)
 
     if isempty(circuit)
-        svg = __svg_vcat_blocks([__svg(Gate{I}(lane); kwargs...) for lane in 1:n]...)
+        svg = __svg_vcat_blocks([svg(Gate{I}(lane); kwargs...) for lane in 1:n]...)
         push!(svg, DEFAULT_STYLE)
         return svg
     end
@@ -94,7 +98,7 @@ function __svg(circuit::Circuit; kwargs...)
         (min, max) = extrema(mapreduce(lanes, ∪, moment))
         moment = [map(I, filter(<(min), 1:n))..., moment..., map(I, filter(>(max), 1:n))...]
 
-        mapreduce(x -> __svg(x; kwargs...), __svg_vcat_blocks, moment)
+        mapreduce(x -> svg(x; kwargs...), __svg_vcat_blocks, moment)
     end
 
     push!(svg, DEFAULT_STYLE)
@@ -102,11 +106,9 @@ function __svg(circuit::Circuit; kwargs...)
     return svg
 end
 
-Base.show(io::IO, ::MIME"image/svg+xml", circuit::Circuit) = print(io, __svg(circuit))
+svg(gate::Gate{Op,1,P}) where {Op,P} = __svg_block(; top = false, bottom = false)
 
-__svg(gate::Gate{Op,1,P}) where {Op,P} = __svg_block(; top = false, bottom = false)
-
-function __svg(gate::Gate{Op,N,P}) where {Op,N,P}
+function svg(gate::Gate{Op,N,P}) where {Op,N,P}
     a, b = extrema(lanes(gate))
     n = b - a + 1
     __svg_vcat_blocks(
@@ -116,14 +118,14 @@ function __svg(gate::Gate{Op,N,P}) where {Op,N,P}
     )
 end
 
-__svg(::Gate{I,1,NamedTuple{(),Tuple{}}}) =
+svg(::Gate{I,1,NamedTuple{(),Tuple{}}}) =
     h.svg(h.line."wire lane"(; x1 = -25, y1 = 0, x2 = 25, y2 = 0), viewBox = "-25 -25 50 50", width = 50, height = 50)
 
 for Op in [X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Hz, FSim]
-    @eval __svg(::Gate{$Op,1,P}; kwargs...) where {P} = __svg_block(texname($Op); kwargs...)
+    @eval svg(::Gate{$Op,1,P}; kwargs...) where {P} = __svg_block(texname($Op); kwargs...)
 end
 
-function __svg(gate::Gate{<:Control}; kwargs...)
+function svg(gate::Gate{<:Control}; kwargs...)
     c = control(gate)
     t = target(gate)
     r = range(extrema(lanes(gate))...)
@@ -141,7 +143,7 @@ function __svg(gate::Gate{<:Control}; kwargs...)
                 __svg_cross()
             end for lane in r if lane < only(t)
         ]...,
-        __svg(
+        svg(
             Gate{targettype(operator(gate))}(target(gate)...; parameters(gate)...);
             top = !any(<(only(t)), c),
             bottom = !any(>(only(t)), c),
