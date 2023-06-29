@@ -16,7 +16,7 @@ texname(::Type{FSim}) = """F<tspan font-size="60%" baseline-shift="sub">S</tspan
 function draw end
 export draw
 
-const DRAWING_STYLE = h.style(
+const DEFAULT_STYLE = h.style(
     """
     .wire {
         stroke: black;
@@ -66,7 +66,7 @@ function draw(circuit::Circuit; kwargs...)
 
     if isempty(circuit)
         svg = __svg_vcat_blocks([draw(Gate{I}(lane); kwargs...) for lane in 1:n]...)
-        push!(svg, DRAWING_STYLE)
+        push!(svg, DEFAULT_STYLE)
         return svg
     end
 
@@ -100,7 +100,7 @@ function draw(circuit::Circuit; kwargs...)
         mapreduce(x -> draw(x; kwargs...), __svg_vcat_blocks, moment)
     end
 
-    push!(svg, DRAWING_STYLE)
+    push!(svg, DEFAULT_STYLE)
 
     return svg
 end
