@@ -101,6 +101,8 @@ end
 The ``\\theta`` rotation around the X-axis gate.
 """
 abstract type Rx <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
+Base.sqrt(g::Gate{X}) = Rx(lanes(g)..., θ = π / 2)
+Base.sqrt(::Type{X}) = (lane) -> Rx(lane, θ = π / 2)
 
 """
     Ry(lane, θ)
@@ -108,6 +110,8 @@ abstract type Rx <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
 The ``\\theta`` rotation around the Y-axis gate.
 """
 abstract type Ry <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
+Base.sqrt(g::Gate{Y}) = Ry(lanes(g)..., θ = π / 2)
+Base.sqrt(::Type{Y}) = (lane) -> Ry(lane, θ = π / 2)
 
 """
     Rz(lane, θ)
@@ -119,6 +123,13 @@ The ``\\theta`` rotation around the Z-axis gate.
   - The `U1` gate is an alias of `Rz`.
 """
 abstract type Rz <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
+Base.sqrt(g::Gate{Z}) = S(lanes(g)...)
+Base.sqrt(::Type{Z}) = (lane) -> S(lane)
+
+Base.sqrt(g::Gate{S}) = T(lanes(g)...)
+Base.sqrt(::Type{S}) = (lane) -> T(lane)
+Base.sqrt(g::Gate{Sd}) = Td(lanes(g)...)
+Base.sqrt(::Type{Sd}) = (lane) -> Td(lane)
 
 for Op in [:Rx, :Ry, :Rz]
     @eval Base.length(::Type{$Op}) = 1
