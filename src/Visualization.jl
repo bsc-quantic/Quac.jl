@@ -6,16 +6,16 @@ Base.show(io::IO, ::MIME"image/svg+xml", circuit::Circuit) = print(io, svg(circu
 
 texname(::Type{Op}) where {Op<:Operator} = String(nameof(Op))
 
-texname(::Type{Sd}) = """S<tspan font-size="60%" baseline-shift="super">†</tspan>"""
-texname(::Type{Td}) = """T<tspan font-size="60%" baseline-shift="super">†</tspan>"""
+texname(::Type{Sd}) = """S<tspan class="superscript">†</tspan>"""
+texname(::Type{Td}) = """T<tspan class="superscript">†</tspan>"""
 
-texname(::Type{Rx}) = """R<tspan font-size="60%" baseline-shift="sub">X</tspan>"""
-texname(::Type{Ry}) = """R<tspan font-size="60%" baseline-shift="sub">Y</tspan>"""
-texname(::Type{Rz}) = """R<tspan font-size="60%" baseline-shift="sub">Z</tspan>"""
+texname(::Type{Rx}) = """R<tspan class="subscript">X</tspan>"""
+texname(::Type{Ry}) = """R<tspan class="subscript">Y</tspan>"""
+texname(::Type{Rz}) = """R<tspan class="subscript">Z</tspan>"""
 
-texname(::Type{Hz}) = """H<tspan font-size="60%" baseline-shift="sub">Z</tspan>"""
+texname(::Type{Hz}) = """H<tspan class="subscript">Z</tspan>"""
 
-texname(::Type{FSim}) = """F<tspan font-size="60%" baseline-shift="sub">S</tspan>"""
+texname(::Type{FSim}) = """F<tspan class="subscript">S</tspan>"""
 
 const DEFAULT_STYLE = h.style(
     """
@@ -35,6 +35,16 @@ const DEFAULT_STYLE = h.style(
     text {
         text-anchor: middle;
         dominant-baseline: central;
+    }
+
+    subscript {
+        font-size: 60%;
+        baseline-shift: sub;
+    }
+
+    superscript {
+        font-size: 60%;
+        baseline-shift: super;
     }
 """,
     type = "text/css",
