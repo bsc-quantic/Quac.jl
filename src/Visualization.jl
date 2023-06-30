@@ -111,6 +111,8 @@ function svg(circuit::Circuit; kwargs...)
         mapreduce(x -> svg(x; kwargs...), __svg_vcat_blocks, moment)
     end
 
+    __svg_lanes!(drawing, lanes(circuit))
+
     push!(drawing, DEFAULT_STYLE)
 
     return drawing
@@ -128,8 +130,12 @@ function svg(gate::Gate{Op,N,P}) where {Op,N,P}
     )
 end
 
-svg(::Gate{I,1,NamedTuple{(),Tuple{}}}) =
-    h.svg(h.line."wire lane"(; x1 = -25, y1 = 0, x2 = 25, y2 = 0), viewBox = "-25 -25 50 50", width = 50, height = 50)
+svg(::Gate{I,1,NamedTuple{(),Tuple{}}}) = h.svg(
+    # h.line."wire lane"(; x1 = -25, y1 = 0, x2 = 25, y2 = 0),
+    viewBox = "-25 -25 50 50",
+    width = 50,
+    height = 50,
+)
 
 for Op in [X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Hz, FSim]
     @eval svg(::Gate{$Op,1,P}; kwargs...) where {P} = __svg_block(texname($Op); kwargs...)
@@ -173,8 +179,8 @@ end
 
 function __svg_block(label = ""; top::Bool = false, bottom::Bool = false)
     drawing = h.svg(
-        h.line."wire lane"(x1 = -25, y1 = 0, x2 = -15, y2 = 0),
-        h.line."wire lane"(x1 = 25, y1 = 0, x2 = 15, y2 = 0),
+        # h.line."wire lane"(x1 = -25, y1 = 0, x2 = -15, y2 = 0),
+        # h.line."wire lane"(x1 = 25, y1 = 0, x2 = 15, y2 = 0),
         h.rect."block"(x = -15, y = -15, width = 30, height = 30),
         h.text."label"(label, x = 0, y = 0),
         viewBox = "-25 -25 50 50",
@@ -187,8 +193,8 @@ function __svg_block(label = ""; top::Bool = false, bottom::Bool = false)
 end
 
 __svg_multiblock_mid() = h.svg(
-    h.line."wire lane"(x1 = -25, y1 = 0, x2 = -15, y2 = 0),
-    h.line."wire lane"(x1 = 25, y1 = 0, x2 = 15, y2 = 0),
+    # h.line."wire lane"(x1 = -25, y1 = 0, x2 = -15, y2 = 0),
+    # h.line."wire lane"(x1 = 25, y1 = 0, x2 = 15, y2 = 0),
     h.line(x1 = -25, y1 = 0, x2 = 25, y2 = 0), # TODO assign class. fill?
     h.line(x1 = 0, y1 = -25, x2 = 0, y2 = 25), # TODO assign class. fill?
     viewBox = "-25 -25 50 50",
@@ -197,7 +203,7 @@ __svg_multiblock_mid() = h.svg(
 )
 
 __svg_cross() = h.svg(
-    h.line."wire lane"(x1 = -25, y1 = 0, x2 = 25, y2 = 0),
+    # h.line."wire lane"(x1 = -25, y1 = 0, x2 = 25, y2 = 0),
     h.line."wire virtual"(x1 = 0, y1 = -25, x2 = 0, y2 = 25),
     viewBox = "-25 -25 50 50",
     width = 50,
@@ -216,11 +222,18 @@ function __svg_copy(dir::Symbol)
     end
 
     h.svg(
-        h.line."wire lane"(x1 = -25, y1 = 0, x2 = 25, y2 = 0),
+        # h.line."wire lane"(x1 = -25, y1 = 0, x2 = 25, y2 = 0),
         h.circle."copy"(cx = 0, cy = 0, r = 5),
         h.line."wire virtual"(x1 = 0, y1 = a, x2 = 0, y2 = b),
         viewBox = "-25 -25 50 50",
         width = 50,
         height = 50,
     )
+end
+
+function __svg_lanes!(drawing, n)
+    for i in 0:n-1
+        y = convert(Float64, 100 * (i + 1 // 2) // n)
+        push!(drawing, h.line."wire lane"(x1 = "0%", y1 = "$y%", x2 = "100%", y2 = "$y%"))
+    end
 end
