@@ -76,9 +76,9 @@ function svg(circuit::Circuit; kwargs...)
     n = lanes(circuit)
 
     if isempty(circuit)
-        svg = __svg_vcat_blocks([svg(Gate{I}(lane); kwargs...) for lane in 1:n]...)
-        push!(svg, DEFAULT_STYLE)
-        return svg
+        drawing = __svg_vcat_blocks([svg(Gate{I}(lane); kwargs...) for lane in 1:n]...)
+        push!(drawing, DEFAULT_STYLE)
+        return drawing
     end
 
     # split moments if gates overlap in 1D
@@ -104,16 +104,16 @@ function svg(circuit::Circuit; kwargs...)
         return ms
     end |> Iterators.flatten |> collect
 
-    svg = mapreduce(__svg_hcat_blocks, _moments) do moment
+    drawing = mapreduce(__svg_hcat_blocks, _moments) do moment
         (min, max) = extrema(mapreduce(lanes, ∪, moment))
         moment = [map(I, filter(<(min), 1:n))..., moment..., map(I, filter(>(max), 1:n))...]
 
         mapreduce(x -> svg(x; kwargs...), __svg_vcat_blocks, moment)
     end
 
-    push!(svg, DEFAULT_STYLE)
+    push!(drawing, DEFAULT_STYLE)
 
-    return svg
+    return drawing
 end
 
 svg(gate::Gate{Op,1,P}) where {Op,P} = __svg_block(; top = false, bottom = false)
