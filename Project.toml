@@ -4,13 +4,19 @@ authors = ["Sergio Sánchez Ramírez <sergio.sanchez.ramirez@bsc.es>"]
 version = "0.2.2"
 
 [deps]
-Cobweb = "ec354790-cf28-43e8-bb59-b484409b7bad"
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 SimpleWeightedGraphs = "47aef6b3-ad0c-573a-a1e2-d07658019622"
 
+[weakdeps]
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+
+[extensions]
+QuacMakieExt = "Makie"
+
 [compat]
-Cobweb = "0.5"
 Combinatorics = "1.0.0"
 SimpleWeightedGraphs = "1.2"
 julia = "1.8"
