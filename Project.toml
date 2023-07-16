@@ -1,7 +1,7 @@
 name = "Quac"
 uuid = "b9105292-1415-45cf-bff1-d6ccf71e6143"
 authors = ["Sergio Sánchez Ramírez <sergio.sanchez.ramirez@bsc.es>"]
-version = "0.2.2"
+version = "0.2.3"
 
 [deps]
 Cobweb = "ec354790-cf28-43e8-bb59-b484409b7bad"
