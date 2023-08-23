@@ -3,6 +3,7 @@ export lanes
 export X, Y, Z, H, S, Sd, T, Td
 export isparametric, parameters
 export Rx, Ry, Rz, U1, U2, U3, Hz
+export Rxx, Ryy, Rzz
 export Control, Swap, FSim
 export CX, CY, CZ, CRx, CRy, CRz
 export control, target, operator
@@ -104,12 +105,26 @@ abstract type Rx <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
 Base.sqrt(::Type{X}) = (lane) -> Rx(lane, θ = π / 2)
 
 """
+    Rxx(lane1, lane2, θ)
+
+The ``\\theta`` rotation around the XX-axis gate.
+"""
+abstract type Rxx <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
+
+"""
     Ry(lane, θ)
 
 The ``\\theta`` rotation around the Y-axis gate.
 """
 abstract type Ry <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
 Base.sqrt(::Type{Y}) = (lane) -> Ry(lane, θ = π / 2)
+
+"""
+    Ryy(lane1, lane2, θ)
+
+The ``\\theta`` rotation around the YY-axis gate.
+"""
+abstract type Ryy <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
 
 """
     Rz(lane, θ)
@@ -121,12 +136,23 @@ The ``\\theta`` rotation around the Z-axis gate.
   - The `U1` gate is an alias of `Rz`.
 """
 abstract type Rz <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
-Base.sqrt(::Type{Z}) = (lane) -> S(lane)
-Base.sqrt(::Type{S}) = (lane) -> T(lane)
-Base.sqrt(::Type{Sd}) = (lane) -> Td(lane)
+Base.sqrt(::Type{Z}) = S
+Base.sqrt(::Type{S}) = T
+Base.sqrt(::Type{Sd}) = Td
+
+"""
+    Rzz(lane1, lane2, θ)
+
+The ``\\theta`` rotation around the ZZ-axis gate.
+"""
+abstract type Rzz <: Operator{NamedTuple{(:θ,),Tuple{Float64}}} end
 
 for Op in [:Rx, :Ry, :Rz]
     @eval Base.length(::Type{$Op}) = 1
+end
+
+for Op in [:Rxx, :Ryy, :Rzz]
+    @eval Base.length(::Type{$Op}) = 2
 end
 
 const U1 = Rz
@@ -185,7 +211,7 @@ for Op in [:X, :Y, :Z, :Rx, :Ry, :Rz]
 end
 
 # adjoints
-for Op in [:I, :X, :Y, :Z, :Rx, :Ry, :Rz, :H, :Swap]
+for Op in [:I, :X, :Y, :Z, :Rx, :Ry, :Rz, :Rxx, :Ryy, :Rzz, :H, :Swap]
     @eval Base.adjoint(::Type{$Op}) = $Op
 end
 
@@ -218,7 +244,7 @@ struct Gate{Op<:Operator,N,Params}
 end
 
 # constructor aliases
-for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td, :U2, :U3, :Rx, :Ry, :Rz, :Swap, :Hz, :FSim]
+for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td, :U2, :U3, :Rx, :Ry, :Rz, :Rxx, :Ryy, :Rzz, :Swap, :Hz, :FSim]
     @eval $Op(lanes...; params...) = Gate{$Op}(lanes...; params...)
 end
 
@@ -233,6 +259,7 @@ Control(lane, op::Gate{Op}) where {Op} = Gate{Control{Op}}(lane, lanes(op)...; p
 
 lanes(g::Gate) = g.lanes
 Base.length(::Type{Gate{Op}}) where {Op} = length(Op)
+Base.length(::Gate{Op}) where {Op} = length(Op)
 operator(::Type{<:Gate{Op}}) where {Op} = Op
 operator(::Gate{Op}) where {Op} = operator(Gate{Op})
 

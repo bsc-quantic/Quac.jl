@@ -78,6 +78,9 @@ Td
 Rx
 Ry
 Rz
+Rxx
+Ryy
+Rzz
 ```
 
 ### General U2, U3 gates

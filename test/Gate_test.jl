@@ -15,6 +15,9 @@
             Rx,
             Ry,
             Rz,
+            Rxx,
+            Ryy,
+            Rzz,
             Swap,
             Control{I},
             Control{Control{I}},
@@ -47,6 +50,9 @@
             Rx,
             Ry,
             Rz,
+            Rxx,
+            Ryy,
+            Rzz,
             Swap,
             Control{I},
             Control{Control{I}},
@@ -78,6 +84,9 @@
             Rx,
             Ry,
             Rz,
+            Rxx,
+            Ryy,
+            Rzz,
             U2,
             U3,
             Swap,
@@ -109,6 +118,9 @@
             Rx,
             Ry,
             Rz,
+            Rxx,
+            Ryy,
+            Rzz,
             U2,
             U3,
             Swap,
@@ -141,6 +153,9 @@
             Rx,
             Ry,
             Rz,
+            Rxx,
+            Ryy,
+            Rzz,
             Swap,
             Control{I},
             Control{Control{I}},
@@ -173,6 +188,9 @@
             Rx,
             Ry,
             Rz,
+            Rxx,
+            Ryy,
+            Rzz,
             Swap,
             Control{I},
             Control{Control{I}},
@@ -214,6 +232,9 @@
             Rx,
             Ry,
             Rz,
+            Rxx,
+            Ryy,
+            Rzz,
             Swap,
             Control{I},
             Control{Control{I}},
@@ -245,6 +266,9 @@
             Rx,
             Ry,
             Rz,
+            Rxx,
+            Ryy,
+            Rzz,
             Swap,
             Control{I},
             Control{Control{I}},
@@ -270,7 +294,7 @@
     @testset "targettype" begin
         using Quac: targettype
 
-        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Swap]
+        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, Swap]
             @test targettype(Gate{Op}) === Op
         end
 
@@ -284,7 +308,7 @@
             @test_throws MethodError control(rand(Gate{Op}, 1:length(Op)...))
         end
 
-        for Op in [I, Rx, Swap]
+        for Op in [I, Rx, Swap, Rxx]
             N = length(Op)
 
             M = length(Control{Op})
@@ -299,11 +323,11 @@
     end
 
     @testset "target" begin
-        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Swap]
+        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, Swap]
             @test_throws MethodError target(rand(Gate{Op}, 1:length(Op)...))
         end
 
-        for Op in [I, Rx, Swap]
+        for Op in [I, Rx, Swap, Rxx]
             N = length(Op)
 
             M = length(Control{Op})

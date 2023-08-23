@@ -48,6 +48,31 @@ Matrix{T}(g::G) where {T,G<:Gate{Ry}} = Matrix{T}([
 ])
 Matrix{T}(g::G) where {T,G<:Gate{Rz}} = Matrix{T}([1 0; 0 cis(g.θ)])
 
+Matrix{T}(g::G) where {T,G<:Gate{Rxx}} = Matrix{T}(
+    [
+        cos(g.θ / 2) 0 0 -1im*sin(g.θ / 2)
+        0 cos(g.θ / 2) -1im*sin(g.θ / 2) 0
+        0 -1im*sin(g.θ / 2) cos(g.θ / 2) 0
+        -1im*sin(g.θ / 2) 0 0 cos(g.θ / 2)
+    ],
+)
+
+Matrix{T}(g::G) where {T,G<:Gate{Ryy}} = Matrix{T}(
+    [
+        cos(g.θ / 2) 0 0 1im*sin(g.θ / 2)
+        0 cos(g.θ / 2) -1im*sin(g.θ / 2) 0
+        0 -1im*sin(g.θ / 2) cos(g.θ / 2) 0
+        1im*sin(g.θ / 2) 0 0 cos(g.θ / 2)
+    ],
+)
+
+Matrix{T}(g::G) where {T,G<:Gate{Rzz}} = Matrix{T}([
+    cis(-g.θ / 2) 0 0 0
+    0 cis(g.θ / 2) 0 0
+    0 0 cis(g.θ / 2) 0
+    0 0 0 cis(-g.θ / 2)
+])
+
 Matrix{T}(g::G) where {T,G<:Gate{U2}} = 1 / sqrt(2) * Matrix{T}([
     1 -cis(g.λ)
     cis(g.ϕ) cis(g.ϕ + g.λ)
@@ -111,6 +136,27 @@ Array{T,4}(::Type{<:Gate{Swap}}) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 
 Array{T,4}(g::G) where {T,G<:Gate{FSim}} =
     Array{T}([1; 0;; 0; 0;;; 0; cos(g.θ);; -1im*sin(g.ϕ); 0;;;; 0; -1im*sin(g.ϕ);; cos(g.θ); 0;;; 0; 0;; 0; 1])
 
+Array{T,4}(g::G) where {T,G<:Gate{Rxx}} = Array{T,4}(
+    [
+        cos(g.θ / 2); 0;; 0; -1im*sin(g.θ / 2);;; 0; cos(g.θ / 2);; -1im*sin(g.θ / 2); 0;;;;
+        0; -1im*sin(g.θ / 2);; cos(g.θ / 2); 0;;; -1im*sin(g.θ / 2); 0;; 0; cos(g.θ / 2)
+    ],
+)
+
+Array{T,4}(g::G) where {T,G<:Gate{Ryy}} = Array{T,4}(
+    [
+        cos(g.θ / 2); 0;; 0; 1im*sin(g.θ / 2);;; 0; cos(g.θ / 2);; -1im*sin(g.θ / 2); 0;;;;
+        0; -1im*sin(g.θ / 2);; cos(g.θ / 2); 0;;; 1im*sin(g.θ / 2); 0;; 0; cos(g.θ / 2)
+    ],
+)
+
+Array{T,4}(g::G) where {T,G<:Gate{Rzz}} = Array{T,4}(
+    [
+        cis(-g.θ / 2); 0;; 0; 0;;; 0; cis(g.θ / 2);; 0; 0;;;;
+        0; 0;; cis(g.θ / 2); 0;;; 0; 0;; 0; cis(-g.θ / 2)
+    ],
+)
+
 Array{T}(::Type{Gate{C}}) where {T,C<:Control} =
     Array{T,2 * length(C)}(reshape(Matrix{T}(Gate{C}), fill(2, 2 * length(C))...))
 Array{T}(g::Gate{C}) where {T,C<:Control} = Array{T,2 * length(C)}(reshape(Matrix{T}(g), fill(2, 2 * length(C))...))
@@ -132,6 +178,7 @@ Diagonal{F}(::Type{<:Gate{T}}) where {F} = Diagonal{F}([1, cispi(1 // 4)])
 Diagonal{T}(::Type{<:Gate{Td}}) where {T} = Diagonal{T}([1, cispi(-1 // 4)])
 
 Diagonal{T}(g::Gate{Rz}) where {T} = Diagonal{T}([1, cis(g.θ)])
+Diagonal{T}(g::Gate{Rzz}) where {T} = Diagonal{T}([1, cis(g.θ), cis(g.θ), 1])
 
 Diagonal{T}(::Type{Gate{Op}}) where {T,Op<:Control} =
     Diagonal{T}([fill(one(T), 2^length(Op) - 2^length(targettype(Op)))..., diag(Diagonal{T}(Gate{targettype(Op)}))...])
