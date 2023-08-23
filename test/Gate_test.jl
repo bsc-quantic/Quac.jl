@@ -18,7 +18,10 @@
             Rxx,
             Ryy,
             Rzz,
+            U2,
+            U3,
             Swap,
+            FSim,
             Control{I},
             Control{Control{I}},
             Control{Control{Control{I}}},
@@ -31,7 +34,7 @@
     end
 
     @testset "Constructor" begin
-        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz]
+        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3]
             @test Gate{Op}(range(1, length = length(Op))...; rand(parameters(Op))...) !== nothing
         end
     end
@@ -53,7 +56,10 @@
             Rxx,
             Ryy,
             Rzz,
+            U2,
+            U3,
             Swap,
+            FSim,
             Control{I},
             Control{Control{I}},
             Control{Control{Control{I}}},
@@ -90,6 +96,7 @@
             U2,
             U3,
             Swap,
+            FSim,
             Control{I},
             Control{Control{I}},
             Control{Control{Control{I}}},
@@ -124,6 +131,7 @@
             U2,
             U3,
             Swap,
+            FSim,
             Control{I},
             Control{Control{I}},
             Control{Control{Control{I}}},
@@ -156,7 +164,10 @@
             Rxx,
             Ryy,
             Rzz,
+            U2,
+            U3,
             Swap,
+            FSim,
             Control{I},
             Control{Control{I}},
             Control{Control{Control{I}}},
@@ -191,7 +202,10 @@
             Rxx,
             Ryy,
             Rzz,
+            U2,
+            U3,
             Swap,
+            FSim,
             Control{I},
             Control{Control{I}},
             Control{Control{Control{I}}},
@@ -211,7 +225,7 @@
         end
 
         # `adjoint(::Gate)` with parameters
-        for Op in [Rx, Ry, Rz, Control{Rx}, Control{Control{Rx}}, Control{Control{Control{Rx}}}]
+        for Op in [Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Control{Rx}, Control{Control{Rx}}, Control{Control{Control{Rx}}}]
             params = rand(parameters(Op))
             @test adjoint(Gate{Op}(1:length(Op)...; params...)) ===
                   Gate{adjoint(Op)}(1:length(Op)...; [key => -val for (key, val) in pairs(params)]...)
@@ -235,7 +249,10 @@
             Rxx,
             Ryy,
             Rzz,
+            U2,
+            U3,
             Swap,
+            FSim,
             Control{I},
             Control{Control{I}},
             Control{Control{Control{I}}},
@@ -269,7 +286,10 @@
             Rxx,
             Ryy,
             Rzz,
+            U2,
+            U3,
             Swap,
+            FSim,
             Control{I},
             Control{Control{I}},
             Control{Control{Control{I}}},
@@ -294,7 +314,7 @@
     @testset "targettype" begin
         using Quac: targettype
 
-        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, Swap]
+        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Swap, FSim]
             @test targettype(Gate{Op}) === Op
         end
 
@@ -304,11 +324,11 @@
     end
 
     @testset "control" begin
-        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Swap]
+        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Swap, FSim]
             @test_throws MethodError control(rand(Gate{Op}, 1:length(Op)...))
         end
 
-        for Op in [I, Rx, Swap, Rxx]
+        for Op in [I, Rx, Swap, Rxx, U2, U3, FSim]
             N = length(Op)
 
             M = length(Control{Op})
@@ -323,11 +343,11 @@
     end
 
     @testset "target" begin
-        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, Swap]
+        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Swap, FSim]
             @test_throws MethodError target(rand(Gate{Op}, 1:length(Op)...))
         end
 
-        for Op in [I, Rx, Swap, Rxx]
+        for Op in [I, Rx, Swap, Rxx, U2, U3, FSim]
             N = length(Op)
 
             M = length(Control{Op})

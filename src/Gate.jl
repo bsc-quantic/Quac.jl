@@ -211,7 +211,7 @@ for Op in [:X, :Y, :Z, :Rx, :Ry, :Rz]
 end
 
 # adjoints
-for Op in [:I, :X, :Y, :Z, :Rx, :Ry, :Rz, :Rxx, :Ryy, :Rzz, :H, :Swap]
+for Op in [:I, :X, :Y, :Z, :Rx, :Ry, :Rz, :Rxx, :Ryy, :Rzz, :U2, :U3, :H, :Swap, :FSim]
     @eval Base.adjoint(::Type{$Op}) = $Op
 end
 
