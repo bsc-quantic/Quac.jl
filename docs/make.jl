@@ -17,4 +17,4 @@ makedocs(
     ],
 )
 
-deploydocs(repo = "github.com/bsc-Quantic/Quac.jl.git", devbranch = "master", push_preview = true)
+deploydocs(repo = "github.com/bsc-quantic/Quac.jl.git", devbranch = "master", push_preview = true)
