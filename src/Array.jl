@@ -101,8 +101,8 @@ for Op in [I, X, Y, Z, H, S, Sd, T, Td, Swap]
     @eval Array{T}(::G) where {T,G<:Gate{$Op}} = Array{T}(G)
 end
 
-@eval Array{T}(::Type{G}) where {T,G<:Gate} = Array{T,2 * length(operator(G))}(G)
-@eval Array{T}(g::G) where {T,G<:Gate} = Array{T,2 * length(operator(G))}(isparametric(operator(G)) ? g : G)
+Array{T}(::Type{G}) where {T,G<:Gate} = Array{T,2 * length(operator(G))}(G)
+Array{T}(g::G) where {T,G<:Gate} = Array{T,2 * length(operator(G))}(isparametric(operator(G)) ? g : G)
 
 # NOTE multidimensional `Array` literal concatenation was introduced in 1.7
 # TODO clean code when we stop supporting Julia 1.6
