@@ -11,13 +11,10 @@ makedocs(
     sitename = "Quac",
     pages = [
         "Home" => "index.md",
-        "API Reference" => [
-            "Gates" => "api/gates.md",
-            "Circuit" => "api/circuit.md",
-            "Algorithms" => "api/algorithms.md",
-            ],
+        "API Reference" =>
+            ["Gates" => "api/gates.md", "Circuit" => "api/circuit.md", "Algorithms" => "api/algorithms.md"],
         "Ecosystem" => "ecosystem.md",
     ],
 )
 
-deploydocs(repo = "github.com/UB-Quantic/Quac.jl.git")
+deploydocs(repo = "github.com/bsc-Quantic/Quac.jl.git", devbranch = "master", push_preview = true)
