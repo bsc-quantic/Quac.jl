@@ -118,14 +118,24 @@ end
 
 svg(gate::Gate{Op,1,P}) where {Op,P} = __svg_block(; top = false, bottom = false)
 
-function svg(gate::Gate{Op,N,P}) where {Op,N,P}
-    a, b = extrema(lanes(gate))
-    n = b - a + 1
-    __svg_vcat_blocks(
-        __svg_block(; top = true, bottom = false),
-        fill(__svg_multiblock_mid(), (n - 2))...,
-        __svg_block(; top = false, bottom = true),
-    )
+function svg(gate::Gate{Op, N, P}) where {Op, N, P}
+    r = range(extrema(lanes(gate))...)
+    first_r, last_r = first(r), last(r)
+    max_lane = max(lanes(gate)...)
+
+    blocks = map(lane -> begin
+        if lane == first_r
+            __svg_block(; top = true, bottom = false)
+        elseif lane == last_r
+            __svg_block(; top = false, bottom = true)
+        elseif lane >= max_lane
+            __svg_copy(:mid)
+        else
+            __svg_cross()
+        end
+    end, r)
+
+    return __svg_vcat_blocks(blocks...)
 end
 
 svg(::Gate{I,1,NamedTuple{(),Tuple{}}}) =
