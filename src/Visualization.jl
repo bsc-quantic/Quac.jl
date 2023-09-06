@@ -120,13 +120,13 @@ svg(gate::Gate{Op,1,P}) where {Op,P} = __svg_block(; top = false, bottom = false
 
 function svg(gate::Gate{Op, N, P}) where {Op, N, P}
     r = range(extrema(lanes(gate))...)
-    first_r, last_r = first(r), last(r)
+    a, b = first(r), last(r)
     max_lane = max(lanes(gate)...)
 
     blocks = map(lane -> begin
-        if lane == first_r
+        if lane == a
             __svg_block(; top = true, bottom = false)
-        elseif lane == last_r
+        elseif lane == b
             __svg_block(; top = false, bottom = true)
         elseif lane ∈ setdiff(collect(lanes(gate)), [first_r, last_r])
             __svg_block(; top = false, bottom = false)
