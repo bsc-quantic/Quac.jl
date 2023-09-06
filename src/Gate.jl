@@ -4,7 +4,7 @@ export X, Y, Z, H, S, Sd, T, Td
 export isparametric, parameters
 export Rx, Ry, Rz, U1, U2, U3, Hz
 export Rxx, Ryy, Rzz
-export Control, Swap, FSim
+export Control, Swap, FSim, SU
 export CX, CY, CZ, CRx, CRy, CRz
 export control, target, operator
 export Pauli, Phase
@@ -206,6 +206,35 @@ abstract type Control{Op<:Operator} <: Operator{NamedTuple{(:target,),Tuple{Oper
 Base.length(::Type{Control{T}}) where {T<:Operator} = 1 + length(T)
 parameters(::Type{Control{Op}}) where {Op} = parameters(Op)
 
+"""
+    SU(N)(lane_1, lane_2, ..., lane_log2(N))
+
+A multi-qubit unitary operator that acts on `log2(N)` qubits.
+"""
+abstract type SU <: StaticOperator end
+Base.length(::Type{SU}) = throw(DomainError("SU is a parametric operator, use SU(N) instead"))
+
+# Generic function to create SU{N} types
+function SU(N::Int)
+    # Generate a new type name
+    name = Symbol("SU$(N)")
+
+    # Check that N is a power of 2
+    if N & (N - 1) != 0 || N < 1
+        throw(ArgumentError("N must be a positive power of 2"))
+    end
+
+    # Define the new type
+    @eval abstract type $name <: SU end
+
+    @eval export $name
+
+    # Dynamically add a length function for the new type
+    @eval Base.length(::Type{$name}) = log2($N) |> Int
+
+    @eval $name(lanes...; params...) = Gate{$name}(lanes...; params...)
+end
+
 for Op in [:X, :Y, :Z, :Rx, :Ry, :Rz]
     @eval const $(Symbol("C" * String(Op))) = Control{$Op}
 end
@@ -244,7 +273,7 @@ struct Gate{Op<:Operator,N,Params}
 end
 
 # constructor aliases
-for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td, :U2, :U3, :Rx, :Ry, :Rz, :Rxx, :Ryy, :Rzz, :Swap, :Hz, :FSim]
+for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td, :U2, :U3, :Rx, :Ry, :Rz, :Rxx, :Ryy, :Rzz, :Swap, :Hz, :FSim, :SU]
     @eval $Op(lanes...; params...) = Gate{$Op}(lanes...; params...)
 end
 
