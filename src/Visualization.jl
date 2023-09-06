@@ -128,7 +128,7 @@ function svg(gate::Gate{Op, N, P}) where {Op, N, P}
             __svg_block(; top = true, bottom = false)
         elseif lane == b
             __svg_block(; top = false, bottom = true)
-        elseif lane ∈ setdiff(collect(lanes(gate)), [first_r, last_r])
+        elseif lane ∈ setdiff(lanes(gate), [first_r, last_r])
             __svg_block(; top = false, bottom = false)
         else
             __svg_cross()
