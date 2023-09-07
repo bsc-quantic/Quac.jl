@@ -119,9 +119,7 @@ function Matrix{T}(g::Gate{<:Control}) where {T}
     return M
 end
 
-function Matrix{T}(g::Gate{<:SU}) where {T}
-    N = 2^length(g)
-
+function Matrix{T}(g::Gate{<:SU{N}}) where {T, N}
     # Create a NxN random complex matrix
     z = rand(T, N, N)
 
