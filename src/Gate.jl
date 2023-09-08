@@ -213,7 +213,7 @@ A multi-qubit random unitary operator that acts on `log2(N)` qubits.
 """
 abstract type SU{N} <: Operator{NamedTuple{(:array,), Tuple{Matrix}}} end
 Base.length(::Type{SU{N}}) where {N} =
-    (N & (N - 1) == 0 && N > 0) ? log2(N) |> Int : throw(DomainError(N, "N must be a power of 2"))
+    ispow2(N) ? log2(N) |> Int : throw(DomainError(N, "N must be a power of 2"))
 
 for Op in [:X, :Y, :Z, :Rx, :Ry, :Rz]
     @eval const $(Symbol("C" * String(Op))) = Control{$Op}
@@ -257,24 +257,13 @@ for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td, :U2, :U3, :Rx, :Ry, :Rz, :Rxx, 
     @eval $Op(lanes...; params...) = Gate{$Op}(lanes...; params...)
 end
 
-# separate constructor for SU
-function SU{N}(lanes...; params...) where {N}
-    # raise error if array is not in params or is not a Matrix
-    if !haskey(params, :array) || !isa(params[:array], Matrix) || size(params[:array]) != (N,N) || (N & (N - 1) != 0) || N <= 0
-        throw(ArgumentError("SU{N} requires a `array` N x N Matrix parameter, where N is a power of 2"))
-    end
+function SU{N}(lanes...; array::Matrix) where {N}
+    ispow2(N) || throw(DomainError(N, "N must be a power of 2"))
+    2^length(lanes) == N || throw(ArgumentError("SU{$N} requires $(log2(N) |> Int) lanes"))
+    size(array) == (N,N) || throw(ArgumentError("`array` must be a (N,N)-size matrix"))
+    isapprox(array * adjoint(array), LinearAlgebra.I(N))) || throw(ArgumentError("`array` is not unitary"))
 
-    # raise error if Matrix is not unitary
-    if !isapprox(params[:array] * adjoint(params[:array]), Matrix{ComplexF32}(LinearAlgebra.I, N, N), atol=1e-6)
-        throw(ArgumentError("SU{N} requires a unitary Matrix `array` parameter"))
-    end
-
-    # raise error if lanes is not log2(N)
-    if length(lanes) != log2(N) |> Int
-        throw(ArgumentError("SU{N} requires `log2(N)` lanes"))
-    end
-
-    Gate{SU{N}}(lanes...; params...)
+    Gate{SU{N}}(lanes...; array)
 end
 
 Base.sqrt(g::Gate{X}) = Rx(lanes(g)..., θ = π / 2)

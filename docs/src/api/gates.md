@@ -102,11 +102,9 @@ Control
 Swap
 ```
 
-## A General Unitary SU{N} gate
-The `SU{N}` gate is a general unitary gate that can be used to represent any unitary matrix that acts on
-`log2(N)` qubits. A new random `SU{N}` can be created with `rand(SU{N}, lanes...)`, where `N` is the dimension of the unitary matrix and `lanes` are the qubit lanes on which the gate acts.
+## Special Unitary gate
 
-!!! tip "Experimental interface"
+!!! warn "Experimental interface"
     This interface is experimental and may change in the future.
 
 ```@docs
