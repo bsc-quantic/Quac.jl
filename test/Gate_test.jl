@@ -44,10 +44,10 @@
         # Special case for SU{N}
        for N in [2, 4, 8]
             _lanes = range(1, length = log2(N) |> Int)
-            random_values = rand(ComplexF32, N, N)
-            q, _ = qr(random_values)
-            _values = Matrix{ComplexF32}(q)
-            @test Gate{SU{N}}(_lanes...; values = _values, N = N) !== nothing
+            rand_matrix = rand(ComplexF32, N, N)
+            q, _ = qr(rand_matrix)
+            array = Matrix{ComplexF32}(q)
+            @test Gate{SU{N}}(_lanes...; array = array) !== nothing
         end
     end
 
@@ -90,10 +90,10 @@
         # Special case for SU{N}
         for N in [2, 4, 8]
             _lanes = range(1, length = log2(N) |> Int)
-            random_values = rand(ComplexF32, N, N)
-            q, _ = qr(random_values)
-            _values = Matrix{ComplexF64}(q)
-            @test SU{N}(_lanes...; values = _values) isa Gate{SU{N},log2(N) |> Int, NamedTuple{(:values, :N),Tuple{Matrix,Int}}}
+            rand_matrix = rand(ComplexF32, N, N)
+            q, _ = qr(rand_matrix)
+            array = Matrix{ComplexF64}(q)
+            @test SU{N}(_lanes...; array = array) isa Gate{SU{N},log2(N) |> Int, NamedTuple{(:array,),Tuple{Matrix}}}
         end
     end
 
@@ -134,10 +134,10 @@
         # Special case for SU{N}
         for N in [2, 4, 8]
             _lanes = 1:length(SU{N}) |> collect
-            random_values = rand(ComplexF32, N, N)
-            q, _ = qr(random_values)
-            _values = Matrix{ComplexF32}(q)
-            @test lanes(Gate{SU{N}}(_lanes...; values = _values, N = log2(N))) === tuple(1:length(SU{N})...)
+            rand_matrix = rand(ComplexF32, N, N)
+            q, _ = qr(rand_matrix)
+            array = Matrix{ComplexF32}(q)
+            @test lanes(Gate{SU{N}}(_lanes...; array = array)) === tuple(1:length(SU{N})...)
         end
     end
 
@@ -179,10 +179,10 @@
         # Special case for SU{N}
         for N in [2, 4, 8]
             _lanes = 1:length(SU{N}) |> collect
-            random_values = rand(ComplexF32, N, N)
-            q, _ = qr(random_values)
-            _values = Matrix{ComplexF32}(q)
-            @test operator(Gate{SU{N}}(_lanes...; values = _values, N = log2(N))) === SU{N}
+            rand_matrix = rand(ComplexF32, N, N)
+            q, _ = qr(rand_matrix)
+            array = Matrix{ComplexF32}(q)
+            @test operator(Gate{SU{N}}(_lanes...; array = array)) === SU{N}
         end
     end
 
@@ -228,11 +228,10 @@
             @test parameters(Gate{SU{N}}) === parameters(SU{N})
 
             _lanes = 1:length(SU{N}) |> collect
-            random_values = rand(ComplexF32, N, N)
-            q, _ = qr(random_values)
-            _values = Matrix{ComplexF32}(q)
-            @test parameters(Gate{SU{N}}(_lanes...; values = _values, N = log2(N) |> Int)).values === _values
-            @test parameters(Gate{SU{N}}(_lanes...; values = _values, N = log2(N) |> Int)).N === log2(N) |> Int
+            rand_matrix = rand(ComplexF32, N, N)
+            q, _ = qr(rand_matrix)
+            array = Matrix{ComplexF32}(q)
+            @test parameters(Gate{SU{N}}(_lanes...; array = array)).array === array
         end
     end
 
@@ -287,12 +286,10 @@
             @test_throws MethodError adjoint(Gate{SU{N}})
 
             _lanes = 1:length(SU{N}) |> collect
-            random_values = rand(ComplexF32, N, N)
-            q, _ = qr(random_values)
-            _values = Matrix{ComplexF32}(q)
+            rand_matrix = rand(ComplexF64, N, N)
+            q, _ = qr(rand_matrix)
 
-            @test adjoint(SU{N}(_lanes...; values = _values, N = log2(N) |> Int)).values == adjoint(_values)
-            @test adjoint(SU{N}(_lanes...; values = _values, N = log2(N) |> Int)).N === log2(N) |> Int
+            @test adjoint(SU{N}(_lanes...; array = Matrix{ComplexF64}(q))).array == adjoint(Matrix{ComplexF64}(q))
         end
     end
 
@@ -414,21 +411,21 @@
 
     @testset "random unitary" begin
         # test_throws on a non-unitary matrix
-        @test_throws ArgumentError SU{4}(1, 2; values = rand(ComplexF32, 4, 4), N = 2)
+        @test_throws ArgumentError SU{4}(1, 2; array = rand(ComplexF32, 4, 4), N = 2)
 
         # test_throws on a non-square matrix
-        @test_throws ArgumentError SU{4}(1, 2; values = rand(ComplexF32, 4, 2), N = 2)
+        @test_throws ArgumentError SU{4}(1, 2; array = rand(ComplexF32, 4, 2), N = 2)
 
         # test_throws on a matrix without size (N, N)
-        @test_throws ArgumentError SU{4}(1, 2; values = rand(ComplexF32, 2, 2), N = 2)
+        @test_throws ArgumentError SU{4}(1, 2; array = rand(ComplexF32, 2, 2), N = 2)
 
         # test_throws SU{N} with N not a power of 2
-        @test_throws ArgumentError SU{3}(1, 2; values = rand(ComplexF32, 3, 3), N = 2)
+        @test_throws ArgumentError SU{3}(1, 2; array = rand(ComplexF32, 3, 3), N = 2)
 
         # test_throws when there are not log2(N) lanes
-        rand_values = rand(ComplexF32, 4, 4)
-        q, _ = qr(rand_values)
-        @test_throws ArgumentError SU{4}(1, 2, 3; values = Matrix{ComplexF32}(q), N = 2)
+        rand_matrix = rand(ComplexF32, 4, 4)
+        q, _ = qr(rand_matrix)
+        @test_throws ArgumentError SU{4}(1, 2, 3; array = Matrix{ComplexF32}(q), N = 2)
     end
 
     @testset "target" begin
