@@ -90,7 +90,7 @@
         # Special case for SU{N}
         for N in [2, 4, 8]
             _lanes = range(1, length = log2(N) |> Int)
-            rand_matrix = rand(ComplexF32, N, N)
+            rand_matrix = rand(ComplexF64, N, N)
             q, _ = qr(rand_matrix)
             array = Matrix{ComplexF64}(q)
             @test SU{N}(_lanes...; array = array) isa Gate{SU{N},log2(N) |> Int, NamedTuple{(:array,),Tuple{Matrix}}}
