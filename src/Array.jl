@@ -1,6 +1,7 @@
 import Base: Matrix, Array
 import LinearAlgebra: Diagonal, diag, eigvals, eigvecs, eigen
 using LinearAlgebra: Eigen, LinearAlgebra, qr
+using Random
 
 # preferred representation
 function arraytype end
@@ -119,14 +120,25 @@ function Matrix{T}(g::Gate{<:Control}) where {T}
     return M
 end
 
+function Base.rand(ElType::Type, ::Type{SU{N}}, lanes::NTuple{M, Int}; seed::Union{Int, Nothing}=nothing) where {N, M}
+    if seed !== nothing
+        Random.seed!(seed)
+    end
+
+    # Generate random numbers here
+    random_values = rand(ElType, N, N)
+
+    # Use QR to make it unitary
+    q, _ = qr(random_values)
+
+    SU{N}(lanes...; values = Matrix{ElType}(q))
+end
+
+Base.rand(::Type{SU{N}}, lanes::NTuple{M, Int}; seed::Union{Int, Nothing}=nothing) where {N, M} = rand(ComplexF32, SU{N}, lanes; seed = seed)
+Base.rand(::Type{Gate{SU{N}}}, lanes::Integer...; seed::Union{Int, Nothing}=nothing) where {N} = rand(ComplexF32, SU{N}, lanes; seed = seed)
+
 function Matrix{T}(g::Gate{<:SU{N}}) where {T, N}
-    # Create a NxN random complex matrix
-    z = rand(T, N, N)
-
-    # QR decomposition to make it unitary
-    Q, _ = qr(z)
-
-    return Matrix{T}(Q)
+    return g.values |> Matrix{T}
 end
 
 Array(x::Gate) = Array{ComplexF32}(x)

@@ -211,8 +211,9 @@ parameters(::Type{Control{Op}}) where {Op} = parameters(Op)
 
 A multi-qubit random unitary operator that acts on `log2(N)` qubits.
 """
-abstract type SU{N} <: Operator{NamedTuple{(:N,), Tuple{Int}}} where {N<:Int} end
-Base.length(::Type{SU{N}}) where {N} = log2(N) |> Int
+abstract type SU{N} <: Operator{NamedTuple{(:values, :N), Tuple{Matrix, Int}}} where {T, N<:Int} end
+Base.length(::Type{SU{N}}) where {N} =
+    (N & (N - 1) == 0 && N > 0) ? log2(N) |> Int : throw(DomainError(N, "N must be a power of 2"))
 
 for Op in [:X, :Y, :Z, :Rx, :Ry, :Rz]
     @eval const $(Symbol("C" * String(Op))) = Control{$Op}
@@ -258,6 +259,21 @@ end
 
 # separate constructor for SU
 @eval function SU{N}(lanes...; params...) where {N}
+    # raise error if values is not in params or is not a Matrix
+    if !haskey(params, :values) || !isa(params[:values], Matrix) || size(params[:values]) != (N,N) || (N & (N - 1) != 0) || N <= 0
+        throw(ArgumentError("SU{N} requires a `values` N x N Matrix parameter, where N is a power of 2"))
+    end
+
+    # raise error if Matrix is not unitary
+    if !isapprox(params[:values] * adjoint(params[:values]), Matrix{ComplexF32}(LinearAlgebra.I, N, N), atol=1e-6)
+        throw(ArgumentError("SU{N} requires a unitary Matrix `values` parameter"))
+    end
+
+    # raise error if lanes is not log2(N)
+    if length(lanes) != log2(N) |> Int
+        throw(ArgumentError("SU{N} requires `log2(N)` lanes"))
+    end
+
     Gate{SU{N}}(lanes...; params..., N = log2(N) |> Int)
 end
 
@@ -296,6 +312,7 @@ Base.getproperty(g::Gate{Op}, i::Symbol) where {Op} = i ∈ propertynames(g) ? p
 Base.adjoint(::Type{<:Gate{Op}}) where {Op} = Gate{adjoint(Op)}
 Base.adjoint(::Type{Gate{Op,N,P}}) where {Op,N,P} = Gate{adjoint(Op),N,P}
 Base.adjoint(g::Gate{Op}) where {Op} = Gate{Op'}(lanes(g)...; [key => -val for (key, val) in pairs(parameters(g))]...)
+Base.adjoint(g::Gate{SU{N}}) where {N} = Gate{SU{N}}(lanes(g)...; values = adjoint(g.values), N = log2(N) |> Int)
 
 # NOTE useful type piracy
 Base.rand(::Type{NamedTuple{N,T}}) where {N,T} = NamedTuple{N}(rand(type) for type in T.parameters)
