@@ -209,7 +209,9 @@ parameters(::Type{Control{Op}}) where {Op} = parameters(Op)
 """
     SU(N)(lane_1, lane_2, ..., lane_log2(N))
 
-A multi-qubit random unitary operator that acts on `log2(N)` qubits.
+The `SU{N}` multi-qubit general unitary gate that can be used to represent any unitary matrix that acts on
+`log2(N)` qubits. A new random `SU{N}` can be created with `rand(SU{N}, lanes...)`, where `N` is the dimension
+ of the unitary matrix and `lanes` are the qubit lanes on which the gate acts.
 """
 abstract type SU{N} <: Operator{NamedTuple{(:array,), Tuple{Matrix}}} end
 Base.length(::Type{SU{N}}) where {N} =
@@ -261,7 +263,7 @@ function SU{N}(lanes...; array::Matrix) where {N}
     ispow2(N) || throw(DomainError(N, "N must be a power of 2"))
     2^length(lanes) == N || throw(ArgumentError("SU{$N} requires $(log2(N) |> Int) lanes"))
     size(array) == (N,N) || throw(ArgumentError("`array` must be a (N,N)-size matrix"))
-    isapprox(array * adjoint(array), LinearAlgebra.I(N))) || throw(ArgumentError("`array` is not unitary"))
+    isapprox(array * adjoint(array), Matrix{Complex64}(LinearAlgebra.I, N, N)) || throw(ArgumentError("`array` is not unitary"))
 
     Gate{SU{N}}(lanes...; array)
 end
