@@ -92,7 +92,7 @@
             _lanes = range(1, length = log2(N) |> Int)
             random_values = rand(ComplexF32, N, N)
             q, _ = qr(random_values)
-            _values = Matrix{ComplexF32}(q)
+            _values = Matrix{ComplexF64}(q)
             @test SU{N}(_lanes...; values = _values) isa Gate{SU{N},log2(N) |> Int, NamedTuple{(:values, :N),Tuple{Matrix,Int}}}
         end
     end
