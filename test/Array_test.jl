@@ -25,6 +25,12 @@
             @test size(Matrix(Gate{Op})) == (2^length(Op), 2^length(Op))
         end
 
+        # Special case for SU{N}
+        for N in [2, 4, 8]
+            @test Matrix(rand(Gate{SU{N}}, 1:Int(log2(N))...)) isa Matrix{ComplexF32}
+            @test size(Matrix(rand(Gate{SU{N}}, 1:Int(log2(N))...))) == (N, N)
+        end
+
         for Op in [
             I,
             X,
