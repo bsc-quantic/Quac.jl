@@ -126,7 +126,7 @@ function Base.rand(::Type{SU{N}}, lanes::NTuple{M, Int}; eltype::Type = ComplexF
     SU{N}(lanes...; values = Matrix(q))
 end
 
-Base.rand(::Type{Gate{SU{N}}}, lanes...; kwargs...) where {N} = rand(SU{N}, lanes; kwargs...)
+Base.rand(::Type{Gate{SU{N}}}, lanes::Integer...; kwargs...) where {N} = rand(SU{N}, lanes; kwargs...)
 
 function Matrix{T}(g::Gate{<:SU{N}}) where {T, N}
     return g.values |> Matrix{T}
