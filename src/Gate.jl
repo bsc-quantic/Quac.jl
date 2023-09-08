@@ -211,7 +211,7 @@ parameters(::Type{Control{Op}}) where {Op} = parameters(Op)
 
 A multi-qubit random unitary operator that acts on `log2(N)` qubits.
 """
-abstract type SU{N} <: Operator{NamedTuple{(:values, :N), Tuple{Matrix, Int}}} where {T, N<:Int} end
+abstract type SU{N} <: Operator{NamedTuple{(:values,), Tuple{Matrix}}} end
 Base.length(::Type{SU{N}}) where {N} =
     (N & (N - 1) == 0 && N > 0) ? log2(N) |> Int : throw(DomainError(N, "N must be a power of 2"))
 
