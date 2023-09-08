@@ -263,7 +263,7 @@ function SU{N}(lanes...; array::Matrix) where {N}
     ispow2(N) || throw(DomainError(N, "N must be a power of 2"))
     2^length(lanes) == N || throw(ArgumentError("SU{$N} requires $(log2(N) |> Int) lanes"))
     size(array) == (N,N) || throw(ArgumentError("`array` must be a (N,N)-size matrix"))
-    isapprox(array * adjoint(array), Matrix{Complex64}(LinearAlgebra.I, N, N)) || throw(ArgumentError("`array` is not unitary"))
+    isapprox(array * adjoint(array), Matrix{ComplexF64}(LinearAlgebra.I, N, N)) || throw(ArgumentError("`array` is not unitary"))
 
     Gate{SU{N}}(lanes...; array)
 end
