@@ -123,13 +123,13 @@ function Base.rand(::Type{SU{N}}, lanes::NTuple{M, Int}; eltype::Type = ComplexF
     # keep unitary matrix Q from QR decomposition
     q, _ = qr(rand(eltype, N, N))
 
-    SU{N}(lanes...; values = Matrix(q))
+    SU{N}(lanes...; array = Matrix(q))
 end
 
 Base.rand(::Type{Gate{SU{N}}}, lanes::Integer...; kwargs...) where {N} = rand(SU{N}, lanes; kwargs...)
 
 function Matrix{T}(g::Gate{<:SU{N}}) where {T, N}
-    return g.values |> Matrix{T}
+    return g.array |> Matrix{T}
 end
 
 Array(x::Gate) = Array{ComplexF32}(x)
