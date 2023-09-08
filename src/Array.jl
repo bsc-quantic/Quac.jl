@@ -134,8 +134,8 @@ function Base.rand(ElType::Type, ::Type{SU{N}}, lanes::NTuple{M, Int}; seed::Uni
     SU{N}(lanes...; values = Matrix{ElType}(q))
 end
 
-Base.rand(::Type{SU{N}}, lanes::NTuple{M, Int}; seed::Union{Int, Nothing}=nothing) where {N, M} = rand(ComplexF32, SU{N}, lanes; seed = seed)
-Base.rand(::Type{Gate{SU{N}}}, lanes::Integer...; seed::Union{Int, Nothing}=nothing) where {N} = rand(ComplexF32, SU{N}, lanes; seed = seed)
+Base.rand(::Type{SU{N}}, lanes::NTuple{M, Int}; seed::Union{Int, Nothing}=nothing) where {N, M} = rand(ComplexF64, SU{N}, lanes; seed = seed)
+Base.rand(::Type{Gate{SU{N}}}, lanes::Integer...; seed::Union{Int, Nothing}=nothing) where {N} = rand(ComplexF64, SU{N}, lanes; seed = seed)
 
 function Matrix{T}(g::Gate{<:SU{N}}) where {T, N}
     return g.values |> Matrix{T}
