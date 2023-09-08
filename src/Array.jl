@@ -1,7 +1,6 @@
 import Base: Matrix, Array
 import LinearAlgebra: Diagonal, diag, eigvals, eigvecs, eigen
 using LinearAlgebra: Eigen, LinearAlgebra, qr
-using Random
 
 # preferred representation
 function arraytype end
@@ -120,22 +119,15 @@ function Matrix{T}(g::Gate{<:Control}) where {T}
     return M
 end
 
-function Base.rand(ElType::Type, ::Type{SU{N}}, lanes::NTuple{M, Int}; seed::Union{Int, Nothing}=nothing) where {N, M}
-    if seed !== nothing
-        Random.seed!(seed)
-    end
+function Base.rand(::Type{SU{N}}, lanes::NTuple{M, Int}; eltype::Type = ComplexF64) where {N, M}
 
-    # Generate random numbers here
-    random_values = rand(ElType, N, N)
+    # keep unitary matrix Q from QR decomposition
+    q, _ = qr(rand(eltype, N, N))
 
-    # Use QR to make it unitary
-    q, _ = qr(random_values)
-
-    SU{N}(lanes...; values = Matrix{ElType}(q))
+    SU{N}(lanes...; values = Matrix(q))
 end
 
-Base.rand(::Type{SU{N}}, lanes::NTuple{M, Int}; seed::Union{Int, Nothing}=nothing) where {N, M} = rand(ComplexF64, SU{N}, lanes; seed = seed)
-Base.rand(::Type{Gate{SU{N}}}, lanes::Integer...; seed::Union{Int, Nothing}=nothing) where {N} = rand(ComplexF64, SU{N}, lanes; seed = seed)
+Base.rand(::Type{Gate{SU{N}}}, lanes...; kwargs...) where {N} = rand(SU{N}, lanes; kwargs...)
 
 function Matrix{T}(g::Gate{<:SU{N}}) where {T, N}
     return g.values |> Matrix{T}
