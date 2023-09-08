@@ -258,7 +258,7 @@ for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td, :U2, :U3, :Rx, :Ry, :Rz, :Rxx, 
 end
 
 # separate constructor for SU
-@eval function SU{N}(lanes...; params...) where {N}
+function SU{N}(lanes...; params...) where {N}
     # raise error if values is not in params or is not a Matrix
     if !haskey(params, :values) || !isa(params[:values], Matrix) || size(params[:values]) != (N,N) || (N & (N - 1) != 0) || N <= 0
         throw(ArgumentError("SU{N} requires a `values` N x N Matrix parameter, where N is a power of 2"))
