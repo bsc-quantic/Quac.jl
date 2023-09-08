@@ -101,3 +101,12 @@ Control
 ```@docs
 Swap
 ```
+
+## Special Unitary gate
+
+!!! warn "Experimental interface"
+    This interface is experimental and may change in the future.
+
+```@docs
+Quac.SU{N}
+```

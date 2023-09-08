@@ -1,5 +1,6 @@
 @testset "Gate" begin
     using Quac: I
+    using LinearAlgebra: qr
 
     @testset "Base.length" begin
         for Op in [
@@ -28,6 +29,8 @@
             Control{Swap},
             Control{Control{Swap}},
             Control{Control{Control{Swap}}},
+            SU{2},
+            SU{4},
         ]
             @test length(Gate{Op}) === length(Op)
         end
@@ -36,6 +39,15 @@
     @testset "Constructor" begin
         for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3]
             @test Gate{Op}(range(1, length = length(Op))...; rand(parameters(Op))...) !== nothing
+        end
+
+        # Special case for SU{N}
+       for N in [2, 4, 8]
+            _lanes = range(1, length = log2(N) |> Int)
+            rand_matrix = rand(ComplexF32, N, N)
+            q, _ = qr(rand_matrix)
+            array = Matrix{ComplexF32}(q)
+            @test Gate{SU{N}}(_lanes...; array = array) !== nothing
         end
     end
 
@@ -74,6 +86,15 @@
             P = parameters(Op)
             @test Op(1:N...; rand(P)...) isa Gate{Op,N,P}
         end
+
+        # Special case for SU{N}
+        for N in [2, 4, 8]
+            _lanes = range(1, length = log2(N) |> Int)
+            rand_matrix = rand(ComplexF64, N, N)
+            q, _ = qr(rand_matrix)
+            array = Matrix{ComplexF64}(q)
+            @test SU{N}(_lanes...; array = array) isa Gate{SU{N},log2(N) |> Int, NamedTuple{(:array,),Tuple{Matrix}}}
+        end
     end
 
     @testset "lanes" begin
@@ -108,6 +129,15 @@
             Control{Control{Control{Swap}}},
         ]
             @test lanes(Gate{Op}(1:length(Op)...; rand(parameters(Op))...)) === tuple(1:length(Op)...)
+        end
+
+        # Special case for SU{N}
+        for N in [2, 4, 8]
+            _lanes = 1:length(SU{N}) |> collect
+            rand_matrix = rand(ComplexF32, N, N)
+            q, _ = qr(rand_matrix)
+            array = Matrix{ComplexF32}(q)
+            @test lanes(Gate{SU{N}}(_lanes...; array = array)) === tuple(1:length(SU{N})...)
         end
     end
 
@@ -144,6 +174,15 @@
         ]
             # NOTE `operator(Gate{Op})` is implied
             @test operator(Gate{Op}(1:length(Op)...; rand(parameters(Op))...)) === Op
+        end
+
+        # Special case for SU{N}
+        for N in [2, 4, 8]
+            _lanes = 1:length(SU{N}) |> collect
+            rand_matrix = rand(ComplexF32, N, N)
+            q, _ = qr(rand_matrix)
+            array = Matrix{ComplexF32}(q)
+            @test operator(Gate{SU{N}}(_lanes...; array = array)) === SU{N}
         end
     end
 
@@ -182,6 +221,17 @@
 
             params = rand(parameters(Op))
             @test parameters(Gate{Op}(1:length(Op)...; params...)) === params
+        end
+
+        # Special case for SU{N}
+        for N in [2, 4, 8]
+            @test parameters(Gate{SU{N}}) === parameters(SU{N})
+
+            _lanes = 1:length(SU{N}) |> collect
+            rand_matrix = rand(ComplexF32, N, N)
+            q, _ = qr(rand_matrix)
+            array = Matrix{ComplexF32}(q)
+            @test parameters(Gate{SU{N}}(_lanes...; array = array)).array === array
         end
     end
 
@@ -230,6 +280,17 @@
             @test adjoint(Gate{Op}(1:length(Op)...; params...)) ===
                   Gate{adjoint(Op)}(1:length(Op)...; [key => -val for (key, val) in pairs(params)]...)
         end
+
+        # Special case for SU{N}
+        for N in [2, 4, 8]
+            @test_throws MethodError adjoint(Gate{SU{N}})
+
+            _lanes = 1:length(SU{N}) |> collect
+            rand_matrix = rand(ComplexF64, N, N)
+            q, _ = qr(rand_matrix)
+
+            @test adjoint(SU{N}(_lanes...; array = Matrix{ComplexF64}(q))).array == adjoint(Matrix{ComplexF64}(q))
+        end
     end
 
     @testset "Base.rand" begin
@@ -262,6 +323,9 @@
             Control{Swap},
             Control{Control{Swap}},
             Control{Control{Control{Swap}}},
+            SU{2},
+            SU{4},
+            SU{8},
         ]
             N = length(Op)
             P = parameters(Op)
@@ -299,6 +363,9 @@
             Control{Swap},
             Control{Control{Swap}},
             Control{Control{Control{Swap}}},
+            SU{2},
+            SU{4},
+            SU{8},
         ]
             @test keys(parameters(Op)) ⊆ propertynames(Gate{Op})
 
@@ -314,7 +381,7 @@
     @testset "targettype" begin
         using Quac: targettype
 
-        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Swap, FSim]
+        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Swap, FSim, SU{2}, SU{4}, SU{8}]
             @test targettype(Gate{Op}) === Op
         end
 
@@ -340,6 +407,25 @@
             M = length(Control{Control{Control{Op}}})
             @test control(rand(Gate{Control{Control{Control{Op}}}}, 1:M...)) === (1:(M-N)...,)
         end
+    end
+
+    @testset "random unitary" begin
+        # test_throws on a non-unitary matrix
+        @test_throws ArgumentError SU{4}(1, 2; array = rand(ComplexF32, 4, 4))
+
+        # test_throws on a non-square matrix
+        @test_throws ArgumentError SU{4}(1, 2; array = rand(ComplexF32, 4, 2))
+
+        # test_throws on a matrix without size (N, N)
+        @test_throws ArgumentError SU{4}(1, 2; array = rand(ComplexF32, 2, 2))
+
+        # test_throws SU{N} with N not a power of 2
+        @test_throws DomainError SU{3}(1, 2; array = rand(ComplexF32, 3, 3))
+
+        # test_throws when there are not log2(N) lanes
+        rand_matrix = rand(ComplexF32, 4, 4)
+        q, _ = qr(rand_matrix)
+        @test_throws ArgumentError SU{4}(1, 2, 3; array = Matrix{ComplexF32}(q))
     end
 
     @testset "target" begin

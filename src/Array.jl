@@ -1,6 +1,6 @@
 import Base: Matrix, Array
 import LinearAlgebra: Diagonal, diag, eigvals, eigvecs, eigen
-using LinearAlgebra: Eigen, LinearAlgebra
+using LinearAlgebra: Eigen, LinearAlgebra, qr
 
 # preferred representation
 function arraytype end
@@ -13,7 +13,7 @@ for G in [I, Z, S, Sd, T, Td, Rz]
     @eval arraytype(::Type{<:Gate{$G}}) = Diagonal
 end
 
-for G in [X, Y, H, Rx, Ry]
+for G in [X, Y, H, Rx, Ry, SU]
     @eval arraytype(::Type{<:Gate{$G}}) = Matrix
 end
 
@@ -22,7 +22,7 @@ end
 Matrix(x::Gate) = Matrix{ComplexF32}(x)
 Matrix(::Type{T}) where {T<:Gate} = Matrix{ComplexF32}(T)
 
-for Op in [I, X, Y, Z, H, S, Sd, T, Td, Swap]
+for Op in [I, X, Y, Z, H, S, Sd, T, Td, Swap, SU]
     @eval Matrix{T}(::G) where {T,G<:Gate{$Op}} = Matrix{T}(G)
 end
 
@@ -117,6 +117,19 @@ function Matrix{T}(g::Gate{<:Control}) where {T}
     M[(2^n-2^t+1):end, (2^n-2^t+1):end] = Matrix{T}(Gate{targettype(operator(g))}(target(g)...; parameters(g)...))
 
     return M
+end
+
+function Base.rand(::Type{SU{N}}, lanes::NTuple{M, Int}; eltype::Type = ComplexF64) where {N, M}
+    # keep unitary matrix Q from QR decomposition
+    q, _ = qr(rand(eltype, N, N))
+
+    SU{N}(lanes...; array = Matrix(q))
+end
+
+Base.rand(::Type{Gate{SU{N}}}, lanes::Integer...; kwargs...) where {N} = rand(SU{N}, lanes; kwargs...)
+
+function Matrix{T}(g::Gate{<:SU{N}}) where {T, N}
+    return g.array |> Matrix{T}
 end
 
 Array(x::Gate) = Array{ComplexF32}(x)

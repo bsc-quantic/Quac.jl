@@ -4,7 +4,7 @@ export X, Y, Z, H, S, Sd, T, Td
 export isparametric, parameters
 export Rx, Ry, Rz, U1, U2, U3, Hz
 export Rxx, Ryy, Rzz
-export Control, Swap, FSim
+export Control, Swap, FSim, SU
 export CX, CY, CZ, CRx, CRy, CRz
 export control, target, operator
 export Pauli, Phase
@@ -206,6 +206,17 @@ abstract type Control{Op<:Operator} <: Operator{NamedTuple{(:target,),Tuple{Oper
 Base.length(::Type{Control{T}}) where {T<:Operator} = 1 + length(T)
 parameters(::Type{Control{Op}}) where {Op} = parameters(Op)
 
+"""
+    SU(N)(lane_1, lane_2, ..., lane_log2(N))
+
+The `SU{N}` multi-qubit general unitary gate that can be used to represent any unitary matrix that acts on
+`log2(N)` qubits. A new random `SU{N}` can be created with `rand(SU{N}, lanes...)`, where `N` is the dimension
+ of the unitary matrix and `lanes` are the qubit lanes on which the gate acts.
+"""
+abstract type SU{N} <: Operator{NamedTuple{(:array,), Tuple{Matrix}}} end
+Base.length(::Type{SU{N}}) where {N} =
+    ispow2(N) ? log2(N) |> Int : throw(DomainError(N, "N must be a power of 2"))
+
 for Op in [:X, :Y, :Z, :Rx, :Ry, :Rz]
     @eval const $(Symbol("C" * String(Op))) = Control{$Op}
 end
@@ -248,6 +259,15 @@ for Op in [:I, :X, :Y, :Z, :H, :S, :Sd, :T, :Td, :U2, :U3, :Rx, :Ry, :Rz, :Rxx, 
     @eval $Op(lanes...; params...) = Gate{$Op}(lanes...; params...)
 end
 
+function SU{N}(lanes...; array::Matrix) where {N}
+    ispow2(N) || throw(DomainError(N, "N must be a power of 2"))
+    2^length(lanes) == N || throw(ArgumentError("SU{$N} requires $(log2(N) |> Int) lanes"))
+    size(array) == (N,N) || throw(ArgumentError("`array` must be a (N,N)-size matrix"))
+    isapprox(array * adjoint(array), Matrix{ComplexF64}(LinearAlgebra.I, N, N)) || throw(ArgumentError("`array` is not unitary"))
+
+    Gate{SU{N}}(lanes...; array)
+end
+
 Base.sqrt(g::Gate{X}) = Rx(lanes(g)..., θ = π / 2)
 Base.sqrt(g::Gate{Y}) = Ry(lanes(g)..., θ = π / 2)
 Base.sqrt(g::Gate{Z}) = S(lanes(g)...)
@@ -283,6 +303,7 @@ Base.getproperty(g::Gate{Op}, i::Symbol) where {Op} = i ∈ propertynames(g) ? p
 Base.adjoint(::Type{<:Gate{Op}}) where {Op} = Gate{adjoint(Op)}
 Base.adjoint(::Type{Gate{Op,N,P}}) where {Op,N,P} = Gate{adjoint(Op),N,P}
 Base.adjoint(g::Gate{Op}) where {Op} = Gate{Op'}(lanes(g)...; [key => -val for (key, val) in pairs(parameters(g))]...)
+Base.adjoint(g::Gate{SU{N}}) where {N} = Gate{SU{N}}(lanes(g)...; array = adjoint(g.array))
 
 # NOTE useful type piracy
 Base.rand(::Type{NamedTuple{N,T}}) where {N,T} = NamedTuple{N}(rand(type) for type in T.parameters)
