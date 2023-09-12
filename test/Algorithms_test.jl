@@ -6,7 +6,7 @@
         @test length(circuit.lanes) == 3
     end
 
-    @testset "Quac.Algorithms.QuantumVolume" begin
+    @testset "Quantum Volume" begin
         n_qubits = 4
         depth = 2
 
