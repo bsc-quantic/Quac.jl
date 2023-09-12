@@ -36,7 +36,7 @@ Generate a Quantum Volume circuit of `n` qubits and `depth` layers. See [1] for 
 [1] Cross, Andrew W., et al. "Validating quantum computers using randomized model circuits." Physical Review A 100.3 (2019): 032328.
 
 """
-function QuantumVolume(n::Int, depth::Int)
+function QuantumVolume(n, depth)
     circuit = Circuit(n)
 
     for _ in 1:depth
