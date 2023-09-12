@@ -17,6 +17,8 @@ texname(::Type{Hz}) = """H<tspan class="subscript">Z</tspan>"""
 
 texname(::Type{FSim}) = """F<tspan class="subscript">S</tspan>"""
 
+texname(::Type{SU{N}}) where {N} = """SU<tspan class="subscript">$(N)</tspan>"""
+
 const DEFAULT_STYLE = h.style(
     """
     .wire {
@@ -118,15 +120,15 @@ end
 
 svg(gate::Gate{Op,1,P}) where {Op,P} = __svg_block(; top = false, bottom = false)
 
-function svg(gate::Gate{Op,N,P}) where {Op,N,P}
+function svg(gate::Gate{Op, N, P}) where {Op, N, P}
     a, b = extrema(lanes(gate))
     r = a:b
 
     blocks = map(lane -> begin
         if lane == a
-            __svg_block(; top = true, bottom = false)
+            __svg_block(texname(Op); top = true, bottom = false)
         elseif lane == b
-            __svg_block(; top = false, bottom = true)
+            __svg_block(texname(Op); top = false, bottom = true)
         elseif lane ∈ setdiff(lanes(gate), [a, b])
             __svg_block(; top = false, bottom = false)
         else
