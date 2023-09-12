@@ -6,6 +6,7 @@ using Quac
     include("Gate_test.jl")
     include("Array_test.jl")
     include("Circuit_test.jl")
+    include("Algorithms_test.jl")
 end
 
 using Aqua
