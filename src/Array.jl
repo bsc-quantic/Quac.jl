@@ -132,6 +132,8 @@ function Matrix{T}(g::Gate{<:SU{N}}) where {T, N}
     return g.array |> Matrix{T}
 end
 
+Array{T}(g::Gate{SU{N}}) where {T,N} = Array{T,2 * length(g)}(reshape(Matrix{T}(g), fill(2, 2 * Int(log2(N)))...))
+
 Array(x::Gate) = Array{ComplexF32}(x)
 Array(::Type{T}) where {T<:Gate} = Array{ComplexF32}(T)
 
