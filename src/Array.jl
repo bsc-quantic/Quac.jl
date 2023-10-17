@@ -174,6 +174,8 @@ Array{T}(::Type{Gate{C}}) where {T,C<:Control} =
     Array{T,2 * length(C)}(reshape(Matrix{T}(Gate{C}), fill(2, 2 * length(C))...))
 Array{T}(g::Gate{C}) where {T,C<:Control} = Array{T,2 * length(C)}(reshape(Matrix{T}(g), fill(2, 2 * length(C))...))
 
+Array{T}(g::Gate{SU{N}}) where {T,N} = Array{T,2 * length(g)}(reshape(Matrix{T}(g), fill(2, 2 * Int(log2(N)))...))
+
 # diagonal matrices
 # NOTE efficient multiplication due to no memory swap needed: plain element-wise multiplication
 Diagonal(x::Gate) = Diagonal{ComplexF32}(x)
