@@ -13,7 +13,7 @@ for G in [I, Z, S, Sd, T, Td, Rz]
     @eval arraytype(::Type{<:Gate{$G}}) = Diagonal
 end
 
-for G in [X, Y, H, Rx, Ry, SU]
+for G in [X, Y, H, Rx, Ry]
     @eval arraytype(::Type{<:Gate{$G}}) = Matrix
 end
 
