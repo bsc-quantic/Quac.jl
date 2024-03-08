@@ -160,6 +160,22 @@
     end
 
     @testset "Correctness" begin
+        @testset "Rx" begin
+            @test begin
+                g = Rx(1, θ = 0)
+                Matrix(g) ≈ LinearAlgebra.I(2^length(g))
+            end
+
+            @test begin
+                g = Rx(1, θ = π / 2)
+                Matrix(g) ≈ 1 / sqrt(2) * [1 -1im; -1im 1]
+            end
+
+            @test begin
+                g = Rx(1, θ = π)
+                Matrix(g) ≈ [0 -1im; -1im 0]
+            end
+        end
         @testset "Rxx" begin
             @test begin
                 g = Rxx(1, 2, θ = 0)
@@ -175,6 +191,23 @@
                 g = Rxx(1, 2, θ = π)
                 x = Matrix(Gate{X})
                 Matrix(g) ≈ -1im * reshape(permutedims(reshape(kron(vec(x), vec(x)), 2, 2, 2, 2), (1, 3, 2, 4)), 4, 4)
+            end
+        end
+
+        @testset "Ry" begin
+            @test begin
+                g = Ry(1, θ = 0)
+                Matrix(g) ≈ LinearAlgebra.I(2^length(g))
+            end
+
+            @test begin
+                g = Ry(1, θ = π / 2)
+                Matrix(g) ≈ 1 / sqrt(2) * [1 -1; 1 1]
+            end
+
+            @test begin
+                g = Ry(1, θ = π)
+                Matrix(g) ≈ [0 -1; 1 0]
             end
         end
 
@@ -196,6 +229,23 @@
             end
         end
 
+        @testset "Rz" begin
+            @test begin
+                g = Rz(1, θ = 0)
+                Matrix(g) ≈ LinearAlgebra.I(2^length(g))
+            end
+
+            @test begin
+                g = Rz(1, θ = π / 2)
+                Matrix(g) ≈ [1 0; 0 1im]
+            end
+
+            @test begin
+                g = Rz(1, θ = π)
+                Matrix(g) ≈ [1 0; 0 -1]
+            end
+        end
+
         @testset "Rzz" begin
             @test begin
                 g = Rzz(1, 2, θ = 0)
@@ -213,5 +263,134 @@
                 Matrix(g) ≈ -1im * reshape(permutedims(reshape(kron(vec(x), vec(x)), 2, 2, 2, 2), (1, 3, 2, 4)), 4, 4)
             end
         end
+
+        @testset "U2" begin
+            @test begin
+                g = U2(1, ϕ = 0, λ = 0)
+                Matrix(g) ≈ 1 / sqrt(2) * [1 -1; 1 1]
+            end
+
+            @test begin
+                g = U2(1, ϕ = 0, λ = π / 2)
+                Matrix(g) ≈ 1 / sqrt(2) * [1 -1im; 1 1im]
+            end
+
+            @test begin
+                g = U2(1, ϕ = 0, λ = π)
+                Matrix(g) ≈ 1 / sqrt(2) * [1 1; 1 -1]
+            end
+
+            @test begin
+                g = U2(1, ϕ = π / 2, λ = 0)
+                Matrix(g) ≈ 1 / sqrt(2) * [1 -1; 1im 1im]
+            end
+
+            @test begin
+                g = U2(1, ϕ = π / 2, λ = π / 2)
+                Matrix(g) ≈ 1 / sqrt(2) * [1 -1im; 1im -1]
+            end
+
+            @test begin
+                g = U2(1, ϕ = π / 2, λ = π)
+                Matrix(g) ≈ 1 / sqrt(2) * [1 1; 1im -1im]
+            end
+
+            @test begin
+                g = U2(1, ϕ = π, λ = 0)
+                Matrix(g) ≈ 1 / sqrt(2) * [1 -1; -1 -1]
+            end
+
+            @test begin
+                g = U2(1, ϕ = π, λ = π / 2)
+                Matrix(g) ≈ 1 / sqrt(2) * [1 -1im; -1 -1im]
+            end
+
+            @test begin
+                g = U2(1, ϕ = π, λ = π)
+                Matrix(g) ≈ 1 / sqrt(2) * [1 1; -1 1]
+            end
+        end
+
+        @testset "U3" begin
+            @test begin
+                g = U3(1, θ = 0, ϕ = 0, λ = 0)
+                Matrix(g) ≈ LinearAlgebra.I(2^length(g))
+            end
+
+            @test begin
+                g = U3(1, θ = π / 2, ϕ = π / 2, λ = π / 2)
+                Matrix(g) ≈ 1 / sqrt(2) * [1 -1im; 1im -1]
+            end
+
+            @test begin
+                g = U3(1, θ = π, ϕ = π, λ = π)
+                Matrix(g) ≈ [0 1; -1 0]
+            end
+        end
+
+        @testset "Hz" begin
+            @test begin
+                g = Hz(1, θ = 0, ϕ = 0)
+                Matrix(g) ≈ LinearAlgebra.I(2^length(g))
+            end
+
+            @test begin
+                g = Hz(1, θ = π / 2, ϕ = π / 2)
+                Matrix(g) ≈ 1 / 2 * [1+1im 1-1im; -1+1im 1+1im]
+            end
+
+            @test begin
+                g = Hz(1, θ = π, ϕ = π)
+                Matrix(g) ≈ [0 1; 1 0]
+            end
+        end
+
+        @testset "FSim" begin
+            @test begin
+                g = FSim(1, 2, θ = 0, ϕ = 0)
+                Matrix(g) ≈ LinearAlgebra.I(2^length(g))
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = 0, ϕ = π / 2)
+                Matrix(g) ≈ [1 0 0 0; 0 1 -1im 0; 0 -1im 1 0; 0 0 0 1]
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = 0, ϕ = π)
+                Matrix(g) ≈ LinearAlgebra.I(2^length(g))
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = π / 2, ϕ = 0)
+                Matrix(g) ≈ [1 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 1]
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = π / 2, ϕ = π / 2)
+                Matrix(g) ≈ [1 0 0 0; 0 0 -1im 0; 0 -1im 0 0; 0 0 0 1]
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = π / 2, ϕ = π)
+                Matrix(g) ≈ [1 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 1]
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = π, ϕ = 0)
+                Matrix(g) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 1]
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = π, ϕ = π / 2)
+                Matrix(g) ≈ [1 0 0 0; 0 -1 -1im 0; 0 -1im -1 0; 0 0 0 1]
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = π, ϕ = π)
+                Matrix(g) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 1]
+            end
+        end
+
     end
 end
