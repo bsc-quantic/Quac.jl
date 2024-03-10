@@ -332,8 +332,11 @@ Control{Op}(lane, lanes::Vararg{Int,N}; params...) where {Op,N} =
     Gate{Control{Op},N + 1}(tuple(lane, lanes...), Control{Op}(; params...))
 
 Base.length(::Type{Control{T}}) where {T<:Operator} = 1 + length(T)
+
 isparametric(::Type{<:Control{T}}) where {T<:Operator} = isparametric(T)
+isparametric(op::Control{T}) where {T<:Operator} = isparametric(T)
 parameters(::Type{Control{Op}}) where {Op} = parameters(Op)
+parameters(op::Control{Op}) where {Op} = parameters(op.target)
 
 Base.adjoint(::Type{Control{Op}}) where {Op} = Control{adjoint(Op)}
 Base.adjoint(op::Control{Op}) where {Op} =
@@ -385,7 +388,9 @@ end
 
 Base.length(::Type{SU{N}}) where {N} = N
 isparametric(::Type{<:SU}) = true
-parameters(::Type{SU{N}}) where {N} = NamedTuple{(:matrix),Tuple{Matrix}}
+isparametric(::SU) = true
+parameters(::Type{SU{N}}) where {N} = NamedTuple{(:matrix,),Tuple{Matrix}}
+parameters(op::SU{N}) where {N} = (; matrix = op.matrix)
 
 Base.adjoint(::Type{SU{N}}) where {N} = SU{N}
 Base.adjoint(op::SU{N}) where {N} = SU{N}(; matrix = op.matrix')

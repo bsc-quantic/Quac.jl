@@ -212,19 +212,17 @@
         ]
             @test parameters(Gate{Op}) === parameters(Op)
 
-            params = rand(parameters(Op))
-            @test parameters(Gate{Op}(1:length(Op)...; params...)) === params
+            params = Quac.randtuple(parameters(Op))
+            @test parameters(Gate{Op}(1:length(Op)...; params...)) == params
         end
 
         # Special case for SU{N}
         for N in [2, 4, 8]
             @test parameters(Gate{SU{N}}) === parameters(SU{N})
 
-            _lanes = 1:length(SU{N}) |> collect
-            rand_matrix = rand(ComplexF32, N, N)
-            q, _ = qr(rand_matrix)
-            array = Matrix{ComplexF32}(q)
-            @test parameters(Gate{SU{N}}(_lanes...; array = array)).array === array
+            q, _ = qr(rand(ComplexF32, 2^N, 2^N))
+            matrix = Matrix{ComplexF32}(q)
+            @test parameters(Gate{SU{N}}(1:N...; matrix)).matrix == matrix
         end
     end
 
