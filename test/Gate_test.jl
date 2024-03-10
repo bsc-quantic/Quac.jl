@@ -38,16 +38,15 @@
 
     @testset "Constructor" begin
         for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3]
-            @test Gate{Op}(range(1, length = length(Op))...; rand(parameters(Op))...) !== nothing
+            N = length(Op)
+            @test Gate{Op}(1:N...; Quac.randtuple(parameters(Op))...) |> !isnothing
         end
 
         # Special case for SU{N}
-       for N in [2, 4, 8]
-            _lanes = range(1, length = log2(N) |> Int)
-            rand_matrix = rand(ComplexF32, N, N)
-            q, _ = qr(rand_matrix)
-            array = Matrix{ComplexF32}(q)
-            @test Gate{SU{N}}(_lanes...; array = array) !== nothing
+        for N in [2, 4, 8]
+            q, _ = qr(rand(ComplexF32, 2^N, 2^N))
+            matrix = Matrix{ComplexF32}(q)
+            @test Gate{SU{N}}(1:N...; matrix) |> !isnothing
         end
     end
 
@@ -83,17 +82,14 @@
             Control{Control{Control{Swap}}},
         ]
             N = length(Op)
-            P = parameters(Op)
-            @test Op(1:N...; rand(P)...) isa Gate{Op,N,P}
+            @test Op(1:N...; Quac.randtuple(parameters(Op))...) isa Gate{Op,N}
         end
 
         # Special case for SU{N}
         for N in [2, 4, 8]
-            _lanes = range(1, length = log2(N) |> Int)
-            rand_matrix = rand(ComplexF64, N, N)
-            q, _ = qr(rand_matrix)
-            array = Matrix{ComplexF64}(q)
-            @test SU{N}(_lanes...; array = array) isa Gate{SU{N},log2(N) |> Int, NamedTuple{(:array,),Tuple{Matrix}}}
+            q, _ = qr(rand(ComplexF64, 2^N, 2^N))
+            matrix = Matrix{ComplexF64}(q)
+            @test SU{N}(1:N...; matrix) isa Gate{SU{N},N}
         end
     end
 

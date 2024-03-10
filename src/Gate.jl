@@ -11,7 +11,7 @@ export Pauli, Phase
 
 abstract type Operator end
 
-isparametric(T::Type{<:Operator}) = !isnothing(parameters(T))
+isparametric(T::Type{<:Operator}) = parameters(T) !== @NamedTuple{}
 isparametric(::T) where {T<:Operator} = isparametric(T)
 
 function parameters end
@@ -22,7 +22,8 @@ struct Gate{Op<:Operator,N}
     operator::Op
 end
 
-Gate{Op,N}(lanes...; params...) where {Op,N} = Gate{Op,N}(lanes, Op(params...))
+Gate{Op}(lanes...; params...) where {Op} = Gate{Op,length(Op)}(lanes...; params...)
+Gate{Op,N}(lanes...; params...) where {Op,N} = Gate{Op,N}(lanes, Op(; params...))
 
 Base.length(::Type{Gate{Op,N}}) where {Op,N} = N
 Base.length(::Type{Gate{Op}}) where {Op} = length(Op)
@@ -90,7 +91,7 @@ macro gatedecl(name, opts...)
             esc(:(parameters(op::$name) = $paramstuple($(fieldaccesses...)))),
         ]
     else
-        [esc(:(parameters(::Type{$name}) = nothing)), esc(:(parameters(::$name) = nothing))]
+        [esc(:(parameters(::Type{$name}) = @NamedTuple{})), esc(:(parameters(::$name) = @NamedTuple{}))]
     end
 
     # adjoint code
@@ -110,7 +111,7 @@ macro gatedecl(name, opts...)
             $(params.args...)
         end)))
 
-        $(esc(:($name(lanes...; params...) = Gate{$name,$n}(lanes, $name(params...)))))
+        $(esc(:($name(lanes...; params...) = Gate{$name,$n}(lanes, $name(; params...)))))
 
         $(esc(:(Base.length(::Type{$name}) = $n)))
         $(code_parameters...)
@@ -369,7 +370,7 @@ struct SU{N} <: Operator
 
     function SU{N}(; matrix) where {N}
         size(matrix) == (2^N, 2^N) || throw(ArgumentError("`matrix` ($(size(matrix))) must be a (2^N,2^N)-size matrix"))
-        LinearAlgebra.det(matrix) ≈ 1 || throw(ArgumentError("`matrix` is not unitary"))
+        abs(LinearAlgebra.det(matrix)) ≈ 1 || throw(ArgumentError("`matrix` is not unitary"))
         new(matrix)
     end
 end
