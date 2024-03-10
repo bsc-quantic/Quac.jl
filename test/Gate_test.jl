@@ -32,7 +32,7 @@
             SU{2},
             SU{4},
         ]
-            @test length(Gate{Op}) === length(Op)
+            @test length(Gate{Op}) == length(Op)
         end
     end
 

@@ -25,6 +25,7 @@ end
 Gate{Op,N}(lanes...; params...) where {Op,N} = Gate{Op,N}(lanes, Op(params...))
 
 Base.length(::Type{Gate{Op,N}}) where {Op,N} = N
+Base.length(::Type{Gate{Op}}) where {Op} = length(Op)
 lanes(g::Gate) = g.lanes
 
 operator(::Type{<:Gate{Op}}) where {Op} = Op
