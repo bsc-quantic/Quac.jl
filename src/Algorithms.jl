@@ -47,7 +47,7 @@ function QuantumVolume(n, depth)
             q1 = permutation[i]
             q2 = permutation[i + 1]
 
-            push!(circuit, rand(SU{4}, q1, q2))
+            push!(circuit, rand(SU{2}, q1, q2))
         end
     end
 
