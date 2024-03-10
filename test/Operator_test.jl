@@ -1,7 +1,5 @@
 @testset "Operator" begin
-    using Quac: I, StaticOperator
-
-    NoParameters = parameters(StaticOperator)
+    using Quac: I
 
     @testset "isparametric" begin
         for Op in [I, X, Y, Z, H, S, Sd, T, Td, Swap, Control{I}, Control{Control{I}}, Control{Control{Control{I}}}]
@@ -33,16 +31,16 @@
 
     @testset "Base.adjoint" begin
         for Op in [I, X, Y, Z, H, Rx, Ry, Rz, Swap, Control{I}, Control{Control{I}}, Control{Control{Control{I}}}]
-            @test adjoint(Op) === Op
+            @test adjoint(Op()) === Op()
         end
 
-        @test adjoint(S) == Sd
-        @test adjoint(Sd) == S
-        @test adjoint(T) == Td
-        @test adjoint(Td) == T
-        @test adjoint(Control{S}) === Control{Sd}
-        @test adjoint(Control{Control{S}}) === Control{Control{Sd}}
-        @test adjoint(Control{Control{Control{S}}}) === Control{Control{Control{Sd}}}
+        @test adjoint(S()) == Sd()
+        @test adjoint(Sd()) == S()
+        @test adjoint(T()) == Td()
+        @test adjoint(Td()) == T()
+        @test adjoint(Control{S}()) === Control{Sd}()
+        @test adjoint(Control{Control{S}}()) === Control{Control{Sd}}()
+        @test adjoint(Control{Control{Control{S}}}()) === Control{Control{Control{Sd}}}()
     end
 
     @testset "Base.rand" begin
@@ -70,7 +68,7 @@
             Control{Control{Swap}},
             Control{Control{Control{Swap}}},
         ]
-            @test rand(Op) isa parameters(Op)
+            @test rand(Op) isa Op
         end
     end
 
