@@ -84,24 +84,24 @@ macro gatedecl(name, opts...)
         end
         paramstuple = :(NamedTuple{($(QuoteNode.(first.(paramstuples))...),),Tuple{$(last.(paramstuples)...)}})
         fieldaccesses = map(field -> :(op.$field), first.(paramstuples))
-        quote
-            $(esc(:(parameters(::Type{$name}) = $paramstuple)))
-            $(esc(:(parameters(op::$name) = $paramstuple($(fieldaccesses...)))))
-        end
+        [
+            esc(:(parameters(::Type{$name}) = $paramstuple)),
+            esc(:(parameters(op::$name) = $paramstuple($(fieldaccesses...)))),
+        ]
     else
-        quote
-            $(esc(:(parameters(::Type{$name}) = nothing)))
-            $(esc(:(parameters(::$name) = nothing)))
-        end
+        [esc(:(parameters(::Type{$name}) = nothing)), esc(:(parameters(::$name) = nothing))]
     end
 
     # adjoint code
     code_adjoint = if adjoint == :hermitian
-        esc(:(Base.adjoint(op::$name) = op))
+        [esc(:(Base.adjoint(op::$name) = op)), esc(:(Base.adjoint(::Type{$name}) = $name))]
     elseif adjoint == :parametric
-        esc(:(Base.adjoint(op::$name) = parameters(op)))
+        [
+            esc(:(Base.adjoint(op::$name) = $name(; [key => -val for (key, val) in pairs(parameters(op))]...))),
+            esc(:(Base.adjoint(::Type{$name}) = $name)),
+        ]
     else
-        esc(:(Base.adjoint(::Type{$name}) = $adjoint()))
+        [esc(:(Base.adjoint(op::$name) = $adjoint())), esc(:(Base.adjoint(::Type{$name}) = $adjoint))]
     end
 
     return quote
@@ -112,8 +112,8 @@ macro gatedecl(name, opts...)
         $(esc(:($name(lanes...; params...) = Gate{$name,$n}(lanes, $name(params...)))))
 
         $(esc(:(Base.length(::Type{$name}) = $n)))
-        $(code_parameters.args...)
-        $code_adjoint
+        $(code_parameters...)
+        $(code_adjoint...)
     end
 end
 
@@ -333,7 +333,7 @@ parameters(::Type{Control{Op}}) where {Op} = parameters(Op)
 Base.adjoint(::Type{Control{Op}}) where {Op} = Control{adjoint(Op)}
 Base.adjoint(op::Control{Op}) where {Op} =
     if isparametric(op)
-        Control{Op'}([key => -val for (key, val) in pairs(parameters(op))]...)
+        Control{Op'}(operator(op)')
     else
         Control{Op'}()
     end

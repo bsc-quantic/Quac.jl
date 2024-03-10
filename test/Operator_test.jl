@@ -31,7 +31,7 @@
 
     @testset "Base.adjoint" begin
         for Op in [I, X, Y, Z, H, Rx, Ry, Rz, Swap, Control{I}, Control{Control{I}}, Control{Control{Control{I}}}]
-            @test adjoint(Op()) === Op()
+            @test adjoint(Op()) isa Op
         end
 
         @test adjoint(S()) == Sd()
