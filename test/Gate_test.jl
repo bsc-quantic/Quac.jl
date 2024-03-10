@@ -124,16 +124,15 @@
             Control{Control{Swap}},
             Control{Control{Control{Swap}}},
         ]
-            @test lanes(Gate{Op}(1:length(Op)...; rand(parameters(Op))...)) === tuple(1:length(Op)...)
+            N = length(Op)
+            @test lanes(Gate{Op}(1:N...; Quac.randtuple(parameters(Op))...)) === tuple(1:N...)
         end
 
         # Special case for SU{N}
         for N in [2, 4, 8]
-            _lanes = 1:length(SU{N}) |> collect
-            rand_matrix = rand(ComplexF32, N, N)
-            q, _ = qr(rand_matrix)
-            array = Matrix{ComplexF32}(q)
-            @test lanes(Gate{SU{N}}(_lanes...; array = array)) === tuple(1:length(SU{N})...)
+            q, _ = qr(rand(ComplexF32, 2^N, 2^N))
+            matrix = Matrix{ComplexF32}(q)
+            @test lanes(Gate{SU{N}}(1:N...; matrix)) === tuple(1:length(SU{N})...)
         end
     end
 
