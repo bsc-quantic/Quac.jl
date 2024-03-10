@@ -118,9 +118,9 @@ function svg(circuit::Circuit; kwargs...)
     return drawing
 end
 
-svg(gate::Gate{Op,1,P}) where {Op,P} = __svg_block(; top = false, bottom = false)
+svg(::Gate{Op,1}) where {Op} = __svg_block(; top = false, bottom = false)
 
-function svg(gate::Gate{Op, N, P}) where {Op, N, P}
+function svg(gate::Gate{Op,N}) where {Op,N}
     a, b = extrema(lanes(gate))
     r = a:b
 
@@ -139,11 +139,11 @@ function svg(gate::Gate{Op, N, P}) where {Op, N, P}
     return __svg_vcat_blocks(blocks...)
 end
 
-svg(::Gate{I,1,NamedTuple{(),Tuple{}}}) =
+svg(::Gate{I,1}) =
     h.svg(h.line."wire lane"(; x1 = -25, y1 = 0, x2 = 25, y2 = 0), viewBox = "-25 -25 50 50", width = 50, height = 50)
 
 for Op in [X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Hz, FSim]
-    @eval svg(::Gate{$Op,1,P}; kwargs...) where {P} = __svg_block(texname($Op); kwargs...)
+    @eval svg(::Gate{$Op,1}; kwargs...) = __svg_block(texname($Op); kwargs...)
 end
 
 function svg(gate::Gate{<:Control}; kwargs...)
