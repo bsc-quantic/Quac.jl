@@ -33,8 +33,8 @@ operator(g::Gate) = g.operator
 parameters(::Type{<:Gate{Op}}) where {Op} = parameters(Op)
 parameters(g::Gate) = parameters(operator(g))
 
-Base.propertynames(::Type{<:Gate{Op}}) where {Op} = (keys(parameters(Op))...,)
-Base.propertynames(::G) where {G<:Gate{Op}} where {Op} = propertynames(G)
+Base.propertynames(::Type{<:Gate{Op}}) where {Op} = isparametric(Op) ? (keys(parameters(Op))...,) : ()
+Base.propertynames(::G) where {Op,G<:Gate{Op}} = isparametric(Op) ? propertynames(G) : ()
 Base.getproperty(g::Gate{Op}, i::Symbol) where {Op} = i ∈ propertynames(g) ? parameters(g)[i] : getfield(g, i)
 
 Base.adjoint(::Type{Gate{Op,N}}) where {Op,N} = Gate{adjoint(Op),N}
