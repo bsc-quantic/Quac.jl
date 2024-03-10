@@ -168,16 +168,14 @@
             Control{Control{Control{Swap}}},
         ]
             # NOTE `operator(Gate{Op})` is implied
-            @test operator(Gate{Op}(1:length(Op)...; rand(parameters(Op))...)) === Op
+            @test operator(Gate{Op}(1:length(Op)...; Quac.randtuple(parameters(Op))...)) isa Op
         end
 
         # Special case for SU{N}
         for N in [2, 4, 8]
-            _lanes = 1:length(SU{N}) |> collect
-            rand_matrix = rand(ComplexF32, N, N)
-            q, _ = qr(rand_matrix)
-            array = Matrix{ComplexF32}(q)
-            @test operator(Gate{SU{N}}(_lanes...; array = array)) === SU{N}
+            q, _ = qr(rand(ComplexF32, 2^N, 2^N))
+            matrix = Matrix{ComplexF32}(q)
+            @test operator(Gate{SU{N}}(1:N...; array = array)) isa SU{N}
         end
     end
 
