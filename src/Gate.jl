@@ -22,6 +22,8 @@ struct Gate{Op<:Operator,N}
     operator::Op
 end
 
+Gate{Op,N}(lanes...; params...) where {Op,N} = Gate{Op,N}(lanes, Op(params...))
+
 Base.length(::Type{Gate{Op,N}}) where {Op,N} = N
 lanes(g::Gate) = g.lanes
 
@@ -312,12 +314,17 @@ end
 
 A controlled gate.
 """
-Base.@kwdef struct Control{Op<:Operator} <: Operator
+struct Control{Op<:Operator} <: Operator
     target::Op
 end
 
-Control{Op}(lanes...; params...) where {Op} = Gate{Control{Op},length(lanes)}(lanes...; params...)
-Control(lane, op::Gate{Op,N}) where {Op,N} = Gate{Control{Op},N + 1}(lane, lanes(op)...; parameters(op)...)
+Control(op::Op) where {Op} = Control{Op}(op)
+Control{Op}(; params...) where {Op} = Control{Op}(Op(params...))
+
+Control(lane, target::Gate{Op,N}) where {Op,N} =
+    Gate{Control{Op},N + 1}(tuple(lane, lanes(target)...), Control(operator(target)))
+Control{Op}(lane, lanes::Vararg{Int,N}; params...) where {Op,N} =
+    Gate{Control{Op},N + 1}(tuple(lane, lanes...), Control{Op}(; params...))
 
 Base.length(::Type{Control{T}}) where {T<:Operator} = 1 + length(T)
 isparametric(::Type{<:Control{T}}) where {T<:Operator} = isparametric(T)
@@ -328,7 +335,7 @@ Base.adjoint(op::Control{Op}) where {Op} =
     if isparametric(op)
         Control{Op'}([key => -val for (key, val) in pairs(parameters(op))]...)
     else
-        Control{adjoint(Op)}()
+        Control{Op'}()
     end
 
 for Op in [:X, :Y, :Z, :Rx, :Ry, :Rz]
