@@ -319,7 +319,7 @@ struct Control{Op<:Operator} <: Operator
 end
 
 Control(op::Op) where {Op} = Control{Op}(op)
-Control{Op}(; params...) where {Op} = Control{Op}(Op(params...))
+Control{Op}(; params...) where {Op} = Control{Op}(Op(; params...))
 
 Control(lane, target::Gate{Op,N}) where {Op,N} =
     Gate{Control{Op},N + 1}(tuple(lane, lanes(target)...), Control(operator(target)))
@@ -391,5 +391,15 @@ const Phase = Union{I,Z,S,Sd,T,Td,Rz}
 
 randtuple(::Type{NamedTuple{N,T}}) where {N,T} = NamedTuple{N}(rand(type) for type in T.parameters)
 
-Base.rand(::Type{Op}) where {Op<:Operator} = randtuple(parameters(Op))
+Base.rand(::Type{Op}) where {Op<:Operator} = isparametric(Op) ? Op(; randtuple(parameters(Op))...) : Op()
 Base.rand(::Type{Gate{Op}}, lanes::Integer...) where {Op} = Gate{Op}(lanes...; rand(Op)...)
+
+function Base.rand(::Type{SU{N}}; eltype::Type = ComplexF64) where {N}
+    q, _ = qr(rand(eltype, N, N))
+    SU{N}(; matrix = Matrix(q))
+end
+
+function Base.rand(::Type{SU{N}}, lanes::Vararg{Int,N}; eltype::Type = ComplexF64) where {N}
+    op = rand(SU{N}; eltype = eltype)
+    Gate{SU{N},N}(lanes, op)
+end

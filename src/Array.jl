@@ -119,15 +119,6 @@ function Matrix{T}(g::Gate{<:Control}) where {T}
     return M
 end
 
-function Base.rand(::Type{SU{N}}, lanes::NTuple{M,Int}; eltype::Type = ComplexF64) where {N,M}
-    # keep unitary matrix Q from QR decomposition
-    q, _ = qr(rand(eltype, N, N))
-
-    SU{N}(lanes...; array = Matrix(q))
-end
-
-Base.rand(::Type{Gate{SU{N}}}, lanes::Integer...; kwargs...) where {N} = rand(SU{N}, lanes; kwargs...)
-
 function Matrix{T}(g::Gate{<:SU{N}}) where {T,N}
     return g.array |> Matrix{T}
 end
