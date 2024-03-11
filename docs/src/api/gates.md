@@ -20,7 +20,7 @@ Any gate can be represented by a dense matrix.
 
 ```jldoctest z-gate
 julia> Matrix(gate)
-2×2 Matrix{ComplexF32}:
+2×2 Matrix{ComplexF64}:
  1.0+0.0im   0.0+0.0im
  0.0+0.0im  -1.0+0.0im
 ```
