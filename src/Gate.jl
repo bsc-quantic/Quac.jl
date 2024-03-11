@@ -9,6 +9,11 @@ export CX, CY, CZ, CRx, CRy, CRz
 export control, target, operator
 export Pauli, Phase
 
+"""
+    Operator
+
+An abstract type that groups all symbolic expressions of operators.
+"""
 abstract type Operator end
 
 isparametric(T::Type{<:Operator}) = parameters(T) !== @NamedTuple{}
@@ -26,6 +31,11 @@ function Base.summary(io::IO, op::Op) where {Op<:Operator}
     print(io, "$Op($(join(map(((k,v),) -> "$k = $v", collect(pairs(parameters(op)))), ", ")))")
 end
 
+"""
+    Gate{Op,N}
+
+A type that represents an [`Operator`](@ref) acting on `N` qubits.
+"""
 struct Gate{Op<:Operator,N}
     lanes::NTuple{N,Int}
     operator::Op
