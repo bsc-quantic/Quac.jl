@@ -17,7 +17,9 @@ for Op in [X, Y, H, Rx, Ry]
     @eval arraytype(::$Op) = Matrix
 end
 
-(::Type{A})(x::Gate) where {A<:AbstractArray} = A(operator(x))
+for A in [:Array, :Diagonal]
+    @eval $A(x::Gate) = $A(operator(x))
+end
 
 # TODO arraytype(::Type{T}) where {T<:Control} = arraytype(op(T)) == Diagonal ? Diagonal : Matrix
 
