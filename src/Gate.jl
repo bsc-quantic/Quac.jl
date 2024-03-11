@@ -20,6 +20,8 @@ function lanes end
 Base.:(==)(a::A, b::B) where {A<:Operator,B<:Operator} = false
 Base.:(==)(a::Op, b::Op) where {Op<:Operator} = isparametric(Op) ? parameters(a) == parameters(b) : true
 
+Base.length(::T) where {T<:Operator} = length(T)
+
 struct Gate{Op<:Operator,N}
     lanes::NTuple{N,Int}
     operator::Op
@@ -365,6 +367,9 @@ targettype(::Type{<:Gate{Op}}) where {Op} = targettype(Op)
 
 control(g::G) where {G<:Gate{<:Control}} = lanes(g)[1:end-length(targettype(G))]
 target(g::G) where {G<:Gate{<:Control}} = lanes(g)[end-length(targettype(G))+1:end]
+
+target(op::Control) = op.target
+target(op::Control{<:Control}) = target(op.target)
 
 """
     SU{N}(lane_1, lane_2, ..., lane_N, array)
