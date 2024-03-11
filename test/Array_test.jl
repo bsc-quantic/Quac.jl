@@ -22,7 +22,7 @@
             Control{Control{Control{Swap}}},
         ]
             N = length(Op)
-            @test Matrix(Op()) isa Matrix{ComplexF32}
+            @test Matrix(Op()) isa Matrix{ComplexF64}
             @test size(Matrix(Op())) == (2^N, 2^N)
         end
 
@@ -55,7 +55,7 @@
         ]
             N = length(Op)
             op = rand(Op)
-            @test Matrix(op) isa Matrix{ComplexF32}
+            @test Matrix(op) isa Matrix{ComplexF64}
             @test size(Matrix(op)) == (2^length(Op), 2^length(Op))
         end
 
@@ -88,7 +88,7 @@
         ]
             N = length(Op)
             op = rand(Op)
-            @test Diagonal(op) isa Diagonal{ComplexF32}
+            @test Diagonal(op) isa Diagonal{ComplexF64}
             @test size(Diagonal(op)) == (2^N, 2^N)
         end
     end
@@ -114,7 +114,7 @@
         ]
             N = length(Op)
             op = rand(Op)
-            @test Array(op) isa Array{ComplexF32,2N}
+            @test Array(op) isa Array{ComplexF64,2N}
             @test size(Array(op)) == tuple(fill(2, 2N)...)
         end
 
@@ -147,14 +147,14 @@
         ]
             N = length(Op)
             op = rand(Op)
-            @test Array(gate) isa Array{ComplexF32,2N}
+            @test Array(gate) isa Array{ComplexF64,2N}
             @test size(Array(gate)) == tuple(fill(2, 2N)...)
         end
 
         # Special case for SU{N}
         @testset "SU{$N}" for N in [1, 2, 3]
             op = rand(SU{N})
-            @test Array(op) isa Array{ComplexF32,2N}
+            @test Array(op) isa Array{ComplexF64,2N}
             @test size(Array(op)) == tuple(fill(2, 2N)...)
         end
     end

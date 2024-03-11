@@ -19,7 +19,7 @@ end
 
 # TODO arraytype(::Type{T}) where {T<:Control} = arraytype(op(T)) == Diagonal ? Diagonal : Matrix
 
-Matrix(x::Operator) = Matrix{ComplexF32}(x)
+Matrix(x::Operator) = Matrix{ComplexF64}(x)
 
 Matrix{T}(::I) where {T} = Matrix{T}(LinearAlgebra.I, 2, 2)
 Matrix{T}(::X) where {T} = Matrix{T}([0 1; 1 0])
@@ -107,8 +107,8 @@ function Matrix{T}(op::SU) where {T}
     return Matrix{T}(op.matrix)
 end
 
-Array(x::Gate) = Array{ComplexF32}(x)
-Array(::Type{T}) where {T<:Gate} = Array{ComplexF32}(T)
+Array(x::Gate) = Array{ComplexF64}(x)
+Array(::Type{T}) where {T<:Gate} = Array{ComplexF64}(T)
 
 for Op in [I, X, Y, Z, H, S, Sd, T, Td, Swap]
     @eval Array{T}(::G) where {T,G<:Gate{$Op}} = Array{T}(G)
@@ -153,8 +153,7 @@ Array{T}(g::Gate{<:SU{N}}) where {T,N} = Array{T,2 * length(g)}(reshape(Matrix{T
 
 # diagonal matrices
 # NOTE efficient multiplication due to no memory swap needed: plain element-wise multiplication
-Diagonal(x::Gate) = Diagonal{ComplexF32}(x)
-Diagonal(::Type{T}) where {T<:Gate} = Diagonal{ComplexF32}(T)
+Diagonal(x::Operator) = Diagonal{ComplexF64}(x)
 
 for Op in [I, Z, S, Sd, T, Td]
     @eval Diagonal{T}(::Gate{$Op}) where {T} = Diagonal{T}(Gate{$Op})
@@ -179,7 +178,7 @@ Diagonal{T}(g::Gate{Op}) where {T,Op<:Control} = Diagonal{T}([
 ])
 
 # permutational matrices (diagonal + permutation)
-# Permutation(x::Gate) = Permutation{ComplexF32}(x)
+# Permutation(x::Gate) = Permutation{ComplexF64}(x)
 # Permutation{T}(_::Gate) where {T} = error("Implementation not found")
 
 # Linear Algebra factorizations
