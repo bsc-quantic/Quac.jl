@@ -3,7 +3,7 @@
     using LinearAlgebra: qr
 
     @testset "Base.length" begin
-        for Op in [
+        @testset "$Op" for Op in [
             I,
             X,
             Y,
@@ -37,13 +37,13 @@
     end
 
     @testset "Constructor" begin
-        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3]
+        @testset "$Op" for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3]
             N = length(Op)
             @test Gate{Op}(1:N...; Quac.randtuple(parameters(Op))...) |> !isnothing
         end
 
         # Special case for SU{N}
-        for N in [2, 4, 8]
+        @testset "SU{$N}" for N in [1, 2, 3]
             q, _ = qr(rand(ComplexF32, 2^N, 2^N))
             matrix = Matrix{ComplexF32}(q)
             @test Gate{SU{N}}(1:N...; matrix) |> !isnothing
@@ -51,7 +51,7 @@
     end
 
     @testset "Constructor aliases" begin
-        for Op in [
+        @testset "$Op" for Op in [
             I,
             X,
             Y,
@@ -86,7 +86,7 @@
         end
 
         # Special case for SU{N}
-        for N in [2, 4, 8]
+        @testset "SU{$N}" for N in [1, 2, 3]
             q, _ = qr(rand(ComplexF64, 2^N, 2^N))
             matrix = Matrix{ComplexF64}(q)
             @test SU{N}(1:N...; matrix) isa Gate{SU{N},N}
@@ -94,7 +94,7 @@
     end
 
     @testset "lanes" begin
-        for Op in [
+        @testset "$Op" for Op in [
             I,
             X,
             Y,
@@ -129,15 +129,33 @@
         end
 
         # Special case for SU{N}
-        for N in [2, 4, 8]
+        @testset "SU{$N}" for N in [1, 2, 3]
             q, _ = qr(rand(ComplexF32, 2^N, 2^N))
             matrix = Matrix{ComplexF32}(q)
             @test lanes(Gate{SU{N}}(1:N...; matrix)) === tuple(1:length(SU{N})...)
         end
+
+        @testset "SU - unitary condition" begin
+            # test_throws on a non-unitary matrix
+            @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 4, 4))
+
+            # test_throws on a non-square matrix
+            @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 4, 2))
+
+            # test_throws on a matrix without size (N, N)
+            @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 2, 2))
+
+            # test_throws SU{N} with N not a power of 2
+            @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 3, 3))
+
+            # test_throws when there are not N lanes
+            q, _ = qr(rand(ComplexF32, 4, 4))
+            @test_throws ArgumentError SU{3}(1, 2, 3; matrix = Matrix{ComplexF32}(q))
+        end
     end
 
     @testset "operator" begin
-        for Op in [
+        @testset "$Op" for Op in [
             I,
             X,
             Y,
@@ -172,7 +190,7 @@
         end
 
         # Special case for SU{N}
-        for N in [2, 4, 8]
+        @testset "SU{$N}" for N in [1, 2, 3]
             q, _ = qr(rand(ComplexF32, 2^N, 2^N))
             matrix = Matrix{ComplexF32}(q)
             @test operator(Gate{SU{N}}(1:N...; array = array)) isa SU{N}
@@ -180,7 +198,7 @@
     end
 
     @testset "parameters" begin
-        for Op in [
+        @testset "$Op" for Op in [
             I,
             X,
             Y,
@@ -217,7 +235,7 @@
         end
 
         # Special case for SU{N}
-        for N in [2, 4, 8]
+        @testset "SU{$N}" for N in [1, 2, 3]
             @test parameters(Gate{SU{N}}) === parameters(SU{N})
 
             q, _ = qr(rand(ComplexF32, 2^N, 2^N))
@@ -227,7 +245,7 @@
     end
 
     @testset "adjoint" begin
-        for Op in [
+        @testset "Gate type - $Op" for Op in [
             I,
             X,
             Y,
@@ -256,19 +274,48 @@
             Control{Swap},
             Control{Control{Swap}},
             Control{Control{Control{Swap}}},
+            SU{1},
+            SU{2},
+            SU{3},
         ]
             @test adjoint(Gate{Op}) === Gate{adjoint(Op),length(Op)}
         end
 
         # `adjoint(::Gate)` with no parameters
-        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Swap, Control{I}, Control{Control{I}}, Control{Control{Control{I}}}]
+        @testset "Gate instance - $Op" for Op in [
+            I,
+            X,
+            Y,
+            Z,
+            H,
+            S,
+            Sd,
+            T,
+            Td,
+            Swap,
+            Control{I},
+            Control{Control{I}},
+            Control{Control{Control{I}}},
+        ]
             N = length(Op)
             @test adjoint(Op(1:N...)) === Op'(1:N...)
             @test adjoint(Gate{Op}(1:N...)) === Gate{Op',N}(1:N...)
         end
 
         # `adjoint(::Gate)` with parameters
-        for Op in [Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Control{Rx}, Control{Control{Rx}}, Control{Control{Control{Rx}}}]
+        @testset "Gate instance - $Op" for Op in [
+            Rx,
+            Ry,
+            Rz,
+            Rxx,
+            Ryy,
+            Rzz,
+            U2,
+            U3,
+            Control{Rx},
+            Control{Control{Rx}},
+            Control{Control{Control{Rx}}},
+        ]
             params = Quac.randtuple(parameters(Op))
             N = length(Op)
             @test Op(1:N...; params...)' === Op'(1:N...; [key => -val for (key, val) in pairs(params)]...)
@@ -277,7 +324,7 @@
         end
 
         # Special case for SU{N}
-        for N in [1, 2, 3]
+        @testset "Gate instance - SU{$N}" for N in [1, 2, 3]
             q, _ = qr(rand(ComplexF64, 2^N, 2^N))
             q = Matrix(q)
 
@@ -287,7 +334,7 @@
     end
 
     @testset "Base.rand" begin
-        for Op in [
+        @testset "$Op" for Op in [
             I,
             X,
             Y,
@@ -326,7 +373,7 @@
     end
 
     @testset "Base.propertynames" begin
-        for Op in [
+        @testset "$Op" for Op in [
             I,
             X,
             Y,
@@ -373,21 +420,45 @@
     @testset "targettype" begin
         using Quac: targettype
 
-        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Swap, FSim, SU{2}, SU{4}, SU{8}]
+        @testset "$Op" for Op in [
+            I,
+            X,
+            Y,
+            Z,
+            H,
+            S,
+            Sd,
+            T,
+            Td,
+            Rx,
+            Ry,
+            Rz,
+            Rxx,
+            Ryy,
+            Rzz,
+            U2,
+            U3,
+            Swap,
+            FSim,
+            SU{2},
+            SU{4},
+            SU{8},
+        ]
             @test targettype(Gate{Op}) === Op
         end
 
-        for Op in [Control{I}, Control{Control{I}}, Control{Control{Control{I}}}]
+        @testset "$Op" for Op in [Control{I}, Control{Control{I}}, Control{Control{Control{I}}}]
             @test targettype(Gate{Op}) === I
         end
     end
 
     @testset "control" begin
-        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Swap, FSim]
+        @testset "throw error - $Op" for Op in
+                                         [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Swap, FSim]
             @test_throws MethodError control(rand(Gate{Op}, 1:length(Op)...))
         end
 
-        for Op in [I, Rx, Swap, Rxx, U2, U3, FSim]
+        @testset "$Op" for Op in [I, Rx, Swap, Rxx, U2, U3, FSim]
             N = length(Op)
 
             M = length(Control{Op})
@@ -401,30 +472,13 @@
         end
     end
 
-    @testset "random unitary" begin
-        # test_throws on a non-unitary matrix
-        @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 4, 4))
-
-        # test_throws on a non-square matrix
-        @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 4, 2))
-
-        # test_throws on a matrix without size (N, N)
-        @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 2, 2))
-
-        # test_throws SU{N} with N not a power of 2
-        @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 3, 3))
-
-        # test_throws when there are not N lanes
-        q, _ = qr(rand(ComplexF32, 4, 4))
-        @test_throws ArgumentError SU{3}(1, 2, 3; matrix = Matrix{ComplexF32}(q))
-    end
-
     @testset "target" begin
-        for Op in [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Swap, FSim]
+        @testset "throw error - $Op" for Op in
+                                         [I, X, Y, Z, H, S, Sd, T, Td, Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Swap, FSim]
             @test_throws MethodError target(rand(Gate{Op}, 1:length(Op)...))
         end
 
-        for Op in [I, Rx, Swap, Rxx, U2, U3, FSim]
+        @testset "$Op" for Op in [I, Rx, Swap, Rxx, U2, U3, FSim]
             N = length(Op)
 
             M = length(Control{Op})
