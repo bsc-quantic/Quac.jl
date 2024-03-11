@@ -354,27 +354,37 @@
 
             @test begin
                 g = FSim(1, 2, θ = 0, ϕ = π / 2)
-                Matrix(g) ≈ [1 0 0 0; 0 1 -1im 0; 0 -1im 1 0; 0 0 0 1]
+                Matrix(g) ≈ [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 -1im]
             end
 
             @test begin
                 g = FSim(1, 2, θ = 0, ϕ = π)
-                Matrix(g) ≈ LinearAlgebra.I(2^length(g))
+                Matrix(g) ≈ [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 -1]
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = 0, ϕ = 3*π / 2)
+                Matrix(g) ≈ [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 1im]
             end
 
             @test begin
                 g = FSim(1, 2, θ = π / 2, ϕ = 0)
-                Matrix(g) ≈ [1 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 1]
-            end
-
-            @test begin
-                g = FSim(1, 2, θ = π / 2, ϕ = π / 2)
                 Matrix(g) ≈ [1 0 0 0; 0 0 -1im 0; 0 -1im 0 0; 0 0 0 1]
             end
 
             @test begin
+                g = FSim(1, 2, θ = π / 2, ϕ = π / 2)
+                Matrix(g) ≈ [1 0 0 0; 0 0 -1im 0; 0 -1im 0 0; 0 0 0 -1im]
+            end
+
+            @test begin
                 g = FSim(1, 2, θ = π / 2, ϕ = π)
-                Matrix(g) ≈ [1 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 1]
+                Matrix(g) ≈ [1 0 0 0; 0 0 -1im 0; 0 -1im 0 0; 0 0 0 -1]
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = π / 2, ϕ = 3*π / 2)
+                Matrix(g) ≈ [1 0 0 0; 0 0 -1im 0; 0 -1im 0 0; 0 0 0 1im]
             end
 
             @test begin
@@ -384,12 +394,37 @@
 
             @test begin
                 g = FSim(1, 2, θ = π, ϕ = π / 2)
-                Matrix(g) ≈ [1 0 0 0; 0 -1 -1im 0; 0 -1im -1 0; 0 0 0 1]
+                Matrix(g) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 -1im]
             end
 
             @test begin
                 g = FSim(1, 2, θ = π, ϕ = π)
-                Matrix(g) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 1]
+                Matrix(g) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 -1]
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = π, ϕ = 3*π / 2)
+                Matrix(g) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 1im]
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = 3*π / 2, ϕ = 0)
+                Matrix(g) ≈ [1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 1]
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = 3*π / 2, ϕ = π / 2)
+                Matrix(g) ≈ [1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 -1im]
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = 3*π / 2, ϕ = π)
+                Matrix(g) ≈ [1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 -1]
+            end
+
+            @test begin
+                g = FSim(1, 2, θ = 3*π / 2, ϕ = 3*π / 2)
+                Matrix(g) ≈ [1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 1im]
             end
         end
     end

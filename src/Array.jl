@@ -92,9 +92,9 @@ Matrix{T}(g::G) where {T,G<:Gate{Hz}} = Matrix{T}(
 
 Matrix{T}(g::G) where {T,G<:Gate{FSim}} = Matrix{T}([
     1 0 0 0
-    0 cos(g.θ) -1im*sin(g.ϕ) 0
-    0 -1im*sin(g.ϕ) cos(g.θ) 0
-    0 0 0 1
+    0 cos(g.θ) -1im*sin(g.θ) 0
+    0 -1im*sin(g.θ) cos(g.θ) 0
+    0 0 0 cis(-g.ϕ)
 ])
 
 function Matrix{T}(::Type{Gate{Op}}) where {T,Op<:Control}
