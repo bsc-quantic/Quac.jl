@@ -17,6 +17,8 @@ for Op in [X, Y, H, Rx, Ry]
     @eval arraytype(::$Op) = Matrix
 end
 
+(::Type{A})(x::Gate) where {A<:AbstractArray} = A(operator(x))
+
 # TODO arraytype(::Type{T}) where {T<:Control} = arraytype(op(T)) == Diagonal ? Diagonal : Matrix
 
 Matrix(x::Operator) = Matrix{ComplexF64}(x)

@@ -22,6 +22,10 @@ Base.:(==)(a::Op, b::Op) where {Op<:Operator} = isparametric(Op) ? parameters(a)
 
 Base.length(::T) where {T<:Operator} = length(T)
 
+function Base.summary(io::IO, op::Op) where {Op<:Operator}
+    print(io, "$Op($(join(map(((k,v),) -> "$k = $v", collect(pairs(parameters(op)))), ", ")))")
+end
+
 struct Gate{Op<:Operator,N}
     lanes::NTuple{N,Int}
     operator::Op
@@ -55,9 +59,8 @@ Base.adjoint(::Type{Gate{Op,N}}) where {Op,N} = Gate{adjoint(Op),N}
 Base.adjoint(g::Gate{Op,N}) where {Op,N} = Gate{Op',N}(g.lanes, g.operator')
 
 function Base.summary(io::IO, gate::Gate)
-    Op = operator(gate)
-    Args = join(Iterators.flatten((lanes(gate), Iterators.map(x -> "$(x[1])=$(x[2])", pairs(parameters(gate))))), ",")
-    print(io, "$Op($Args)")
+    summary(io, operator(gate))
+    print(io, " on $(join(lanes(gate), ", "))")
 end
 
 Base.show(io::IO, ::MIME"text/plain", gate::Gate) = summary(io, gate)

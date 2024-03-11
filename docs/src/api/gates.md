@@ -13,7 +13,7 @@ For example, this is a $Z$ that acts on qubit 4.
 
 ```jldoctest z-gate
 julia> gate = Z(4)
-Z(4)
+Z() on 4
 ```
 
 Any gate can be represented by a dense matrix.
