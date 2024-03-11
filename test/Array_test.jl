@@ -176,6 +176,7 @@
                 Matrix(g) ≈ [0 -1im; -1im 0]
             end
         end
+
         @testset "Rxx" begin
             @test begin
                 g = Rxx(1, 2, θ = 0)
