@@ -155,27 +155,18 @@ Array{T}(g::Gate{<:SU{N}}) where {T,N} = Array{T,2 * length(g)}(reshape(Matrix{T
 # NOTE efficient multiplication due to no memory swap needed: plain element-wise multiplication
 Diagonal(x::Operator) = Diagonal{ComplexF64}(x)
 
-for Op in [I, Z, S, Sd, T, Td]
-    @eval Diagonal{T}(::Gate{$Op}) where {T} = Diagonal{T}(Gate{$Op})
-end
+Diagonal{T}(::I) where {T} = Diagonal{T}(LinearAlgebra.I, 2)
+Diagonal{T}(::Z) where {T} = Diagonal{T}([1, -1])
+Diagonal{T}(::S) where {T} = Diagonal{T}([1, 1im])
+Diagonal{T}(::Sd) where {T} = Diagonal{T}([1, -1im])
+Diagonal{F}(::T) where {F} = Diagonal{F}([1, cispi(1 // 4)])
+Diagonal{T}(::Td) where {T} = Diagonal{T}([1, cispi(-1 // 4)])
 
-Diagonal{T}(::Type{<:Gate{I}}) where {T} = Diagonal{T}(LinearAlgebra.I, 2)
-Diagonal{T}(::Type{<:Gate{Z}}) where {T} = Diagonal{T}([1, -1])
-Diagonal{T}(::Type{<:Gate{S}}) where {T} = Diagonal{T}([1, 1im])
-Diagonal{T}(::Type{<:Gate{Sd}}) where {T} = Diagonal{T}([1, -1im])
-Diagonal{F}(::Type{<:Gate{T}}) where {F} = Diagonal{F}([1, cispi(1 // 4)])
-Diagonal{T}(::Type{<:Gate{Td}}) where {T} = Diagonal{T}([1, cispi(-1 // 4)])
+Diagonal{T}(op::Rz) where {T} = Diagonal{T}([1, cis(op.θ)])
+Diagonal{T}(op::Rzz) where {T} = Diagonal{T}([1, cis(op.θ), cis(op.θ), 1])
 
-Diagonal{T}(g::Gate{Rz}) where {T} = Diagonal{T}([1, cis(g.θ)])
-Diagonal{T}(g::Gate{Rzz}) where {T} = Diagonal{T}([1, cis(g.θ), cis(g.θ), 1])
-
-Diagonal{T}(::Type{Gate{Op}}) where {T,Op<:Control} =
-    Diagonal{T}([fill(one(T), 2^length(Op) - 2^length(targettype(Op)))..., diag(Diagonal{T}(Gate{targettype(Op)}))...])
-
-Diagonal{T}(g::Gate{Op}) where {T,Op<:Control} = Diagonal{T}([
-    fill(one(T), 2^length(Op) - 2^length(targettype(Op)))...,
-    diag(Diagonal{T}(Gate{targettype(Op)}(target(g)...; parameters(g)...)))...,
-])
+Diagonal{T}(op::Op) where {T,Op<:Control} =
+    Diagonal{T}([fill(one(T), 2^length(Op) - 2^length(targettype(Op)))..., diag(Diagonal{T}(target(op)))...])
 
 # permutational matrices (diagonal + permutation)
 # Permutation(x::Gate) = Permutation{ComplexF64}(x)
