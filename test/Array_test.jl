@@ -121,8 +121,8 @@
         # Special case for SU{N}
         for N in [2, 4, 8]
             n_qubits = Int(log2(N))
-            @test Array(rand(Gate{SU{N}}, 1:Int(log2(N))...)) isa Array{ComplexF32, 2*n_qubits}
-            @test size(Array(rand(Gate{SU{N}}, 1:Int(log2(N))...))) == tuple(fill(2, 2*n_qubits)...)
+            @test Array(rand(Gate{SU{N}}, 1:Int(log2(N))...)) isa Array{ComplexF32,2 * n_qubits}
+            @test size(Array(rand(Gate{SU{N}}, 1:Int(log2(N))...))) == tuple(fill(2, 2 * n_qubits)...)
         end
 
         for Op in [
