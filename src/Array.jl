@@ -107,49 +107,41 @@ function Matrix{T}(op::SU) where {T}
     return Matrix{T}(op.matrix)
 end
 
-Array(x::Gate) = Array{ComplexF64}(x)
-Array(::Type{T}) where {T<:Gate} = Array{ComplexF64}(T)
+Array(x::Operator) = Array{ComplexF64}(x)
 
-for Op in [I, X, Y, Z, H, S, Sd, T, Td, Swap]
-    @eval Array{T}(::G) where {T,G<:Gate{$Op}} = Array{T}(G)
-end
-
-Array{T}(::Type{G}) where {T,G<:Gate} = Array{T,2 * length(operator(G))}(G)
-Array{T}(g::G) where {T,G<:Gate} = Array{T,2 * length(operator(G))}(isparametric(operator(G)) ? g : G)
+Array{T}(op::Op) where {T,Op<:Operator} = Array{T,2 * length(Op)}(op)
 
 # NOTE multidimensional `Array` literal concatenation was introduced in 1.7
 # TODO clean code when we stop supporting Julia 1.6
-Array{T,4}(::Type{<:Gate{Swap}}) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
+Array{T,4}(::Swap) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
 
-Array{T,4}(g::G) where {T,G<:Gate{FSim}} =
-    Array{T}([1; 0;; 0; 0;;; 0; cos(g.θ);; -1im*sin(g.ϕ); 0;;;; 0; -1im*sin(g.ϕ);; cos(g.θ); 0;;; 0; 0;; 0; 1])
+Array{T,4}(op::FSim) where {T} =
+    Array{T}([1; 0;; 0; 0;;; 0; cos(op.θ);; -1im*sin(op.ϕ); 0;;;; 0; -1im*sin(op.ϕ);; cos(op.θ); 0;;; 0; 0;; 0; 1])
 
-Array{T,4}(g::G) where {T,G<:Gate{Rxx}} = Array{T,4}(
+Array{T,4}(op::Rxx) where {T} = Array{T,4}(
     [
-        cos(g.θ / 2); 0;; 0; -1im*sin(g.θ / 2);;; 0; cos(g.θ / 2);; -1im*sin(g.θ / 2); 0;;;;
-        0; -1im*sin(g.θ / 2);; cos(g.θ / 2); 0;;; -1im*sin(g.θ / 2); 0;; 0; cos(g.θ / 2)
+        cos(op.θ / 2); 0;; 0; -1im*sin(op.θ / 2);;; 0; cos(op.θ / 2);; -1im*sin(op.θ / 2); 0;;;;
+        0; -1im*sin(op.θ / 2);; cos(op.θ / 2); 0;;; -1im*sin(op.θ / 2); 0;; 0; cos(op.θ / 2)
     ],
 )
 
-Array{T,4}(g::G) where {T,G<:Gate{Ryy}} = Array{T,4}(
+Array{T,4}(op::Ryy) where {T} = Array{T,4}(
     [
-        cos(g.θ / 2); 0;; 0; 1im*sin(g.θ / 2);;; 0; cos(g.θ / 2);; -1im*sin(g.θ / 2); 0;;;;
-        0; -1im*sin(g.θ / 2);; cos(g.θ / 2); 0;;; 1im*sin(g.θ / 2); 0;; 0; cos(g.θ / 2)
+        cos(op.θ / 2); 0;; 0; 1im*sin(op.θ / 2);;; 0; cos(op.θ / 2);; -1im*sin(op.θ / 2); 0;;;;
+        0; -1im*sin(op.θ / 2);; cos(op.θ / 2); 0;;; 1im*sin(op.θ / 2); 0;; 0; cos(op.θ / 2)
     ],
 )
 
-Array{T,4}(g::G) where {T,G<:Gate{Rzz}} = Array{T,4}(
+Array{T,4}(op::Rzz) where {T} = Array{T,4}(
     [
-        cis(-g.θ / 2); 0;; 0; 0;;; 0; cis(g.θ / 2);; 0; 0;;;;
-        0; 0;; cis(g.θ / 2); 0;;; 0; 0;; 0; cis(-g.θ / 2)
+        cis(-op.θ / 2); 0;; 0; 0;;; 0; cis(op.θ / 2);; 0; 0;;;;
+        0; 0;; cis(op.θ / 2); 0;;; 0; 0;; 0; cis(-op.θ / 2)
     ],
 )
 
-Array{T}(::Type{Gate{C}}) where {T,C<:Control} =
-    Array{T,2 * length(C)}(reshape(Matrix{T}(Gate{C}), fill(2, 2 * length(C))...))
-Array{T}(g::Gate{C}) where {T,C<:Control} = Array{T,2 * length(C)}(reshape(Matrix{T}(g), fill(2, 2 * length(C))...))
+Array{T}(op::Op) where {T,Op<:Control} = Array{T,2 * length(Op)}(reshape(Matrix{T}(op), fill(2, 2 * length(Op))...))
 
-Array{T}(g::Gate{<:SU{N}}) where {T,N} = Array{T,2 * length(g)}(reshape(Matrix{T}(g), fill(2, 2 * Int(log2(N)))...))
+Array{T}(op::SU{N}) where {T,N} = Array{T,2N}(reshape(Matrix{T}(op), fill(2, 2N)...))
 
 # diagonal matrices
 # NOTE efficient multiplication due to no memory swap needed: plain element-wise multiplication

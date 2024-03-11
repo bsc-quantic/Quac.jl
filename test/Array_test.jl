@@ -144,16 +144,12 @@
             Control{Swap},
             Control{Control{Swap}},
             Control{Control{Control{Swap}}},
+            SU{1},
+            SU{2},
+            SU{3},
         ]
             N = length(Op)
             op = rand(Op)
-            @test Array(gate) isa Array{ComplexF64,2N}
-            @test size(Array(gate)) == tuple(fill(2, 2N)...)
-        end
-
-        # Special case for SU{N}
-        @testset "SU{$N}" for N in [1, 2, 3]
-            op = rand(SU{N})
             @test Array(op) isa Array{ComplexF64,2N}
             @test size(Array(op)) == tuple(fill(2, 2N)...)
         end
