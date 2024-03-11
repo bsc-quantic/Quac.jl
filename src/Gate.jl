@@ -101,7 +101,7 @@ macro gatedecl(name, opts...)
             esc(:(parameters(op::$name) = $paramstuple(tuple($(fieldaccesses...))))),
         ]
     else
-        [esc(:(parameters(::Type{$name}) = @NamedTuple{})), esc(:(parameters(::$name) = @NamedTuple{}))]
+        [esc(:(parameters(::Type{$name}) = @NamedTuple{})), esc(:(parameters(::$name) = NamedTuple()))]
     end
 
     # adjoint code
