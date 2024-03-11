@@ -87,9 +87,9 @@ Matrix{T}(op::Hz) where {T} = Matrix{T}(
 
 Matrix{T}(op::FSim) where {T} = Matrix{T}([
     1 0 0 0
-    0 cos(op.θ) -1im*sin(op.ϕ) 0
-    0 -1im*sin(op.ϕ) cos(op.θ) 0
-    0 0 0 1
+    0 cos(op.θ) -1im*sin(op.θ) 0
+    0 -1im*sin(op.θ) cos(op.θ) 0
+    0 0 0 cis(-op.ϕ)
 ])
 
 function Matrix{T}(op::Op) where {T,Op<:Control}
