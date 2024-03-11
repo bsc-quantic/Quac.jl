@@ -319,8 +319,7 @@
             SU{8},
         ]
             N = length(Op)
-            P = parameters(Op)
-            @test rand(Gate{Op}, 1:N...) isa Gate{Op,N,P}
+            @test rand(Gate{Op}, 1:N...) isa Gate{Op,N}
         end
     end
 

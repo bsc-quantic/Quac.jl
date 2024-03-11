@@ -402,7 +402,7 @@ const Phase = Union{I,Z,S,Sd,T,Td,Rz}
 randtuple(::Type{NamedTuple{N,T}}) where {N,T} = NamedTuple{N}(rand(type) for type in T.parameters)
 
 Base.rand(::Type{Op}) where {Op<:Operator} = isparametric(Op) ? Op(; randtuple(parameters(Op))...) : Op()
-Base.rand(::Type{Gate{Op}}, lanes::Integer...) where {Op} = Gate{Op}(lanes...; rand(Op)...)
+Base.rand(::Type{Gate{Op}}, lanes::Integer...) where {Op} = Gate{Op}(lanes, rand(Op))
 
 function Base.rand(::Type{SU{N}}; eltype::Type = ComplexF64) where {N}
     q, _ = qr(rand(eltype, N, N))
