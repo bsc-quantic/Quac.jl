@@ -57,6 +57,24 @@
             @test Gate{SU{N}}(1:N...; matrix) |> !isnothing
         end
 
+        @testset "SU - unitary condition" begin
+            # test_throws on a non-unitary matrix
+            @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 4, 4))
+
+            # test_throws on a non-square matrix
+            @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 4, 2))
+
+            # test_throws on a matrix without size (N, N)
+            @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 2, 2))
+
+            # test_throws SU{N} with N not a power of 2
+            @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 3, 3))
+
+            # test_throws when there are not N lanes
+            q, _ = qr(rand(ComplexF32, 4, 4))
+            @test_throws ArgumentError SU{3}(1, 2, 3; matrix = Matrix{ComplexF32}(q))
+        end
+
         @testset "Product operator (⊗)" begin
             op = X() ⊗ Y()
             N = length(op)
@@ -163,24 +181,6 @@
             q, _ = qr(rand(ComplexF32, 2^N, 2^N))
             matrix = Matrix{ComplexF32}(q)
             @test lanes(Gate{SU{N}}(1:N...; matrix)) === tuple(1:length(SU{N})...)
-        end
-
-        @testset "SU - unitary condition" begin
-            # test_throws on a non-unitary matrix
-            @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 4, 4))
-
-            # test_throws on a non-square matrix
-            @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 4, 2))
-
-            # test_throws on a matrix without size (N, N)
-            @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 2, 2))
-
-            # test_throws SU{N} with N not a power of 2
-            @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 3, 3))
-
-            # test_throws when there are not N lanes
-            q, _ = qr(rand(ComplexF32, 4, 4))
-            @test_throws ArgumentError SU{3}(1, 2, 3; matrix = Matrix{ComplexF32}(q))
         end
     end
 
