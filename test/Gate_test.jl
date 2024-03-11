@@ -353,9 +353,9 @@
             Control{Swap},
             Control{Control{Swap}},
             Control{Control{Control{Swap}}},
+            SU{1},
             SU{2},
-            SU{4},
-            SU{8},
+            SU{3},
         ]
             @test Quac.ntnames(parameters(Op)) ⊆ propertynames(Gate{Op})
 

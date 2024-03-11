@@ -406,7 +406,7 @@ Base.rand(::Type{Op}) where {Op<:Operator} = isparametric(Op) ? Op(; randtuple(p
 Base.rand(::Type{Gate{Op}}, lanes::Integer...) where {Op} = Gate{Op}(lanes, rand(Op))
 
 function Base.rand(::Type{SU{N}}; eltype::Type = ComplexF64) where {N}
-    q, _ = qr(rand(eltype, N, N))
+    q, _ = qr(rand(eltype, 2^N, 2^N))
     SU{N}(; matrix = Matrix(q))
 end
 
