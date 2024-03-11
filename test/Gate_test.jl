@@ -401,21 +401,20 @@
 
     @testset "random unitary" begin
         # test_throws on a non-unitary matrix
-        @test_throws ArgumentError SU{4}(1, 2; array = rand(ComplexF32, 4, 4))
+        @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 4, 4))
 
         # test_throws on a non-square matrix
-        @test_throws ArgumentError SU{4}(1, 2; array = rand(ComplexF32, 4, 2))
+        @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 4, 2))
 
         # test_throws on a matrix without size (N, N)
-        @test_throws ArgumentError SU{4}(1, 2; array = rand(ComplexF32, 2, 2))
+        @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 2, 2))
 
         # test_throws SU{N} with N not a power of 2
-        @test_throws DomainError SU{3}(1, 2; array = rand(ComplexF32, 3, 3))
+        @test_throws ArgumentError SU{2}(1, 2; matrix = rand(ComplexF32, 3, 3))
 
-        # test_throws when there are not log2(N) lanes
-        rand_matrix = rand(ComplexF32, 4, 4)
-        q, _ = qr(rand_matrix)
-        @test_throws ArgumentError SU{4}(1, 2, 3; array = Matrix{ComplexF32}(q))
+        # test_throws when there are not N lanes
+        q, _ = qr(rand(ComplexF32, 4, 4))
+        @test_throws ArgumentError SU{3}(1, 2, 3; matrix = Matrix{ComplexF32}(q))
     end
 
     @testset "target" begin
