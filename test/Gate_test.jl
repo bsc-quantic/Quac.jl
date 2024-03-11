@@ -357,10 +357,10 @@
             SU{4},
             SU{8},
         ]
-            @test keys(parameters(Op)) ⊆ propertynames(Gate{Op})
+            @test Quac.ntnames(parameters(Op)) ⊆ propertynames(Gate{Op})
 
             N = length(Op)
-            @test keys(parameters(Op)) ⊆ propertynames(rand(Gate{Op}, 1:N...))
+            @test Quac.ntnames(parameters(Op)) ⊆ propertynames(rand(Gate{Op}, 1:N...))
         end
     end
 
