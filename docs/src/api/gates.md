@@ -44,7 +44,7 @@ julia> Diagonal{Float32}(gate)
 ```
 
 ```@docs
-Operator
+Quac.Operator
 Gate
 ```
 
