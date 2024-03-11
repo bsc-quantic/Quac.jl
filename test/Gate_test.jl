@@ -257,30 +257,30 @@
             Control{Control{Swap}},
             Control{Control{Control{Swap}}},
         ]
-            @test adjoint(Gate{Op}) === Gate{adjoint(Op)}
+            @test adjoint(Gate{Op}) === Gate{adjoint(Op),length(Op)}
         end
 
         # `adjoint(::Gate)` with no parameters
         for Op in [I, X, Y, Z, H, S, Sd, T, Td, Swap, Control{I}, Control{Control{I}}, Control{Control{Control{I}}}]
-            @test adjoint(Gate{Op}(1:length(Op)...)) === Gate{adjoint(Op)}(1:length(Op)...)
+            N = length(Op)
+            @test adjoint(Gate{Op}(1:N...)) === Gate{adjoint(Op),N}(1:N...)
         end
 
         # `adjoint(::Gate)` with parameters
         for Op in [Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Control{Rx}, Control{Control{Rx}}, Control{Control{Control{Rx}}}]
-            params = rand(parameters(Op))
-            @test adjoint(Gate{Op}(1:length(Op)...; params...)) ===
-                  Gate{adjoint(Op)}(1:length(Op)...; [key => -val for (key, val) in pairs(params)]...)
+            params = Quac.randtuple(parameters(Op))
+            N = length(Op)
+            @test adjoint(Gate{Op}(1:N...; params...)) ===
+                  Gate{adjoint(Op),N}(1:N...; [key => -val for (key, val) in pairs(params)]...)
         end
 
         # Special case for SU{N}
         for N in [2, 4, 8]
             @test_throws MethodError adjoint(Gate{SU{N}})
 
-            _lanes = 1:length(SU{N}) |> collect
-            rand_matrix = rand(ComplexF64, N, N)
-            q, _ = qr(rand_matrix)
+            q, _ = qr(rand(ComplexF64, 2^N, 2^N))
 
-            @test adjoint(SU{N}(_lanes...; array = Matrix{ComplexF64}(q))).array == adjoint(Matrix{ComplexF64}(q))
+            @test adjoint(SU{N}(1:N...; matrix = Matrix{ComplexF64}(q))).matrix == adjoint(Matrix{ComplexF64}(q))
         end
     end
 

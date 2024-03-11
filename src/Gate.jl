@@ -42,6 +42,7 @@ Base.propertynames(::Type{<:Gate{Op}}) where {Op} = isparametric(Op) ? (ntnames(
 Base.propertynames(::G) where {Op,G<:Gate{Op}} = isparametric(Op) ? propertynames(G) : ()
 Base.getproperty(g::Gate{Op}, i::Symbol) where {Op} = i ∈ propertynames(g) ? parameters(g)[i] : getfield(g, i)
 
+Base.adjoint(::Type{Gate{Op}}) where {Op} = Gate{Op',length(Op)}
 Base.adjoint(::Type{Gate{Op,N}}) where {Op,N} = Gate{adjoint(Op),N}
 Base.adjoint(g::Gate{Op,N}) where {Op,N} = Gate{Op',N}(g.lanes, g.operator')
 
