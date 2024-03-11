@@ -193,7 +193,7 @@
         @testset "SU{$N}" for N in [1, 2, 3]
             q, _ = qr(rand(ComplexF32, 2^N, 2^N))
             matrix = Matrix{ComplexF32}(q)
-            @test operator(Gate{SU{N}}(1:N...; array = array)) isa SU{N}
+            @test operator(Gate{SU{N}}(1:N...; matrix)) isa SU{N}
         end
     end
 
