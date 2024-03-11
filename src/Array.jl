@@ -41,7 +41,7 @@ Matrix{T}(op::Ry) where {T} = Matrix{T}([
     cos(op.θ / 2) -sin(op.θ / 2)
     sin(op.θ / 2) cos(op.θ / 2)
 ])
-Matrix{T}(op::Rz) where {T} = Diagonal{T}(op)
+Matrix{T}(op::Rz) where {T} = Matrix{T}(Diagonal{T}(op))
 
 Matrix{T}(op::Rxx) where {T} = Matrix{T}(
     [
