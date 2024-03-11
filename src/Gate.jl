@@ -382,9 +382,10 @@ struct SU{N} <: Operator
     matrix::Matrix
 
     function SU{N}(; matrix) where {N}
-        size(matrix) == (2^N, 2^N) || throw(ArgumentError("`matrix` ($(size(matrix))) must be a (2^N,2^N)-size matrix"))
+        size(matrix) == (2^N, 2^N) ||
+            throw(ArgumentError("`matrix` $(size(matrix)) must be a ($(2^N),$(2^N))-size matrix"))
         abs(LinearAlgebra.det(matrix)) ≈ 1 || throw(ArgumentError("`matrix` is not unitary"))
-        new(matrix)
+        new{N}(matrix)
     end
 end
 
