@@ -17,9 +17,10 @@ for Op in [X, Y, H, Rx, Ry]
     @eval arraytype(::$Op) = Matrix
 end
 
-for A in [:Array, :Diagonal]
-    @eval $A(x::Gate) = $A(operator(x))
-end
+(::Type{A})(x::Gate) where {A<:Array} = A(operator(x))
+Diagonal(x::Quac.Gate) = Diagonal(operator(x))
+Diagonal{T}(x::Quac.Gate) where {T} = Diagonal{T}(operator(x))
+Diagonal{T,V}(x::Quac.Gate) where {T,V<:AbstractVector{T}} = Diagonal{T,V}(operator(x))
 
 # TODO arraytype(::Type{T}) where {T<:Control} = arraytype(op(T)) == Diagonal ? Diagonal : Matrix
 
