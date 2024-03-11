@@ -34,6 +34,14 @@
         ]
             @test length(Gate{Op}) == length(Op)
         end
+
+        @testset "Product operator (⊗)" begin
+            @test length(X() ⊗ Y()) == 2
+            @test length(X() ⊗ Y() ⊗ Z()) == 3
+            @test length(X() ⊗ Y() ⊗ Z() ⊗ H()) == 4
+            @test length(X() ⊗ Swap()) == 3
+            @test length(Swap() ⊗ CRx()) == 4
+        end
     end
 
     @testset "Constructor" begin
@@ -47,6 +55,28 @@
             q, _ = qr(rand(ComplexF32, 2^N, 2^N))
             matrix = Matrix{ComplexF32}(q)
             @test Gate{SU{N}}(1:N...; matrix) |> !isnothing
+        end
+
+        @testset "Product operator (⊗)" begin
+            op = X() ⊗ Y()
+            N = length(op)
+            @test op(1:N...) isa Gate{Quac.ProductOperator,N}
+
+            op = X() ⊗ Y() ⊗ Z()
+            N = length(op)
+            @test op(1:N...) isa Gate{Quac.ProductOperator,N}
+
+            op = X() ⊗ Y() ⊗ Z() ⊗ H()
+            N = length(op)
+            @test op(1:N...) isa Gate{Quac.ProductOperator,N}
+
+            op = X() ⊗ Swap()
+            N = length(op)
+            @test op(1:N...) isa Gate{Quac.ProductOperator,N}
+
+            op = Swap() ⊗ CRx()
+            N = length(op)
+            @test op(1:N...) isa Gate{Quac.ProductOperator,N}
         end
     end
 

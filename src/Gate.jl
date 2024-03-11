@@ -8,6 +8,7 @@ export Control, Swap, FSim, SU
 export CX, CY, CZ, CRx, CRy, CRz
 export control, target, operator
 export Pauli, Phase
+export ⊗
 
 """
     Operator
@@ -438,4 +439,38 @@ end
 function Base.rand(::Type{SU{N}}, lanes::Vararg{Int,N}; eltype::Type = ComplexF64) where {N}
     op = rand(SU{N}; eltype = eltype)
     Gate{SU{N},N}(lanes, op)
+end
+
+"""
+    ProductOperator(ops...)
+
+A tensor product of operators.
+"""
+struct ProductOperator <: Operator
+    ops::Vector{Operator}
+end
+
+⊗(a::Operator, b::Operator) = ProductOperator([a, b])
+⊗(a::ProductOperator, b::Operator) = ProductOperator([a.ops..., b])
+⊗(a::Operator, b::ProductOperator) = ProductOperator([a, b.ops...])
+⊗(a::ProductOperator, b::ProductOperator) = ProductOperator([a.ops..., b.ops...])
+
+Base.length(op::ProductOperator) = reduce(+, map(length, op.ops))
+isparametric(op::ProductOperator) = any(isparametric, op.ops)
+# TODO parameters?
+
+Base.adjoint(op::ProductOperator) = ProductOperator(tuple(map(adjoint, op.ops)...))
+
+(op::ProductOperator)(lanes...) = Gate{ProductOperator,length(op)}(lanes, op)
+
+⊗(a::Gate, b::Gate) = (operator(a) ⊗ operator(b))(lanes(a)..., lanes(b)...)
+
+Base.propertynames(::Type{<:Gate{ProductOperator}}) = ()
+Base.propertynames(::Gate{ProductOperator}) = ()
+Base.getproperty(g::Gate{ProductOperator}, i::Symbol) = getfield(g, i)
+
+Base.summary(io::IO, op::ProductOperator) = print(io, join(op.ops, " ⊗ "))
+function Base.summary(io::IO, gate::Gate{ProductOperator})
+    summary(io, operator(gate))
+    print(io, " on $(join(lanes(gate), ", "))")
 end
