@@ -6,205 +6,168 @@ using LinearAlgebra: Eigen, LinearAlgebra, qr
 function arraytype end
 export arraytype
 
-arraytype(::T) where {T<:Gate} = arraytype(T)
-arraytype(::Type{<:Gate}) = Array{T} where {T}
+arraytype(::Gate{Op}) where {Op<:Operator} = arraytype(Op)
+# arraytype(::Type{<:Gate}) = Array{T} where {T}
 
-for G in [I, Z, S, Sd, T, Td, Rz]
-    @eval arraytype(::Type{<:Gate{$G}}) = Diagonal
+for Op in [I, Z, S, Sd, T, Td, Rz]
+    @eval arraytype(::$Op) = Diagonal
 end
 
-for G in [X, Y, H, Rx, Ry]
-    @eval arraytype(::Type{<:Gate{$G}}) = Matrix
+for Op in [X, Y, H, Rx, Ry]
+    @eval arraytype(::$Op) = Matrix
 end
+
+(::Type{A})(x::Gate) where {A<:Array} = A(operator(x))
+Diagonal(x::Quac.Gate) = Diagonal(operator(x))
+Diagonal{T}(x::Quac.Gate) where {T} = Diagonal{T}(operator(x))
+Diagonal{T,V}(x::Quac.Gate) where {T,V<:AbstractVector{T}} = Diagonal{T,V}(operator(x))
 
 # TODO arraytype(::Type{T}) where {T<:Control} = arraytype(op(T)) == Diagonal ? Diagonal : Matrix
 
-Matrix(x::Gate) = Matrix{ComplexF32}(x)
-Matrix(::Type{T}) where {T<:Gate} = Matrix{ComplexF32}(T)
+Matrix(x::Operator) = Matrix{ComplexF64}(x)
 
-for Op in [I, X, Y, Z, H, S, Sd, T, Td, Swap, SU]
-    @eval Matrix{T}(::G) where {T,G<:Gate{$Op}} = Matrix{T}(G)
-end
+Matrix{T}(::I) where {T} = Matrix{T}(LinearAlgebra.I, 2, 2)
+Matrix{T}(::X) where {T} = Matrix{T}([0 1; 1 0])
+Matrix{T}(::Y) where {T} = Matrix{T}([0 -1im; 1im 0])
+Matrix{T}(::Z) where {T} = Matrix{T}([1 0; 0 -1])
+Matrix{T}(::H) where {T} = Matrix{T}([1 1; 1 -1] ./ sqrt(2))
+Matrix{T}(::S) where {T} = Matrix{T}([1 0; 0 1im])
+Matrix{T}(::Sd) where {T} = Matrix{T}([1 0; 0 -1im])
+Matrix{F}(::T) where {F} = Matrix{F}([1 0; 0 cispi(1 // 4)])
+Matrix{F}(::Td) where {F} = Matrix{F}([1 0; 0 cispi(-1 // 4)])
 
-Matrix{T}(::Type{<:Gate{I}}) where {T} = Matrix{T}(LinearAlgebra.I, 2, 2)
-Matrix{T}(::Type{<:Gate{X}}) where {T} = Matrix{T}([0 1; 1 0])
-Matrix{T}(::Type{<:Gate{Y}}) where {T} = Matrix{T}([0 -1im; 1im 0])
-Matrix{T}(::Type{<:Gate{Z}}) where {T} = Matrix{T}([1 0; 0 -1])
-Matrix{T}(::Type{<:Gate{H}}) where {T} = Matrix{T}([1 1; 1 -1] ./ sqrt(2))
-Matrix{T}(::Type{<:Gate{S}}) where {T} = Matrix{T}([1 0; 0 1im])
-Matrix{T}(::Type{<:Gate{Sd}}) where {T} = Matrix{T}([1 0; 0 -1im])
-Matrix{F}(::Type{<:Gate{T}}) where {F} = Matrix{F}([1 0; 0 cispi(1 // 4)])
-Matrix{F}(::Type{<:Gate{Td}}) where {F} = Matrix{F}([1 0; 0 cispi(-1 // 4)])
+Matrix{T}(::Swap) where {T} = Matrix{T}([1 0 0 0; 0 0 1 0; 0 1 0 0; 0 0 0 1])
 
-Matrix{T}(::Type{<:Gate{Swap}}) where {T} = Matrix{T}([1 0 0 0; 0 0 1 0; 0 1 0 0; 0 0 0 1])
-
-Matrix{T}(g::G) where {T,G<:Gate{Rx}} = Matrix{T}([
-    cos(g.θ / 2) -1im*sin(g.θ / 2)
-    -1im*sin(g.θ / 2) cos(g.θ / 2)
+Matrix{T}(op::Rx) where {T} = Matrix{T}([
+    cos(op.θ / 2) -1im*sin(op.θ / 2)
+    -1im*sin(op.θ / 2) cos(op.θ / 2)
 ])
-Matrix{T}(g::G) where {T,G<:Gate{Ry}} = Matrix{T}([
-    cos(g.θ / 2) -sin(g.θ / 2)
-    sin(g.θ / 2) cos(g.θ / 2)
+Matrix{T}(op::Ry) where {T} = Matrix{T}([
+    cos(op.θ / 2) -sin(op.θ / 2)
+    sin(op.θ / 2) cos(op.θ / 2)
 ])
-Matrix{T}(g::G) where {T,G<:Gate{Rz}} = Matrix{T}([1 0; 0 cis(g.θ)])
+Matrix{T}(op::Rz) where {T} = Matrix{T}(Diagonal{T}(op))
 
-Matrix{T}(g::G) where {T,G<:Gate{Rxx}} = Matrix{T}(
+Matrix{T}(op::Rxx) where {T} = Matrix{T}(
     [
-        cos(g.θ / 2) 0 0 -1im*sin(g.θ / 2)
-        0 cos(g.θ / 2) -1im*sin(g.θ / 2) 0
-        0 -1im*sin(g.θ / 2) cos(g.θ / 2) 0
-        -1im*sin(g.θ / 2) 0 0 cos(g.θ / 2)
+        cos(op.θ / 2) 0 0 -1im*sin(op.θ / 2)
+        0 cos(op.θ / 2) -1im*sin(op.θ / 2) 0
+        0 -1im*sin(op.θ / 2) cos(op.θ / 2) 0
+        -1im*sin(op.θ / 2) 0 0 cos(op.θ / 2)
     ],
 )
 
-Matrix{T}(g::G) where {T,G<:Gate{Ryy}} = Matrix{T}(
+Matrix{T}(op::Ryy) where {T} = Matrix{T}(
     [
-        cos(g.θ / 2) 0 0 1im*sin(g.θ / 2)
-        0 cos(g.θ / 2) -1im*sin(g.θ / 2) 0
-        0 -1im*sin(g.θ / 2) cos(g.θ / 2) 0
-        1im*sin(g.θ / 2) 0 0 cos(g.θ / 2)
+        cos(op.θ / 2) 0 0 1im*sin(op.θ / 2)
+        0 cos(op.θ / 2) -1im*sin(op.θ / 2) 0
+        0 -1im*sin(op.θ / 2) cos(op.θ / 2) 0
+        1im*sin(op.θ / 2) 0 0 cos(op.θ / 2)
     ],
 )
 
-Matrix{T}(g::G) where {T,G<:Gate{Rzz}} = Matrix{T}([
-    cis(-g.θ / 2) 0 0 0
-    0 cis(g.θ / 2) 0 0
-    0 0 cis(g.θ / 2) 0
-    0 0 0 cis(-g.θ / 2)
+Matrix{T}(op::Rzz) where {T} = Matrix{T}([
+    cis(-op.θ / 2) 0 0 0
+    0 cis(op.θ / 2) 0 0
+    0 0 cis(op.θ / 2) 0
+    0 0 0 cis(-op.θ / 2)
 ])
 
-Matrix{T}(g::G) where {T,G<:Gate{U2}} = 1 / sqrt(2) * Matrix{T}([
-    1 -cis(g.λ)
-    cis(g.ϕ) cis(g.ϕ + g.λ)
+Matrix{T}(op::U2) where {T} = 1 / sqrt(2) * Matrix{T}([
+    1 -cis(op.λ)
+    cis(op.ϕ) cis(op.ϕ + op.λ)
 ])
 
-Matrix{T}(g::G) where {T,G<:Gate{U3}} = Matrix{T}([
-    cos(g.θ / 2) -cis(g.λ)*sin(g.θ / 2)
-    cis(g.ϕ)*sin(g.θ / 2) cis(g.ϕ + g.λ)*cos(g.θ / 2)
+Matrix{T}(op::U3) where {T} = Matrix{T}([
+    cos(op.θ / 2) -cis(op.λ)*sin(op.θ / 2)
+    cis(op.ϕ)*sin(op.θ / 2) cis(op.ϕ + op.λ)*cos(op.θ / 2)
 ])
 
-Matrix{T}(g::G) where {T,G<:Gate{Hz}} = Matrix{T}(
+Matrix{T}(op::Hz) where {T} = Matrix{T}(
     [
-        cis(g.θ / 2)*cos(g.θ / 2) -1im*cis(-g.θ / 2 + g.ϕ)*sin(g.θ / 2)
-        -1im*cis(-g.θ / 2 - g.ϕ)*sin(g.θ / 2) cis(g.θ / 2)*cos(g.θ / 2)
+        cis(op.θ / 2)*cos(op.θ / 2) -1im*cis(-op.θ / 2 + op.ϕ)*sin(op.θ / 2)
+        -1im*cis(-op.θ / 2 - op.ϕ)*sin(op.θ / 2) cis(op.θ / 2)*cos(op.θ / 2)
     ],
 )
 
-Matrix{T}(g::G) where {T,G<:Gate{FSim}} = Matrix{T}([
+Matrix{T}(op::FSim) where {T} = Matrix{T}([
     1 0 0 0
-    0 cos(g.θ) -1im*sin(g.θ) 0
-    0 -1im*sin(g.θ) cos(g.θ) 0
-    0 0 0 cis(-g.ϕ)
+    0 cos(op.θ) -1im*sin(op.θ) 0
+    0 -1im*sin(op.θ) cos(op.θ) 0
+    0 0 0 cis(-op.ϕ)
 ])
 
-function Matrix{T}(::Type{Gate{Op}}) where {T,Op<:Control}
-    n = length(Op)
+function Matrix{T}(op::Op) where {T,Op<:Control}
+    N = length(Op)
     t = length(targettype(Op))
 
-    M = Matrix{T}(LinearAlgebra.I, 2^n, 2^n)
+    M = Matrix{T}(LinearAlgebra.I, 2^N, 2^N)
 
-    M[(2^n-2^t+1):end, (2^n-2^t+1):end] = Matrix{T}(Gate{targettype(Op)})
-
-    return M
-end
-
-function Matrix{T}(g::Gate{<:Control}) where {T}
-    n = (length ∘ lanes)(g)
-    t = (length ∘ target)(g)
-
-    M = Matrix{T}(LinearAlgebra.I, 2^n, 2^n)
-
-    M[(2^n-2^t+1):end, (2^n-2^t+1):end] = Matrix{T}(Gate{targettype(operator(g))}(target(g)...; parameters(g)...))
+    M[(2^N-2^t+1):end, (2^N-2^t+1):end] = Matrix{T}(target(op))
 
     return M
 end
 
-function Base.rand(::Type{SU{N}}, lanes::NTuple{M,Int}; eltype::Type = ComplexF64) where {N,M}
-    # keep unitary matrix Q from QR decomposition
-    q, _ = qr(rand(eltype, N, N))
-
-    SU{N}(lanes...; array = Matrix(q))
+function Matrix{T}(op::SU) where {T}
+    return Matrix{T}(op.matrix)
 end
 
-Base.rand(::Type{Gate{SU{N}}}, lanes::Integer...; kwargs...) where {N} = rand(SU{N}, lanes; kwargs...)
+Array(x::Operator) = Array{ComplexF64}(x)
 
-function Matrix{T}(g::Gate{<:SU{N}}) where {T,N}
-    return g.array |> Matrix{T}
-end
-
-Array(x::Gate) = Array{ComplexF32}(x)
-Array(::Type{T}) where {T<:Gate} = Array{ComplexF32}(T)
-
-for Op in [I, X, Y, Z, H, S, Sd, T, Td, Swap]
-    @eval Array{T}(::G) where {T,G<:Gate{$Op}} = Array{T}(G)
-end
-
-Array{T}(::Type{G}) where {T,G<:Gate} = Array{T,2 * length(operator(G))}(G)
-Array{T}(g::G) where {T,G<:Gate} = Array{T,2 * length(operator(G))}(isparametric(operator(G)) ? g : G)
+Array{T}(op::Op) where {T,Op<:Operator} = Array{T,2 * length(Op)}(op)
 
 # NOTE multidimensional `Array` literal concatenation was introduced in 1.7
 # TODO clean code when we stop supporting Julia 1.6
-Array{T,4}(::Type{<:Gate{Swap}}) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
+Array{T,4}(::Swap) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
 
-Array{T,4}(g::G) where {T,G<:Gate{FSim}} =
-    Array{T}([1; 0;; 0; 0;;; 0; cos(g.θ);; -1im*sin(g.ϕ); 0;;;; 0; -1im*sin(g.ϕ);; cos(g.θ); 0;;; 0; 0;; 0; 1])
+Array{T,4}(op::FSim) where {T} = Array{T}(
+    [1; 0;; 0; 0;;; 0; cos(op.θ);; -1im*sin(op.θ); 0;;;; 0; -1im*sin(op.θ);; cos(op.θ); 0;;; 0; 0;; 0; cis(-op.θ)],
+)
 
-Array{T,4}(g::G) where {T,G<:Gate{Rxx}} = Array{T,4}(
+Array{T,4}(op::Rxx) where {T} = Array{T,4}(
     [
-        cos(g.θ / 2); 0;; 0; -1im*sin(g.θ / 2);;; 0; cos(g.θ / 2);; -1im*sin(g.θ / 2); 0;;;;
-        0; -1im*sin(g.θ / 2);; cos(g.θ / 2); 0;;; -1im*sin(g.θ / 2); 0;; 0; cos(g.θ / 2)
+        cos(op.θ / 2); 0;; 0; -1im*sin(op.θ / 2);;; 0; cos(op.θ / 2);; -1im*sin(op.θ / 2); 0;;;;
+        0; -1im*sin(op.θ / 2);; cos(op.θ / 2); 0;;; -1im*sin(op.θ / 2); 0;; 0; cos(op.θ / 2)
     ],
 )
 
-Array{T,4}(g::G) where {T,G<:Gate{Ryy}} = Array{T,4}(
+Array{T,4}(op::Ryy) where {T} = Array{T,4}(
     [
-        cos(g.θ / 2); 0;; 0; 1im*sin(g.θ / 2);;; 0; cos(g.θ / 2);; -1im*sin(g.θ / 2); 0;;;;
-        0; -1im*sin(g.θ / 2);; cos(g.θ / 2); 0;;; 1im*sin(g.θ / 2); 0;; 0; cos(g.θ / 2)
+        cos(op.θ / 2); 0;; 0; 1im*sin(op.θ / 2);;; 0; cos(op.θ / 2);; -1im*sin(op.θ / 2); 0;;;;
+        0; -1im*sin(op.θ / 2);; cos(op.θ / 2); 0;;; 1im*sin(op.θ / 2); 0;; 0; cos(op.θ / 2)
     ],
 )
 
-Array{T,4}(g::G) where {T,G<:Gate{Rzz}} = Array{T,4}(
+Array{T,4}(op::Rzz) where {T} = Array{T,4}(
     [
-        cis(-g.θ / 2); 0;; 0; 0;;; 0; cis(g.θ / 2);; 0; 0;;;;
-        0; 0;; cis(g.θ / 2); 0;;; 0; 0;; 0; cis(-g.θ / 2)
+        cis(-op.θ / 2); 0;; 0; 0;;; 0; cis(op.θ / 2);; 0; 0;;;;
+        0; 0;; cis(op.θ / 2); 0;;; 0; 0;; 0; cis(-op.θ / 2)
     ],
 )
 
-Array{T}(::Type{Gate{C}}) where {T,C<:Control} =
-    Array{T,2 * length(C)}(reshape(Matrix{T}(Gate{C}), fill(2, 2 * length(C))...))
-Array{T}(g::Gate{C}) where {T,C<:Control} = Array{T,2 * length(C)}(reshape(Matrix{T}(g), fill(2, 2 * length(C))...))
+Array{T}(op::Op) where {T,Op<:Control} = Array{T,2 * length(Op)}(reshape(Matrix{T}(op), fill(2, 2 * length(Op))...))
 
-Array{T}(g::Gate{<:SU{N}}) where {T,N} = Array{T,2 * length(g)}(reshape(Matrix{T}(g), fill(2, 2 * Int(log2(N)))...))
+Array{T}(op::SU{N}) where {T,N} = Array{T,2N}(reshape(Matrix{T}(op), fill(2, 2N)...))
 
 # diagonal matrices
 # NOTE efficient multiplication due to no memory swap needed: plain element-wise multiplication
-Diagonal(x::Gate) = Diagonal{ComplexF32}(x)
-Diagonal(::Type{T}) where {T<:Gate} = Diagonal{ComplexF32}(T)
+Diagonal(x::Operator) = Diagonal{ComplexF64}(x)
 
-for Op in [I, Z, S, Sd, T, Td]
-    @eval Diagonal{T}(::Gate{$Op}) where {T} = Diagonal{T}(Gate{$Op})
-end
+Diagonal{T}(::I) where {T} = Diagonal{T}(LinearAlgebra.I, 2)
+Diagonal{T}(::Z) where {T} = Diagonal{T}([1, -1])
+Diagonal{T}(::S) where {T} = Diagonal{T}([1, 1im])
+Diagonal{T}(::Sd) where {T} = Diagonal{T}([1, -1im])
+Diagonal{F}(::T) where {F} = Diagonal{F}([1, cispi(1 // 4)])
+Diagonal{T}(::Td) where {T} = Diagonal{T}([1, cispi(-1 // 4)])
 
-Diagonal{T}(::Type{<:Gate{I}}) where {T} = Diagonal{T}(LinearAlgebra.I, 2)
-Diagonal{T}(::Type{<:Gate{Z}}) where {T} = Diagonal{T}([1, -1])
-Diagonal{T}(::Type{<:Gate{S}}) where {T} = Diagonal{T}([1, 1im])
-Diagonal{T}(::Type{<:Gate{Sd}}) where {T} = Diagonal{T}([1, -1im])
-Diagonal{F}(::Type{<:Gate{T}}) where {F} = Diagonal{F}([1, cispi(1 // 4)])
-Diagonal{T}(::Type{<:Gate{Td}}) where {T} = Diagonal{T}([1, cispi(-1 // 4)])
+Diagonal{T}(op::Rz) where {T} = Diagonal{T}([1, cis(op.θ)])
+Diagonal{T}(op::Rzz) where {T} = Diagonal{T}([1, cis(op.θ), cis(op.θ), 1])
 
-Diagonal{T}(g::Gate{Rz}) where {T} = Diagonal{T}([1, cis(g.θ)])
-Diagonal{T}(g::Gate{Rzz}) where {T} = Diagonal{T}([1, cis(g.θ), cis(g.θ), 1])
-
-Diagonal{T}(::Type{Gate{Op}}) where {T,Op<:Control} =
-    Diagonal{T}([fill(one(T), 2^length(Op) - 2^length(targettype(Op)))..., diag(Diagonal{T}(Gate{targettype(Op)}))...])
-
-Diagonal{T}(g::Gate{Op}) where {T,Op<:Control} = Diagonal{T}([
-    fill(one(T), 2^length(Op) - 2^length(targettype(Op)))...,
-    diag(Diagonal{T}(Gate{targettype(Op)}(target(g)...; parameters(g)...)))...,
-])
+Diagonal{T}(op::Op) where {T,Op<:Control} =
+    Diagonal{T}([fill(one(T), 2^length(Op) - 2^length(targettype(Op)))..., diag(Diagonal{T}(target(op)))...])
 
 # permutational matrices (diagonal + permutation)
-# Permutation(x::Gate) = Permutation{ComplexF32}(x)
+# Permutation(x::Gate) = Permutation{ComplexF64}(x)
 # Permutation{T}(_::Gate) where {T} = error("Implementation not found")
 
 # Linear Algebra factorizations

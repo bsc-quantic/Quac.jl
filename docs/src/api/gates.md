@@ -13,14 +13,14 @@ For example, this is a $Z$ that acts on qubit 4.
 
 ```jldoctest z-gate
 julia> gate = Z(4)
-Z(4)
+Z() on 4
 ```
 
 Any gate can be represented by a dense matrix.
 
 ```jldoctest z-gate
 julia> Matrix(gate)
-2×2 Matrix{ComplexF32}:
+2×2 Matrix{ComplexF64}:
  1.0+0.0im   0.0+0.0im
  0.0+0.0im  -1.0+0.0im
 ```
@@ -44,7 +44,7 @@ julia> Diagonal{Float32}(gate)
 ```
 
 ```@docs
-Operator
+Quac.Operator
 Gate
 ```
 

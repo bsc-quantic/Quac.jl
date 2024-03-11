@@ -1,5 +1,4 @@
 @testset "Algorithms" begin
-
     @testset "Quac.Algorithms.QFT" begin
         circuit = Quac.Algorithms.QFT(3)
 

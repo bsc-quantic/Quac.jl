@@ -25,7 +25,6 @@ function QFT(n::Int)
     circuit
 end
 
-
 """
     QuantumVolume(n, depth)
 
@@ -34,7 +33,6 @@ Generate a Quantum Volume circuit of `n` qubits and `depth` layers. See [1] for 
 # References
 
 [1] Cross, Andrew W., et al. "Validating quantum computers using randomized model circuits." Physical Review A 100.3 (2019): 032328.
-
 """
 function QuantumVolume(n, depth)
     circuit = Circuit(n)
@@ -45,9 +43,9 @@ function QuantumVolume(n, depth)
 
         for i in 1:2:n-1
             q1 = permutation[i]
-            q2 = permutation[i + 1]
+            q2 = permutation[i+1]
 
-            push!(circuit, rand(SU{4}, q1, q2))
+            push!(circuit, rand(SU{2}, q1, q2))
         end
     end
 
