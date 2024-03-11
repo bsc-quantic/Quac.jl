@@ -159,7 +159,8 @@
         @testset "Rx" begin
             @test begin
                 op = Rx(; θ = 0)
-                Matrix(op) ≈ LinearAlgebra.I(2^length(g))
+                N = length(op)
+                Matrix(op) ≈ LinearAlgebra.I(2^N)
             end
 
             @test begin
@@ -194,18 +195,19 @@
 
         @testset "Ry" begin
             @test begin
-                g = Ry(1, θ = 0)
-                Matrix(g) ≈ LinearAlgebra.I(2^length(g))
+                op = Ry(; θ = 0)
+                N = length(op)
+                Matrix(op) ≈ LinearAlgebra.I(2^N)
             end
 
             @test begin
-                g = Ry(1, θ = π / 2)
-                Matrix(g) ≈ 1 / sqrt(2) * [1 -1; 1 1]
+                op = Ry(; θ = π / 2)
+                Matrix(op) ≈ 1 / sqrt(2) * [1 -1; 1 1]
             end
 
             @test begin
-                g = Ry(1, θ = π)
-                Matrix(g) ≈ [0 -1; 1 0]
+                op = Ry(; θ = π)
+                Matrix(op) ≈ [0 -1; 1 0]
             end
         end
 
@@ -230,18 +232,19 @@
 
         @testset "Rz" begin
             @test begin
-                g = Rz(1, θ = 0)
-                Matrix(g) ≈ LinearAlgebra.I(2^length(g))
+                op = Rz(; θ = 0)
+                N = length(op)
+                Matrix(op) ≈ LinearAlgebra.I(2^N)
             end
 
             @test begin
-                g = Rz(1, θ = π / 2)
-                Matrix(g) ≈ [1 0; 0 1im]
+                op = Rz(; θ = π / 2)
+                Matrix(op) ≈ [1 0; 0 1im]
             end
 
             @test begin
-                g = Rz(1, θ = π)
-                Matrix(g) ≈ [1 0; 0 -1]
+                op = Rz(; θ = π)
+                Matrix(op) ≈ [1 0; 0 -1]
             end
         end
 
@@ -266,164 +269,167 @@
 
         @testset "U2" begin
             @test begin
-                g = U2(1, ϕ = 0, λ = 0)
-                Matrix(g) ≈ 1 / sqrt(2) * [1 -1; 1 1]
+                op = U2(; ϕ = 0, λ = 0)
+                Matrix(op) ≈ 1 / sqrt(2) * [1 -1; 1 1]
             end
 
             @test begin
-                g = U2(1, ϕ = 0, λ = π / 2)
-                Matrix(g) ≈ 1 / sqrt(2) * [1 -1im; 1 1im]
+                op = U2(; ϕ = 0, λ = π / 2)
+                Matrix(op) ≈ 1 / sqrt(2) * [1 -1im; 1 1im]
             end
 
             @test begin
-                g = U2(1, ϕ = 0, λ = π)
-                Matrix(g) ≈ 1 / sqrt(2) * [1 1; 1 -1]
+                op = U2(; ϕ = 0, λ = π)
+                Matrix(op) ≈ 1 / sqrt(2) * [1 1; 1 -1]
             end
 
             @test begin
-                g = U2(1, ϕ = π / 2, λ = 0)
-                Matrix(g) ≈ 1 / sqrt(2) * [1 -1; 1im 1im]
+                op = U2(; ϕ = π / 2, λ = 0)
+                Matrix(op) ≈ 1 / sqrt(2) * [1 -1; 1im 1im]
             end
 
             @test begin
-                g = U2(1, ϕ = π / 2, λ = π / 2)
-                Matrix(g) ≈ 1 / sqrt(2) * [1 -1im; 1im -1]
+                op = U2(; ϕ = π / 2, λ = π / 2)
+                Matrix(op) ≈ 1 / sqrt(2) * [1 -1im; 1im -1]
             end
 
             @test begin
-                g = U2(1, ϕ = π / 2, λ = π)
-                Matrix(g) ≈ 1 / sqrt(2) * [1 1; 1im -1im]
+                op = U2(; ϕ = π / 2, λ = π)
+                Matrix(op) ≈ 1 / sqrt(2) * [1 1; 1im -1im]
             end
 
             @test begin
-                g = U2(1, ϕ = π, λ = 0)
-                Matrix(g) ≈ 1 / sqrt(2) * [1 -1; -1 -1]
+                op = U2(; ϕ = π, λ = 0)
+                Matrix(op) ≈ 1 / sqrt(2) * [1 -1; -1 -1]
             end
 
             @test begin
-                g = U2(1, ϕ = π, λ = π / 2)
-                Matrix(g) ≈ 1 / sqrt(2) * [1 -1im; -1 -1im]
+                op = U2(; ϕ = π, λ = π / 2)
+                Matrix(op) ≈ 1 / sqrt(2) * [1 -1im; -1 -1im]
             end
 
             @test begin
-                g = U2(1, ϕ = π, λ = π)
-                Matrix(g) ≈ 1 / sqrt(2) * [1 1; -1 1]
+                op = U2(; ϕ = π, λ = π)
+                Matrix(op) ≈ 1 / sqrt(2) * [1 1; -1 1]
             end
         end
 
         @testset "U3" begin
             @test begin
-                g = U3(1, θ = 0, ϕ = 0, λ = 0)
-                Matrix(g) ≈ LinearAlgebra.I(2^length(g))
+                op = U3(; θ = 0, ϕ = 0, λ = 0)
+                N = length(op)
+                Matrix(op) ≈ LinearAlgebra.I(2^N)
             end
 
             @test begin
-                g = U3(1, θ = π / 2, ϕ = π / 2, λ = π / 2)
-                Matrix(g) ≈ 1 / sqrt(2) * [1 -1im; 1im -1]
+                op = U3(; θ = π / 2, ϕ = π / 2, λ = π / 2)
+                Matrix(op) ≈ 1 / sqrt(2) * [1 -1im; 1im -1]
             end
 
             @test begin
-                g = U3(1, θ = π, ϕ = π, λ = π)
-                Matrix(g) ≈ [0 1; -1 0]
+                op = U3(; θ = π, ϕ = π, λ = π)
+                Matrix(op) ≈ [0 1; -1 0]
             end
         end
 
         @testset "Hz" begin
             @test begin
-                g = Hz(1, θ = 0, ϕ = 0)
-                Matrix(g) ≈ LinearAlgebra.I(2^length(g))
+                op = Hz(; θ = 0, ϕ = 0)
+                N = length(op)
+                Matrix(op) ≈ LinearAlgebra.I(2^N)
             end
 
             @test begin
-                g = Hz(1, θ = π / 2, ϕ = π / 2)
-                Matrix(g) ≈ 1 / 2 * [1+1im 1-1im; -1+1im 1+1im]
+                op = Hz(; θ = π / 2, ϕ = π / 2)
+                Matrix(op) ≈ 1 / 2 * [1+1im 1-1im; -1+1im 1+1im]
             end
 
             @test begin
-                g = Hz(1, θ = π, ϕ = π)
-                Matrix(g) ≈ [0 1; 1 0]
+                op = Hz(; θ = π, ϕ = π)
+                Matrix(op) ≈ [0 1; 1 0]
             end
         end
 
         @testset "FSim" begin
             @test begin
-                g = FSim(1, 2, θ = 0, ϕ = 0)
-                Matrix(g) ≈ LinearAlgebra.I(2^length(g))
+                op = FSim(; θ = 0, ϕ = 0)
+                N = length(op)
+                Matrix(op) ≈ LinearAlgebra.I(2^N)
             end
 
             @test begin
-                g = FSim(1, 2, θ = 0, ϕ = π / 2)
-                Matrix(g) ≈ [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 -1im]
+                op = FSim(; θ = 0, ϕ = π / 2)
+                Matrix(op) ≈ [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 -1im]
             end
 
             @test begin
-                g = FSim(1, 2, θ = 0, ϕ = π)
-                Matrix(g) ≈ [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 -1]
+                op = FSim(; θ = 0, ϕ = π)
+                Matrix(op) ≈ [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 -1]
             end
 
             @test begin
-                g = FSim(1, 2, θ = 0, ϕ = 3*π / 2)
-                Matrix(g) ≈ [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 1im]
+                op = FSim(; θ = 0, ϕ = 3 * π / 2)
+                Matrix(op) ≈ [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 1im]
             end
 
             @test begin
-                g = FSim(1, 2, θ = π / 2, ϕ = 0)
-                Matrix(g) ≈ [1 0 0 0; 0 0 -1im 0; 0 -1im 0 0; 0 0 0 1]
+                op = FSim(; θ = π / 2, ϕ = 0)
+                Matrix(op) ≈ [1 0 0 0; 0 0 -1im 0; 0 -1im 0 0; 0 0 0 1]
             end
 
             @test begin
-                g = FSim(1, 2, θ = π / 2, ϕ = π / 2)
-                Matrix(g) ≈ [1 0 0 0; 0 0 -1im 0; 0 -1im 0 0; 0 0 0 -1im]
+                op = FSim(; θ = π / 2, ϕ = π / 2)
+                Matrix(op) ≈ [1 0 0 0; 0 0 -1im 0; 0 -1im 0 0; 0 0 0 -1im]
             end
 
             @test begin
-                g = FSim(1, 2, θ = π / 2, ϕ = π)
-                Matrix(g) ≈ [1 0 0 0; 0 0 -1im 0; 0 -1im 0 0; 0 0 0 -1]
+                op = FSim(; θ = π / 2, ϕ = π)
+                Matrix(op) ≈ [1 0 0 0; 0 0 -1im 0; 0 -1im 0 0; 0 0 0 -1]
             end
 
             @test begin
-                g = FSim(1, 2, θ = π / 2, ϕ = 3*π / 2)
-                Matrix(g) ≈ [1 0 0 0; 0 0 -1im 0; 0 -1im 0 0; 0 0 0 1im]
+                op = FSim(; θ = π / 2, ϕ = 3 * π / 2)
+                Matrix(op) ≈ [1 0 0 0; 0 0 -1im 0; 0 -1im 0 0; 0 0 0 1im]
             end
 
             @test begin
-                g = FSim(1, 2, θ = π, ϕ = 0)
-                Matrix(g) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 1]
+                op = FSim(; θ = π, ϕ = 0)
+                Matrix(op) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 1]
             end
 
             @test begin
-                g = FSim(1, 2, θ = π, ϕ = π / 2)
-                Matrix(g) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 -1im]
+                op = FSim(; θ = π, ϕ = π / 2)
+                Matrix(op) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 -1im]
             end
 
             @test begin
-                g = FSim(1, 2, θ = π, ϕ = π)
-                Matrix(g) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 -1]
+                op = FSim(; θ = π, ϕ = π)
+                Matrix(op) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 -1]
             end
 
             @test begin
-                g = FSim(1, 2, θ = π, ϕ = 3*π / 2)
-                Matrix(g) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 1im]
+                op = FSim(; θ = π, ϕ = 3 * π / 2)
+                Matrix(op) ≈ [1 0 0 0; 0 -1 0 0; 0 0 -1 0; 0 0 0 1im]
             end
 
             @test begin
-                g = FSim(1, 2, θ = 3*π / 2, ϕ = 0)
-                Matrix(g) ≈ [1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 1]
+                op = FSim(; θ = 3 * π / 2, ϕ = 0)
+                Matrix(op) ≈ [1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 1]
             end
 
             @test begin
-                g = FSim(1, 2, θ = 3*π / 2, ϕ = π / 2)
-                Matrix(g) ≈ [1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 -1im]
+                op = FSim(; θ = 3 * π / 2, ϕ = π / 2)
+                Matrix(op) ≈ [1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 -1im]
             end
 
             @test begin
-                g = FSim(1, 2, θ = 3*π / 2, ϕ = π)
-                Matrix(g) ≈ [1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 -1]
+                op = FSim(; θ = 3 * π / 2, ϕ = π)
+                Matrix(op) ≈ [1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 -1]
             end
 
             @test begin
-                g = FSim(1, 2, θ = 3*π / 2, ϕ = 3*π / 2)
-                Matrix(g) ≈ [1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 1im]
+                op = FSim(; θ = 3 * π / 2, ϕ = 3 * π / 2)
+                Matrix(op) ≈ [1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 1im]
             end
         end
     end
