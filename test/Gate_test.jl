@@ -263,24 +263,26 @@
         # `adjoint(::Gate)` with no parameters
         for Op in [I, X, Y, Z, H, S, Sd, T, Td, Swap, Control{I}, Control{Control{I}}, Control{Control{Control{I}}}]
             N = length(Op)
-            @test adjoint(Gate{Op}(1:N...)) === Gate{adjoint(Op),N}(1:N...)
+            @test adjoint(Op(1:N...)) === Op'(1:N...)
+            @test adjoint(Gate{Op}(1:N...)) === Gate{Op',N}(1:N...)
         end
 
         # `adjoint(::Gate)` with parameters
         for Op in [Rx, Ry, Rz, Rxx, Ryy, Rzz, U2, U3, Control{Rx}, Control{Control{Rx}}, Control{Control{Control{Rx}}}]
             params = Quac.randtuple(parameters(Op))
             N = length(Op)
+            @test Op(1:N...; params...)' === Op'(1:N...; [key => -val for (key, val) in pairs(params)]...)
             @test adjoint(Gate{Op}(1:N...; params...)) ===
                   Gate{adjoint(Op),N}(1:N...; [key => -val for (key, val) in pairs(params)]...)
         end
 
         # Special case for SU{N}
-        for N in [2, 4, 8]
-            @test_throws MethodError adjoint(Gate{SU{N}})
-
+        for N in [1, 2, 3]
             q, _ = qr(rand(ComplexF64, 2^N, 2^N))
+            q = Matrix(q)
 
-            @test adjoint(SU{N}(1:N...; matrix = Matrix{ComplexF64}(q))).matrix == adjoint(Matrix{ComplexF64}(q))
+            @test adjoint(SU{N}(1:N...; matrix = q)) == SU{N}'(1:N...; matrix = q')
+            @test adjoint(Gate{SU{N}}(1:N...; matrix = q)) == Gate{SU{N}'}(1:N...; matrix = q')
         end
     end
 

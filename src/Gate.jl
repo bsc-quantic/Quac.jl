@@ -17,6 +17,9 @@ isparametric(::T) where {T<:Operator} = isparametric(T)
 function parameters end
 function lanes end
 
+Base.:(==)(a::A, b::B) where {A<:Operator,B<:Operator} = false
+Base.:(==)(a::Op, b::Op) where {Op<:Operator} = isparametric(Op) ? parameters(a) == parameters(b) : true
+
 struct Gate{Op<:Operator,N}
     lanes::NTuple{N,Int}
     operator::Op
@@ -24,6 +27,9 @@ end
 
 Gate{Op}(lanes...; params...) where {Op} = Gate{Op,length(Op)}(lanes...; params...)
 Gate{Op,N}(lanes...; params...) where {Op,N} = Gate{Op,N}(lanes, Op(; params...))
+Gate{Op,N}(lanes::Vararg{Int,N}) where {Op,N} = Gate{Op,N}(lanes, Op())
+
+Base.:(==)(a::Gate, b::Gate) = lanes(a) == lanes(b) && operator(a) == operator(b)
 
 Base.length(::Type{Gate{Op,N}}) where {Op,N} = N
 Base.length(::Type{Gate{Op}}) where {Op} = length(Op)
@@ -92,7 +98,7 @@ macro gatedecl(name, opts...)
         fieldaccesses = map(field -> :(op.$field), first.(paramstuples))
         [
             esc(:(parameters(::Type{$name}) = $paramstuple)),
-            esc(:(parameters(op::$name) = $paramstuple($(fieldaccesses...)))),
+            esc(:(parameters(op::$name) = $paramstuple(tuple($(fieldaccesses...))))),
         ]
     else
         [esc(:(parameters(::Type{$name}) = @NamedTuple{})), esc(:(parameters(::$name) = @NamedTuple{}))]
@@ -335,14 +341,14 @@ Control{Op}(lane, lanes::Vararg{Int,N}; params...) where {Op,N} =
 Base.length(::Type{Control{T}}) where {T<:Operator} = 1 + length(T)
 
 isparametric(::Type{<:Control{T}}) where {T<:Operator} = isparametric(T)
-isparametric(op::Control{T}) where {T<:Operator} = isparametric(T)
+isparametric(::Control{T}) where {T<:Operator} = isparametric(T)
 parameters(::Type{Control{Op}}) where {Op} = parameters(Op)
 parameters(op::Control{Op}) where {Op} = parameters(op.target)
 
 Base.adjoint(::Type{Control{Op}}) where {Op} = Control{adjoint(Op)}
 Base.adjoint(op::Control{Op}) where {Op} =
     if isparametric(op)
-        Control{Op'}(operator(op)')
+        Control{Op'}(op.target')
     else
         Control{Op'}()
     end
