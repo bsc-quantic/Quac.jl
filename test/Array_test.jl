@@ -226,7 +226,7 @@
             @test begin
                 op = Ryy(; θ = π)
                 y = Matrix(Y())
-                Matrix(op) ≈ -1im * reshape(permutedims(reshape(kron(vec(y), vec(y)), 2, 2, 2, 2), (1, 3, 2, 4)), 4, 4)
+                Matrix(op) ≈ 1im * reshape(permutedims(reshape(kron(vec(y), vec(y)), 2, 2, 2, 2), (1, 3, 2, 4)), 4, 4)
             end
         end
 
