@@ -6,16 +6,33 @@ using LinearAlgebra: Eigen, LinearAlgebra, qr
 function arraytype end
 export arraytype
 
-arraytype(::Gate{Op}) where {Op<:Operator} = arraytype(Op)
-# arraytype(::Type{<:Gate}) = Array{T} where {T}
+arraytype(gate::Gate) = arraytype(operator(gate))
 
-for Op in [I, Z, S, Sd, T, Td, Rz]
-    @eval arraytype(::$Op) = Diagonal
+arraytype(::I) = Diagonal{Bool}
+arraytype(::X) = Matrix{Bool}
+arraytype(::Y) = Matrix{Int}
+arraytype(::Z) = Diagonal{Int}
+
+for Op in [S, Sd, T, Td, Rz]
+    @eval arraytype(::$Op) = Diagonal{ComplexF64}
 end
 
-for Op in [X, Y, H, Rx, Ry]
-    @eval arraytype(::$Op) = Matrix
+arraytype(::H) = Matrix{Float64}
+
+for Op in [Rx, Hz, U2, U3]
+    @eval arraytype(::$Op) = Matrix{ComplexF64}
 end
+
+arraytype(::Ry) = Matrix{Float64}
+
+for Op in [Rxx, Ryy, Rzz, FSim]
+    @eval arraytype(::$Op) = Array{ComplexF64,4}
+end
+
+arraytype(::Swap) = Array{Bool,4}
+arraytype(::SU{N}) where {N} = Array{ComplexF64,2N}
+
+arraytype(op::Control) = Array{ComplexF64,2 * length(op)}
 
 (::Type{A})(x::Gate) where {A<:Array} = A(operator(x))
 Diagonal(x::Quac.Gate) = Diagonal(operator(x))
