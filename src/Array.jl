@@ -190,6 +190,8 @@ Diagonal{T}(op::Op) where {T,Op<:Control} =
 
 # Linear Algebra factorizations
 LinearAlgebra.eigen(op::Operator) = Eigen(eigvals(op), eigvecs(op))
+LinearAlgebra.eigvals(op::Operator) = eigvals(Matrix(op))
+LinearAlgebra.eigvecs(op::Operator) = eigvecs(Matrix(op))
 
 LinearAlgebra.eigen(g::Gate) = eigen(operator(g))
 LinearAlgebra.eigvals(g::Gate) = eigvals(operator(g))
