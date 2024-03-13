@@ -162,7 +162,8 @@ Array{T,4}(op::Rzz) where {T} = Array{T,4}(
     ],
 )
 
-Array{T}(op::Op) where {T,Op<:Control} = Array{T,2 * length(Op)}(reshape(Matrix{T}(op), fill(2, 2 * length(Op))...))
+Array{T}(op::Op) where {T,Op<:Control} = Array{T,2 * length(Op)}(op)
+Array{T,N}(op::Control) where {T,N} = Array{T,N}(reshape(Matrix{T}(op), fill(2, N)...))
 
 Array{T}(op::SU{N}) where {T,N} = Array{T,2N}(reshape(Matrix{T}(op), fill(2, 2N)...))
 
