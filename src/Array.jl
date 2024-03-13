@@ -1,5 +1,5 @@
 import Base: Matrix, Array
-import LinearAlgebra: Diagonal, diag, eigvals, eigvecs, eigen
+import LinearAlgebra: Diagonal, diag
 using LinearAlgebra: Eigen, LinearAlgebra, qr
 
 # preferred representation
@@ -189,57 +189,45 @@ Diagonal{T}(op::Op) where {T,Op<:Control} =
 # Permutation{T}(_::Gate) where {T} = error("Implementation not found")
 
 # Linear Algebra factorizations
-eigen(::Type{T}) where {T<:Gate} = Eigen(eigvals(T), eigvecs(T))
-eigen(g::T) where {T<:Gate} = isparametric(T) ? Eigen(eigvals(g), eigvecs(g)) : eigen(T)
+LinearAlgebra.eigen(op::Operator) = Eigen(eigvals(op), eigvecs(op))
 
-eigvals(::Type{T}) where {T<:Gate} = eigvals(Matrix(T))
-eigvals(g::T) where {T<:Gate} = isparametric(T) ? eigvals(Matrix(g)) : eigvals(T)
+LinearAlgebra.eigen(g::Gate) = eigen(operator(g))
+LinearAlgebra.eigvals(g::Gate) = eigvals(operator(g))
+LinearAlgebra.eigvecs(g::Gate) = eigvecs(operator(g))
 
-eigvecs(::Type{T}) where {T<:Gate} = eigvecs(Matrix(T))
-eigvecs(g::T) where {T<:Gate} = isparametric(T) ? eigvecs(Matrix(g)) : eigvecs(T)
+LinearAlgebra.eigvals(::I) = [1, 1]
+LinearAlgebra.eigvecs(::I) = [1 0; 0 1]
 
-eigvals(::Type{I}) = [1, 1]
-eigvecs(::Type{I}) = [1 0; 0 1]
-
-for G in [X, Y, Z, H]
-    @eval eigvals(::$G) = eigvals($G)
-    @eval eigvals(::Type{$G}) = [-1, 1]
+for Op in [X, Y, Z, H]
+    @eval LinearAlgebra.eigvals(::$Op) = [-1, 1]
 end
 
-eigvecs(::Type{X}) = sqrt(2) / 2 .* [-1 1; 1 1]
-eigvecs(::Type{Y}) = sqrt(2) / 2 .* [-1im -1im; -1 1]
-eigvecs(::Type{Z}) = [0 1; 1 0]
-eigvecs(::Type{H}) = (m = [1-sqrt(2) 1+sqrt(2); 1 1]; m ./ sqrt.(sum(m .^ 2, dims = 1)))
+LinearAlgebra.eigvecs(::X) = sqrt(2) / 2 .* [-1 1; 1 1]
+LinearAlgebra.eigvecs(::Y) = sqrt(2) / 2 .* [-1im -1im; -1 1]
+LinearAlgebra.eigvecs(::Z) = [0 1; 1 0]
+LinearAlgebra.eigvecs(::H) = (m = [1-sqrt(2) 1+sqrt(2); 1 1]; m ./ sqrt.(sum(m .^ 2, dims = 1)))
 
-eigvals(::Type{S}) = [1im, 1]
-eigvals(::Type{Sd}) = [-1im, 1]
-eigvals(::Type{T}) = [sqrt(2) / 2 + 1im * sqrt(2) / 2, 1]
-eigvals(::Type{Td}) = [sqrt(2) / 2 - 1im * sqrt(2) / 2, 1]
+LinearAlgebra.eigvals(::S) = [1im, 1]
+LinearAlgebra.eigvals(::Sd) = [-1im, 1]
+LinearAlgebra.eigvals(::T) = [sqrt(2) / 2 + 1im * sqrt(2) / 2, 1]
+LinearAlgebra.eigvals(::Td) = [sqrt(2) / 2 - 1im * sqrt(2) / 2, 1]
 
 for G in [S, Sd, T, Td]
-    @eval eigvecs(::Type{$G}) = eigvecs(Z)
+    @eval LinearAlgebra.eigvecs(::$G) = eigvecs(Z())
 end
 
-for G in [Rx, Ry, Rz]
-    @eval eigen(g::$G) = Eigen(eigvals(g), eigvecs($G))
-end
+LinearAlgebra.eigvals(op::Rx) = [cis(-op.θ / 2), cis(op.θ / 2)]
+LinearAlgebra.eigvals(op::Ry) = [cis(-op.θ / 2), cis(op.θ / 2)]
+LinearAlgebra.eigvals(op::Rz) = [1, cis(op.θ)]
 
-eigvals(g::Rx) = [cis(-g[:θ] / 2), cis(g[:θ] / 2)]
-eigvals(g::Ry) = [cis(-g[:θ] / 2), cis(g[:θ] / 2)]
-eigvals(g::Rz) = [1, cis(g[:θ])]
+LinearAlgebra.eigvecs(::Rx) = (α = sqrt(2) / 2; α * [1 1; 1 -1])
+LinearAlgebra.eigvecs(::Ry) = (α = sqrt(2) / 2; α * [-1im 1; 1 -1im])
+LinearAlgebra.eigvecs(::Rz) = [1 0; 0 1]
 
-eigvecs(g::Rx) = eigvecs(Rx)
-eigvecs(::Type{Rx}) = (α = sqrt(2) / 2; α * [1 1; 1 -1])
-eigvecs(g::Ry) = eigvecs(Ry)
-eigvecs(::Type{Ry}) = (α = sqrt(2) / 2; α * [-1im 1; 1 -1im])
-eigvecs(g::Rz) = eigvecs(Rz)
-eigvecs(::Type{Rz}) = [1 0; 0 1]
-
-eigvals(::Type{Swap}) = [-1, 1, 1, 1]
-eigvecs(::Type{Swap}) = (α = sqrt(2) / 2;
+LinearAlgebra.eigvals(::Swap) = [-1, 1, 1, 1]
+LinearAlgebra.eigvecs(::Swap) = (α = sqrt(2) / 2;
 [0 1 0 0; α 0 α 0; -α 0 α 0; 0 0 0 1])
 
-eigvals(::Type{T}) where {T<:Control} = [eigvals(op(T))..., fill(1, 2^(lanes(T) - 1))...]
-eigvals(g::T) where {T<:Control} = [eigvals(op(g))..., fill(1, 2^(lanes(T) - 1))...]
+LinearAlgebra.eigvals(op::T) where {T<:Control} = [eigvals(op(g))..., fill(1, 2^(lanes(T) - 1))...]
 
 # TODO eigenvecs of `Control`?
