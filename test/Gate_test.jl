@@ -480,6 +480,16 @@
         @testset "$Op" for Op in [Control{I}, Control{Control{I}}, Control{Control{Control{I}}}]
             @test targettype(Gate{Op}) === I
         end
+
+        @test begin
+            crzop = operator(CRz(1, 2, θ = π / 4))
+            targettype(crzop) === Rz
+        end
+
+        @test begin
+            crzgate = CRz(1, 2, θ = π / 4)
+            targettype(crzgate) === Rz
+        end
     end
 
     @testset "control" begin
