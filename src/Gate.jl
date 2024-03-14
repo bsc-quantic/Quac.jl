@@ -378,6 +378,8 @@ targettype(::Type{Op}) where {Op<:Operator} = Op
 targettype(::Type{Control{Op}}) where {Op} = Op
 targettype(::Type{Control{Op}}) where {Op<:Control} = targettype(Op)
 targettype(::Type{<:Gate{Op}}) where {Op} = targettype(Op)
+targettype(g::Control{Op}) where {Op} = targettype(typeof(g))
+targettype(g::Gate{Op}) where {Op<:Control} = targettype(typeof(g))
 
 control(g::G) where {G<:Gate{<:Control}} = lanes(g)[1:end-length(targettype(G))]
 target(g::G) where {G<:Gate{<:Control}} = lanes(g)[end-length(targettype(G))+1:end]
