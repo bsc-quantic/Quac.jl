@@ -477,7 +477,7 @@
             @test targettype(Gate{Op}) === Op
         end
 
-        @testset "$Op" for Op in [Control{I}, Control{Control{I}}, Control{Control{Control{I}}}]
+        @testset "$Op" for Op in [I, Control{I}, Control{Control{I}}, Control{Control{Control{I}}}]
             @test targettype(Gate{Op}) === I
         end
 
