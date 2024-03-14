@@ -477,8 +477,17 @@
             @test targettype(Gate{Op}) === Op
         end
 
-        @testset "$Op" for Op in [Control{I}, Control{Control{I}}, Control{Control{Control{I}}}]
+        @testset "$Op" for Op in [I, Control{I}, Control{Control{I}}, Control{Control{Control{I}}}]
             @test targettype(Gate{Op}) === I
+        end
+
+        @testset "$(operator(gate))" for (gate, correct) in [
+            (Z(1), Z),
+            (CZ(1, 2), Z),
+            (Control(1, Control(2, Z(3))), Z),
+        ]
+            @test targettype(gate) === correct
+            @test targettype(operator(gate)) === correct
         end
     end
 
