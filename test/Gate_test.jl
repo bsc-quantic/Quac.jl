@@ -487,6 +487,7 @@
             (Control(1, Control(2, Z(3))), Z),
         ]
             @test targettype(gate) === correct
+            @test targettype(operator(gate)) === correct
         end
     end
 
