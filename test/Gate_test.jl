@@ -481,14 +481,18 @@
             @test targettype(Gate{Op}) === I
         end
 
-        @test begin
-            crzop = operator(CRz(1, 2, θ = π / 4))
-            targettype(crzop) === Rz
-        end
+        @testset "gate_operator_targettype" begin
+            gates = [Rx(1, θ = π / 4), CRy(1, 2, θ = π / 6), Control(1, Control(2, Rz(3, θ = π / 3)))]
+            targettypes = [Rx, Ry, Rz]
 
-        @test begin
-            crzgate = CRz(1, 2, θ = π / 4)
-            targettype(crzgate) === Rz
+            @testset "gate_targettype_$gate" for (gate, tgttype) in zip(gates, targettypes)
+                @test targettype(gate) === tgttype
+            end
+
+            @testset "op_targettype_$gate" for (gate, tgttype) in zip(gates, targettypes)
+                op = operator(gate)
+                @test targettype(op) === tgttype
+            end
         end
     end
 
