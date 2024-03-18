@@ -109,6 +109,15 @@ Matrix{T}(::Swap) where {T} = Matrix{T}([1 0 0 0; 0 0 1 0; 0 1 0 0; 0 0 0 1])
 
 Matrix{T}(::ISwap) where {T} = Matrix{T}([1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 1])
 
+Matrix{T}(op::FractionalISwap) where {T} = Matrix{T}(
+    [
+        1 0 0 0
+        0 cospi(op.exponent / 2) 1im*sinpi(op.exponent / 2)*cispi(2 * op.phase_exponent) 0
+        0 1im*sinpi(op.exponent / 2)*cispi(-2 * op.phase_exponent) cospi(op.exponent / 2) 0
+        0 0 0 1
+    ],
+)
+
 Matrix{T}(::FSwap) where {T} = Matrix{T}([1 0 0 0; 0 0 1 0; 0 1 0 0; 0 0 0 -1])
 
 Matrix{T}(op::FSim) where {T} = Matrix{T}([
@@ -164,6 +173,13 @@ Array{T,4}(op::Rzz) where {T} = Array{T,4}(
 Array{T,4}(::Swap) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
 
 Array{T,4}(::ISwap) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1im; 0;;;; 0; 1im;; 0; 0;;; 0; 0;; 0; 1])
+
+Array{T,4}(op::FractionalISwap) where {T} = Array{T}(
+    [
+        1; 0;; 0; 0;;; 0; cospi(op.exponent / 2);; 1im*sinpi(op.exponent / 2)*cispi(-2 * op.phase_exponent); 0;;;;
+        0; 1im*sinpi(op.exponent / 2)*cispi(-2 * op.phase_exponent);; cospi(op.exponent / 2); 0;;; 0; 0;; 0; 1
+    ],
+)
 
 Array{T,4}(::Swap) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; -1])
 

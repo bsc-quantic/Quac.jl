@@ -334,6 +334,12 @@ The ISWAP gate.
 """
 @gatedecl ISwap n = 2
 
+# TODO move `exponent`, `phase_exponent` to `ISwap` operator?
+@gatedecl FractionalISwap n = 2 begin
+    exponent::Float64 = 1
+    phase_exponent::Float64 = 0
+end
+
 """
     FSwap(lane1, lane2)
 
