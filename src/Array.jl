@@ -53,8 +53,6 @@ Matrix{T}(::Sd) where {T} = Matrix{T}([1 0; 0 -1im])
 Matrix{F}(::T) where {F} = Matrix{F}([1 0; 0 cispi(1 // 4)])
 Matrix{F}(::Td) where {F} = Matrix{F}([1 0; 0 cispi(-1 // 4)])
 
-Matrix{T}(::Swap) where {T} = Matrix{T}([1 0 0 0; 0 0 1 0; 0 1 0 0; 0 0 0 1])
-
 Matrix{T}(op::Rx) where {T} = Matrix{T}([
     cos(op.θ / 2) -1im*sin(op.θ / 2)
     -1im*sin(op.θ / 2) cos(op.θ / 2)
@@ -106,6 +104,8 @@ Matrix{T}(op::Hz) where {T} = Matrix{T}(
         -1im*cis(-op.θ / 2 - op.ϕ)*sin(op.θ / 2) cis(op.θ / 2)*cos(op.θ / 2)
     ],
 )
+
+Matrix{T}(::Swap) where {T} = Matrix{T}([1 0 0 0; 0 0 1 0; 0 1 0 0; 0 0 0 1])
 
 Matrix{T}(op::FSim) where {T} = Matrix{T}([
     1 0 0 0
