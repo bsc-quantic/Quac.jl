@@ -328,6 +328,13 @@ The SWAP gate.
 @gatedecl Swap n = 2
 
 """
+    ISwap(lane1, lane2)
+
+The ISWAP gate.
+"""
+@gatedecl ISwap n = 2
+
+"""
     FSim(lane1, lane2, θ, ϕ)
 
 The FSim (Fermionic Simulation) gate.
