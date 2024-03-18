@@ -109,6 +109,8 @@ Matrix{T}(::Swap) where {T} = Matrix{T}([1 0 0 0; 0 0 1 0; 0 1 0 0; 0 0 0 1])
 
 Matrix{T}(::ISwap) where {T} = Matrix{T}([1 0 0 0; 0 0 1im 0; 0 1im 0 0; 0 0 0 1])
 
+Matrix{T}(::FSwap) where {T} = Matrix{T}([1 0 0 0; 0 0 1 0; 0 1 0 0; 0 0 0 -1])
+
 Matrix{T}(op::FSim) where {T} = Matrix{T}([
     1 0 0 0
     0 cos(op.θ) -1im*sin(op.θ) 0
@@ -162,6 +164,8 @@ Array{T,4}(op::Rzz) where {T} = Array{T,4}(
 Array{T,4}(::Swap) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
 
 Array{T,4}(::ISwap) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1im; 0;;;; 0; 1im;; 0; 0;;; 0; 0;; 0; 1])
+
+Array{T,4}(::Swap) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; -1])
 
 Array{T,4}(op::FSim) where {T} = Array{T}(
     [1; 0;; 0; 0;;; 0; cos(op.θ);; -1im*sin(op.θ); 0;;;; 0; -1im*sin(op.θ);; cos(op.θ); 0;;; 0; 0;; 0; cis(-op.θ)],
