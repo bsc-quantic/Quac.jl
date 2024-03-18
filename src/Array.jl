@@ -135,11 +135,6 @@ Array{T}(op::Op) where {T,Op<:Operator} = Array{T,2 * length(Op)}(op)
 
 # NOTE multidimensional `Array` literal concatenation was introduced in 1.7
 # TODO clean code when we stop supporting Julia 1.6
-Array{T,4}(::Swap) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
-
-Array{T,4}(op::FSim) where {T} = Array{T}(
-    [1; 0;; 0; 0;;; 0; cos(op.θ);; -1im*sin(op.θ); 0;;;; 0; -1im*sin(op.θ);; cos(op.θ); 0;;; 0; 0;; 0; cis(-op.θ)],
-)
 
 Array{T,4}(op::Rxx) where {T} = Array{T,4}(
     [
@@ -160,6 +155,12 @@ Array{T,4}(op::Rzz) where {T} = Array{T,4}(
         cis(-op.θ / 2); 0;; 0; 0;;; 0; cis(op.θ / 2);; 0; 0;;;;
         0; 0;; cis(op.θ / 2); 0;;; 0; 0;; 0; cis(-op.θ / 2)
     ],
+)
+
+Array{T,4}(::Swap) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; 1])
+
+Array{T,4}(op::FSim) where {T} = Array{T}(
+    [1; 0;; 0; 0;;; 0; cos(op.θ);; -1im*sin(op.θ); 0;;;; 0; -1im*sin(op.θ);; cos(op.θ); 0;;; 0; 0;; 0; cis(-op.θ)],
 )
 
 Array{T}(op::Op) where {T,Op<:Control} = Array{T,2 * length(Op)}(op)
