@@ -181,7 +181,7 @@ Array{T,4}(op::FractionalISwap) where {T} = Array{T}(
     ],
 )
 
-Array{T,4}(::Swap) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; -1])
+Array{T,4}(::FSwap) where {T} = Array{T}([1; 0;; 0; 0;;; 0; 0;; 1; 0;;;; 0; 1;; 0; 0;;; 0; 0;; 0; -1])
 
 Array{T,4}(op::FSim) where {T} = Array{T}(
     [1; 0;; 0; 0;;; 0; cos(op.θ);; -1im*sin(op.θ); 0;;;; 0; -1im*sin(op.θ);; cos(op.θ); 0;;; 0; 0;; 0; cis(-op.θ)],
