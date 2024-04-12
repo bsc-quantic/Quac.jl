@@ -33,7 +33,7 @@ arraytype(::Swap) = Array{Bool,4}
 arraytype(::ISwap) = Array{Complex{Bool},4}
 arraytype(::FSwap) = Array{Int,4}
 
-arraytype(::SU{N}) where {N} = Array{ComplexF64,2N}
+arraytype(::SU{N}) where {N} = Array{ComplexF64}
 
 arraytype(op::Control) = Array{ComplexF64,2 * length(op)}
 
