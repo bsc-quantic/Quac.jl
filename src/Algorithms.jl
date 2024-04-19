@@ -1,6 +1,7 @@
 module Algorithms
 
 using Quac
+using Graphs
 using Random: randperm
 
 export QFT
@@ -50,6 +51,60 @@ function QuantumVolume(n, depth)
     end
 
     return circuit
+end
+
+function RQC(grid::Quac.Sycamore, depth::Int; sequence = "ABCDCDAB")
+    sequence ∈ ["ABCDCDAB", "ABCDABCD"] || throw(ArgumentError("Invalid sequence: $sequence"))
+
+    circuit = Circuit(nv(grid))
+
+    # initial layer of Hadamards
+    for qid in vertices(grid)
+        push!(circuit, H(grid[qid]))
+    end
+
+    randomops1 = [√X(), √Y(), U3(; θ = π, ϕ = π / 4, λ = 3π / 4)] # TODO is U3 parameters correct?
+
+    for layer in 1:depth
+        for qid in vertices(grid)
+            push!(circuit, rand(randomops1)(grid[qid]))
+        end
+
+        mod = layer % length(sequence)
+        target_edges = if sequence[mod] == 'A'
+            Iterators.filter(Quac.hedges(grid)) do edge
+                i, _ = Tuple(edge[1])
+                isodd(i)
+            end |> collect
+        elseif sequence[mod] == 'B'
+            Iterators.filter(Quac.hedges(grid)) do edge
+                i, _ = Tuple(edge[1])
+                iseven(i)
+            end |> collect
+        elseif sequence[mod] == 'C'
+            Iterators.filter(Quac.vedges(grid)) do edge
+                i, _ = Tuple(edge[1])
+                isodd(i)
+            end |> collect
+        elseif sequence[mod] == 'D'
+            Iterators.filter(Quac.vedges(grid)) do edge
+                i, _ = Tuple(edge[1])
+                iseven(i)
+            end |> collect
+        end
+
+        for edge in target_edges
+            i, j = Tuple(edge)
+            push!(circuit, rand(FSim)(grid[i], grid[j]))
+        end
+    end
+
+    # last layer of Hadamards
+    for qid in vertices(grid)
+        push!(circuit, H(grid[qid]))
+    end
+
+    circuit
 end
 
 end
