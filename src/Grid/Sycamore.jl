@@ -59,19 +59,22 @@ Graphs.vertices(::Sycamore) = [
     CartesianIndex(10, 5),
 ]
 
-Graphs.has_vertex(::Sycamore, v::CartesianIndex{2}) = v in vertices(Sycamore)
-Graphs.nv(::Sycamore) = length(vertices(Sycamore))
+Graphs.has_vertex(grid::Sycamore, v::CartesianIndex{2}) = v in vertices(grid)
+Graphs.nv(grid::Sycamore) = length(vertices(grid))
 
-function hedges(::Sycamore)
+function hedges(grid::Sycamore)
     Iterators.filter([(CartesianIndex(i, j), CartesianIndex(i, j + 1)) for i in 1:10 for j in 1:9]) do (u, v)
-        has_vertex(Sycamore, u) && has_vertex(Sycamore, v)
+        has_vertex(grid, u) && has_vertex(grid, v)
     end
 end
 
-function vedges(::Sycamore)
+function vedges(grid::Sycamore)
     Iterators.filter([(CartesianIndex(i, j + 1), CartesianIndex(i, j)) for i in 1:9 for j in 1:10]) do (u, v)
-        has_vertex(Sycamore, u) && has_vertex(Sycamore, v)
+        has_vertex(grid, u) && has_vertex(grid, v)
     end
 end
 
 Graphs.edges(::Sycamore) = Iterators.flatten([vedges(Sycamore), hedges(Sycamore)])
+Graphs.ne(grid::Sycamore) = length(edges(grid))
+
+Base.getindex(grid::Sycamore, keys::CartesianIndex{2}) = findfirst(==(keys), vertices(grid))

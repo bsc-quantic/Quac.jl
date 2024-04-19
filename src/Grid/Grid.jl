@@ -20,3 +20,4 @@ end
 include("Chain.jl")
 include("Rectangular.jl")
 include("Honeycomb.jl")
+include("Sycamore.jl")
