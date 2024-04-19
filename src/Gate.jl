@@ -138,6 +138,7 @@ macro gatedecl(name, opts...)
         end)))
 
         $(esc(:($name(lanes...; params...) = Gate{$name,$n}(lanes, $name(; params...)))))
+        $(esc(:((op::$name)(lanes...) = Gate{$name,$n}(lanes, op))))
 
         $(esc(:(Base.length(::Type{$name}) = $n)))
         $(code_parameters...)
