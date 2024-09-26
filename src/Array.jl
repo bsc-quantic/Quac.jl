@@ -194,7 +194,6 @@ Array{T}(op::Op) where {T,Op<:Control} = Array{T,2 * length(Op)}(op)
 Array{T,N}(op::Control) where {T,N} = Array{T,N}(reshape(Matrix{T}(op), fill(2, N)...))
 
 Array{T}(op::SU{N}) where {T,N} = Array{T,2N}(reshape(Matrix{T}(op), fill(2, 2N)...))
-Array{T,M}(op::SU{N}) where {T,N,M} = (M == 2*N) ?  Array{T,2N}(reshape(Matrix{T}(op), fill(2, 2N)...)) : throw(ArgumentError("Invalid dimensions"))
 
 # diagonal matrices
 # NOTE efficient multiplication due to no memory swap needed: plain element-wise multiplication
