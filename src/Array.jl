@@ -48,7 +48,7 @@ Matrix(x::Operator) = Matrix{ComplexF64}(x)
 
 Matrix{T}(::I) where {T} = Matrix{T}(LinearAlgebra.I, 2, 2)
 Matrix{T}(::X) where {T} = Matrix{T}([0 1; 1 0])
-Matrix{T}(::Y) where {T} = Matrix{T}([0 -1; 1 0])
+Matrix{T}(::Y) where {T} = Matrix{T}([0 -1im; 1im 0])
 Matrix{T}(::Z) where {T} = Matrix{T}([1 0; 0 -1])
 Matrix{T}(::H) where {T} = Matrix{T}([1 1; 1 -1] ./ sqrt(2))
 Matrix{T}(::S) where {T} = Matrix{T}([1 0; 0 1im])
